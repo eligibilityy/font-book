@@ -1,6 +1,6 @@
 # Placeholder: replace with a reverse-DNS id you control, e.g. com.yourname.book.
 # macOS uses it to tell apps apart, so keep it stable once she has installed one.
-appId: com.example.book
+appId: studio.yiliya.book
 productName: Book
 directories:
   buildResources: build
