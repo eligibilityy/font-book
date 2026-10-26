@@ -1,0 +1,166 @@
+// Biome is font-book's only formatter and linter. It replaces the template's
+// ESLint + Prettier. `npm run lint` (biome ci) fails on any error or warning.
+//
+// Strict rules and the Pond idea each one stands in for. Pond runs 15 custom
+// oxlint "anti-slop" rules; docs/anti-slop.md maps every one of them.
+//
+//   suspicious.noExplicitAny        no escape hatch from the type checker
+//   suspicious.noEvolvingTypes      no-known-value-widening: a `let x;` that
+//   suspicious.noImplicitAnyLet       becomes any loses type evidence
+//   suspicious.noTsIgnore           a silenced compiler error is a hidden bug
+//   suspicious.noConsole            stray debug logs; console.warn/error stay
+//   suspicious.noImportCycles       check-architecture.mjs dependency cycles
+//   style.noNonNullAssertion        `x!` is an unchecked assertion
+//   style.noParameterAssign         inputs stay what the caller passed
+//   style.useImportType             type-only imports never pull runtime code
+//                                     across a process boundary
+//   style.noRestrictedGlobals       no-reflect-get / no-reflect-apply
+//   complexity.noBannedTypes        no-unsafe-dictionary-type / no-object-
+//                                     parameters (`{}`, `Object`, `Function`)
+//   performance.noReExportAll       feature entries list their public API
+//   performance.noBarrelFile          by name; only feature index.ts may
+//                                     re-export
+//   correctness.noNodejsModules     renderer and shared stay free of Node
+//   correctness.useExhaustiveDependencies  React hooks see every input
+//   plugin no-unjustified-type-assertion   require-safety-comment-for-type-
+//                                     assertion, no-chained-type-assertions,
+//                                     no-widen-then-assert
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/out",
+      "!**/dist",
+      "!**/coverage",
+      "!**/.claude",
+      "!**/package-lock.json"
+    ]
+  },
+  "plugins": ["./tools/biome/no-unjustified-type-assertion.grit"],
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  // Docs are prose: column-aligned tables and rewrapped lines would bury
+  // every real change in diff noise.
+  "markdown": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "react": "recommended"
+    },
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        "preset": "recommended"
+      },
+      "complexity": {
+        "noBannedTypes": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "error",
+        "useHookAtTopLevel": "error",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      },
+      "performance": {
+        "noBarrelFile": "error",
+        "noReExportAll": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "error",
+        "noParameterAssign": "error",
+        "useImportType": "error",
+        "useExportType": "error",
+        "useNodejsImportProtocol": "error",
+        "noRestrictedGlobals": {
+          "level": "error",
+          "options": {
+            "deniedGlobals": {
+              "Reflect": "Reflect.get/apply skip the type checker. Use typed property access or a typed function call."
+            }
+          }
+        }
+      },
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noEvolvingTypes": "error",
+        "noImplicitAnyLet": "error",
+        "noTsIgnore": "error",
+        "noImportCycles": "error",
+        "noConsole": {
+          "level": "error",
+          "options": { "allow": ["warn", "error"] }
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      // Image files shown with <img alt="...">; the alt text describes them.
+      "includes": ["src/renderer/src/assets/**/*.svg"],
+      "linter": {
+        "rules": {
+          "a11y": { "noSvgWithoutTitle": "off" }
+        }
+      }
+    },
+    {
+      // A feature's index.ts is its public entry: the one file other features
+      // may import from, so it is allowed to re-export by name.
+      "includes": ["src/renderer/src/features/*/index.ts"],
+      "linter": {
+        "rules": {
+          "performance": { "noBarrelFile": "off" }
+        }
+      }
+    },
+    {
+      // The renderer is a web page and src/shared is pure contracts: neither
+      // may touch Node or Electron. dependency-cruiser enforces the same rule
+      // in CI; this gives editor feedback while typing.
+      "includes": ["src/renderer/**", "src/shared/**"],
+      "linter": {
+        "rules": {
+          "correctness": { "noNodejsModules": "error" },
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "electron": "Only src/main and src/preload may import electron. Ask main for data through the preload bridge."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

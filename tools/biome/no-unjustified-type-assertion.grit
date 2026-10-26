@@ -1,0 +1,19 @@
+// Every type assertion (`x as T` or `<T>x`) is a claim the compiler cannot
+// check, so each one must carry a written justification. `as const` is
+// allowed because it only narrows a literal. Matching AST nodes (not the
+// `$a as $b` snippet) keeps `import { a as b }` renames out of scope.
+//
+// GritQL cannot read comments, so the justification is a Biome suppression,
+// which Biome refuses without a reason:
+//   // biome-ignore lint/plugin/no-unjustified-type-assertion: SAFETY: <invariant>
+// Prefer removing the assertion: parse the value or let inference keep the type.
+
+language js(typescript, jsx)
+
+or {
+  TsAsExpression(ty=$type),
+  TsTypeAssertionExpression(ty=$type)
+} as $assertion where {
+  not $type <: r"const",
+  register_diagnostic(span=$assertion, message="Type assertion without a SAFETY reason. Parse the value or keep the inferred type; if the assertion is truly safe, add `// biome-ignore lint/plugin/no-unjustified-type-assertion: SAFETY: <why it holds>` above it.")
+}

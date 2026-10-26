@@ -1,0 +1,15 @@
+# Store and check out text with LF endings on every OS. Without this, Git on
+# Windows converts files to CRLF and `biome ci` reports every file as unformatted.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.otf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.dmg binary
+*.exe binary
+*.zip binary

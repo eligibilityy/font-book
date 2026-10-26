@@ -1,0 +1,124 @@
+name: Release
+
+# Push a tag like v0.1.0 to build both installers and publish a GitHub Release.
+# Run it by hand (Actions > Release > Run workflow) to build installers without
+# releasing; download them from the run's Artifacts section.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $VERSION"
+            exit 1
+          fi
+
+      - name: Verify
+        run: npm run check
+
+  mac:
+    needs: check
+    # macos-latest runs on Apple Silicon, the same arch as the M5 MacBook Air.
+    runs-on: macos-latest
+    env:
+      # No Developer ID certificate: never search the keychain for one.
+      # electron-builder.yml ad-hoc signs instead, and skips notarization.
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # --publish never: the release job below uploads the files.
+      - name: Build arm64 dmg and zip
+        run: npm run build:mac -- --publish never
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mac-arm64
+          path: |
+            dist/*.dmg
+            dist/*.zip
+          if-no-files-found: error
+
+  windows:
+    needs: check
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build x64 NSIS installer
+        run: npm run build:win -- --publish never
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows-x64
+          path: dist/*-setup.exe
+          if-no-files-found: error
+
+  # One small job creates the release after both builds pass, so the two build
+  # runners never race to create it, and only this job, which runs no npm
+  # code, gets write access to the repository.
+  release:
+    needs: [mac, windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true
