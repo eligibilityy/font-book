@@ -1,43 +1,51 @@
-appId: com.electron.app
-productName: book
+# Placeholder: replace with a reverse-DNS id you control, e.g. com.yourname.book.
+# macOS uses it to tell apps apart, so keep it stable once she has installed one.
+appId: com.example.book
+productName: Book
 directories:
   buildResources: build
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!{dev-app-update.yml,CHANGELOG.md,README.md}"
+  - "!{.env,.env.*,.npmrc,bun.lock}"
+  - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
+  # Tooling and docs never ship inside the app.
+  - "!{biome.jsonc,knip.json,.dependency-cruiser.cjs,commitlint.config.cjs,.gitattributes}"
+  - "!{AGENTS.md,CLAUDE.md,CONTEXT.md,CONTRIBUTING.md}"
+  - "!{docs,tools,.husky,.github,.claude}/**/*"
 asarUnpack:
   - resources/**
 win:
   executableName: book
+  target:
+    - target: nsis
+      arch:
+        - x64
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
+  category: public.app-category.graphics-design
+  target:
+    - target: dmg
+      arch:
+        - arm64
+    - target: zip
+      arch:
+        - arm64
+  # No Apple Developer ID: ad-hoc sign ("-") so Apple Silicon will launch the
+  # arm64 binary. Ad-hoc signing needs hardenedRuntime off. No notarization.
+  identity: "-"
+  hardenedRuntime: false
+  notarize: false
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
+    NSDocumentsFolderUsageDescription: Book reads font files you keep in Documents.
+    NSDownloadsFolderUsageDescription: Book reads font files you keep in Downloads.
 dmg:
-  artifactName: ${name}-${version}.${ext}
-linux:
-  target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
-appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates

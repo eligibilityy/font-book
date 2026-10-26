@@ -4,11 +4,11 @@
 
 A rule that runs on every change beats a sentence in a doc. See [why checks, not prose](#why-checks-not-prose).
 
-## Pond's 15 rules and how font-book covers them
+## Pond's 15 rules and how Book covers them
 
-Pond writes these as custom [oxlint](https://oxc.rs/docs/guide/usage/linter) plugins. font-book uses [Biome](https://biomejs.dev/) built-in rules where one exists, a small Biome plugin for type assertions, and [code standards](contributing/code-standards.md) for the rest.
+Pond writes these as custom [oxlint](https://oxc.rs/docs/guide/usage/linter) plugins. Book uses [Biome](https://biomejs.dev/) built-in rules where one exists, a small Biome plugin for type assertions, and [code standards](contributing/code-standards.md) for the rest.
 
-| Pond rule | What it prevents | How font-book covers it |
+| Pond rule | What it prevents | How Book covers it |
 | --- | --- | --- |
 | `require-safety-comment-for-type-assertion` | An `as` cast with no written reason why it is safe. | **Biome plugin** `no-unjustified-type-assertion` flags every `x as T` and `<T>x` except `as const`. The reason goes in a suppression comment (see [type assertions](#type-assertions)). |
 | `no-chained-type-assertions` | `x as unknown as T`, which forces any value into any type. | **Biome plugin**: each assertion in the chain is flagged and needs its own reason, so a chain is twice as hard to justify. |
@@ -24,7 +24,7 @@ Pond writes these as custom [oxlint](https://oxc.rs/docs/guide/usage/linter) plu
 | `no-runtime-typeof` | `typeof x === "string"` checks scattered through the code instead of parsing once at the boundary. | **Code standard.** Parse input with zod where it enters (IPC, files), then work with typed values. Not automated: a blanket ban would also hit legitimate checks. |
 | `no-module-mocking` | `vi.mock(...)` in tests, which swaps real imports for fakes and lets tests pass against code that no longer exists. | **Code standard** (no `vi.mock`; pass dependencies in). [Future exercise 2](#2-ban-vimock) automates it. |
 | `no-conditional-empty-object-spread` | `{ ...(cond ? { icon } : {}) }`, which hides when a field is left out. | **Not yet.** [Future exercise 1](#1-ban-conditional-empty-spreads). The template's `src/main/index.ts` contains exactly this pattern. |
-| `no-shape-in-symbol-names` | Names containing "shape", which describe structure instead of meaning. | **Not adopted.** A Pond naming preference. font-book names things by their domain role using [CONTEXT.md](../CONTEXT.md). |
+| `no-shape-in-symbol-names` | Names containing "shape", which describe structure instead of meaning. | **Not adopted.** A Pond naming preference. Book names things by their domain role using [CONTEXT.md](../CONTEXT.md). |
 
 ## Other strict Biome rules
 
@@ -58,11 +58,11 @@ First, try to remove it: parse the value with zod, add a type guard, or fix the 
 
 Biome refuses a suppression with no reason after the colon, and reports a suppression that no longer suppresses anything, so stale reasons get cleaned up. A reviewer reads the `SAFETY:` sentence and decides whether it holds.
 
-Pond's version checks for a nearby `SAFETY:` comment directly. Biome's GritQL plugins cannot read comments, so font-book uses the suppression comment as the place for the reason. [Future exercise 3](#3-a-real-safety-comment-check) is the exact check.
+Pond's version checks for a nearby `SAFETY:` comment directly. Biome's GritQL plugins cannot read comments, so Book uses the suppression comment as the place for the reason. [Future exercise 3](#3-a-real-safety-comment-check) is the exact check.
 
 ## Import boundaries
 
-`.dependency-cruiser.cjs` replaces Pond's `scripts/check-architecture.mjs`. `npm run deps:check` fails when:
+`.dependency-cruiser.cjs` replaces Pond's `scripts/check-architecture.mjs`. `bun run deps:check` fails when:
 
 - the renderer imports `src/main`, `src/preload`, Node built-ins, or `electron`
 - main imports the renderer
@@ -81,11 +81,11 @@ Each error names the rule. The rule's `comment` in `.dependency-cruiser.cjs` exp
 | Layer | When it runs | What it catches |
 | --- | --- | --- |
 | Editor (Biome extension) | As you type | Lint and format problems, before you save. |
-| `pre-commit` hook | `git commit` | Runs `npm run lint`. Kept fast, like Pond's: lint only. It never rewrites your files. |
+| `pre-commit` hook | `git commit` | Runs `bun run lint`. Kept fast, like Pond's: lint only. It never rewrites your files. |
 | `commit-msg` hook | `git commit` | [commitlint](https://commitlint.js.org/) rejects messages that are not `type(scope): summary`. |
-| `npm run check` | Before you push | Lint, typecheck, boundaries, unused code, tests. |
+| `bun run check` | Before you push | Lint, typecheck, boundaries, unused code, tests. |
 | [Knip](https://knip.dev/) | Inside `check` | Unused files, exports, and dependencies: dead code that agents leave behind after a refactor. |
-| CI (`ci.yml`) | Every push and pull request | `npm run check` and `npm run build` on a clean machine, so "works on my PC" is not enough. |
+| CI (`ci.yml`) | Every push and pull request | `bun run check` and `bun run build` on a clean machine, so "works on my PC" is not enough. |
 | Release (`release.yml`) | On a `vX.Y.Z` tag | Runs `check` again, then builds the real installers on macOS and Windows. |
 
 Left out from Pond on purpose, because a single small app does not need them yet: Turborepo task caching, performance budgets on bundle size, a desktop smoke test in CI, generated-docs checks, an SBOM, a Homebrew cask, and Developer ID signing with notarization.

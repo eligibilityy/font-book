@@ -1,4 +1,4 @@
-// dependency-cruiser checks who may import whom (`npm run deps:check`).
+// dependency-cruiser checks who may import whom (`bun run deps:check`).
 // It replaces Pond's scripts/check-architecture.mjs with config: Electron runs
 // three separate programs (main, preload, renderer), and an import across that
 // line either breaks the build or leaks Node power into the web page.
@@ -123,7 +123,7 @@ module.exports = {
     {
       name: "no-non-package-json",
       comment:
-        "The package is installed but not listed in package.json. Add it with npm i.",
+        "The package is installed but not listed in package.json. Add it with bun add.",
       severity: "error",
       from: {},
       to: { dependencyTypes: ["npm-no-pkg", "npm-unknown"] },

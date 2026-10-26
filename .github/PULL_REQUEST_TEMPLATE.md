@@ -10,9 +10,9 @@
 
 ## Validation
 
-- [ ] `npm run check` passes (lint, typecheck, boundaries, knip, tests)
-- [ ] `npm run build` passes
-- [ ] Tried it in `npm run dev`: <!-- what you clicked and what you saw -->
+- [ ] `bun run check` passes (lint, typecheck, boundaries, knip, tests)
+- [ ] `bun run build` passes
+- [ ] Tried it in `bun run dev`: <!-- what you clicked and what you saw -->
 
 ## Compatibility
 

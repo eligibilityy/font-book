@@ -1,6 +1,6 @@
 # Repository instructions
 
-font-book is a local-first, offline Electron + React + TypeScript font manager. Read these first:
+Book is a local-first, offline Electron + React + TypeScript font manager. Read these first:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) for workflow, checks, and releases.
 - [Code standards](docs/contributing/code-standards.md) for naming, types, React, and tests.
@@ -26,11 +26,11 @@ This is a learning project. The user writes the application code. You are a tuto
 
 The user runs the app. The dev server is user-owned.
 
-- Do not run `npm run dev`, `vitest` in watch mode, or any other long-running or watch command.
-- Use finite checks: `npm run check` (lint, typecheck, dependency boundaries, knip, tests), or one of `npm run lint`, `npm run typecheck`, `npm run test`, `npm run deps:check`, `npm run knip`, `npm run build`.
+- Do not run `bun run dev`, `vitest` in watch mode, or any other long-running or watch command.
+- Use finite checks: `bun run check` (lint, typecheck, dependency boundaries, knip, tests), or one of `bun run lint`, `bun run typecheck`, `bun run test`, `bun run deps:check`, `bun run knip`, `bun run build`.
 - If behavior must be seen in the running app, tell the user what to click and what to look for.
 
-Preserve unrelated working changes. Do not revert, reformat, or "tidy" files outside the task. Do not run `npm run format` across the repository unless asked.
+Preserve unrelated working changes. Do not revert, reformat, or "tidy" files outside the task. Do not run `bun run format` across the repository unless asked.
 
 ## Platform
 

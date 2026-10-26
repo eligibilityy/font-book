@@ -1,6 +1,6 @@
 # Architecture
 
-font-book is a local-first, offline Electron app. Font files on disk are authoritative; the Library index is a cache built from them. The main process owns the filesystem, Font file parsing, persistence, and native UI. The renderer owns presentation and UI state. Preload is the only door between them. `src/shared` holds the contracts both sides agree on.
+Book is a local-first, offline Electron app. Font files on disk are authoritative; the Library index is a cache built from them. The main process owns the filesystem, Font file parsing, persistence, and native UI. The renderer owns presentation and UI state. Preload is the only door between them. `src/shared` holds the contracts both sides agree on.
 
 Use [CONTEXT.md](../../CONTEXT.md) for domain names and [code standards](code-standards.md) for naming, types, and tests.
 
@@ -40,7 +40,7 @@ src/
     └── shared/             # Reusable UI primitives, the fontBook client, theme tokens
 ```
 
-`npm run deps:check` enforces these boundaries: no main/renderer cross-imports, no Node or Electron in `src/shared`, renderer `shared/` never imports a feature, and features import each other only through their root `index.ts`.
+`bun run deps:check` enforces these boundaries: no main/renderer cross-imports, no Node or Electron in `src/shared`, renderer `shared/` never imports a feature, and features import each other only through their root `index.ts`.
 
 ## Data flow
 
@@ -126,7 +126,7 @@ Follow Electron's [security checklist](https://www.electronjs.org/docs/latest/tu
 3. **Handler.** In `src/main/ipc/<domain>.ts`, register `ipcMain.handle(channel, ...)`: parse the input with the schema, call the operation, return the result. Make sure startup in `src/main/index.ts` registers that file.
 4. **Bridge.** In `src/preload/index.ts`, add one function under the domain that calls `ipcRenderer.invoke(channel, input)`. Update `src/preload/index.d.ts` so `window.fontBook` has the new function with the shared types, for example `listStyles(): Promise<Style[]>`.
 5. **Renderer.** Call it from a hook or operation in the owning feature, such as `features/library/hooks/`. Model the result as a discriminated union (loading, ready, error).
-6. **Tests.** Test the operation with a temporary directory and fixture Font files: success, invalid input rejected by the schema, and the failure case. Run `npm run check`.
+6. **Tests.** Test the operation with a temporary directory and fixture Font files: success, invalid input rejected by the schema, and the failure case. Run `bun run check`.
 
 ### Add a feature
 
@@ -147,4 +147,4 @@ Pass the operation what it needs: a folder path, a storage object, a clock. Prod
 
 ## Verification
 
-`npm run check` runs the required local checks and offline tests. `npm run build` verifies the production bundle. `npm run build:mac` and `npm run build:win` package installers; the macOS arm64 build runs in GitHub Actions. Document changes to ownership, IPC conventions, or stored files in this file in the same pull request.
+`bun run check` runs the required local checks and offline tests. `bun run build` verifies the production bundle. `bun run build:mac` and `bun run build:win` package installers; the macOS arm64 build runs in GitHub Actions. Document changes to ownership, IPC conventions, or stored files in this file in the same pull request.

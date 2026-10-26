@@ -1,5 +1,5 @@
-// Biome is font-book's only formatter and linter. It replaces the template's
-// ESLint + Prettier. `npm run lint` (biome ci) fails on any error or warning.
+// Biome is Book's only formatter and linter. It replaces the template's
+// ESLint + Prettier. `bun run lint` (biome ci) fails on any error or warning.
 //
 // Strict rules and the Pond idea each one stands in for. Pond runs 15 custom
 // oxlint "anti-slop" rules; docs/anti-slop.md maps every one of them.

@@ -72,7 +72,11 @@ _Avoid_: like, star (as a noun in code), bookmark, pin
 
 **Specimen**:
 A rendered preview of one Style with Sample text and controls (size, line height, Axes, OpenType features).
-_Avoid_: preview (as the product word), sample (for the whole view), demo
+_Avoid_: preview (alone, as the product word), sample (for the whole view), demo
+
+**Quick preview**:
+A temporary, larger Specimen of the highlighted Style, opened with Space from the Library list without leaving it. Space or Escape closes it and the list selection is unchanged.
+_Avoid_: quick look, peek, popup, lightbox
 
 **Sample text**:
 The words a Specimen or Pairing renders. The user can type their own.

@@ -1,6 +1,6 @@
 # Design principles
 
-font-book is a tool for a designer. She will judge it the way she judges type: by spacing,
+Book is a tool for a designer. She will judge it the way she judges type: by spacing,
 rhythm, restraint, and whether it gets out of the way. These principles describe how the app
 should feel and give reviewers (human or AI) something concrete to check against.
 
@@ -56,6 +56,10 @@ walk in.
   button that triggered it. The user never loses their place in the Library or the
   Specimen. Use a dialog only for decisions that need full attention (deleting a Collection).
   Each overlay does one job. A header close button is enough, with no extra footer Cancel.
+- **Build overlays and controls on [Base UI](https://base-ui.com/)** (`@base-ui/react`):
+  Popover, Dialog, Menu, Slider, Switch, Toggle. It handles focus trapping, Escape, focus
+  return, and ARIA roles, so you style the parts instead of rebuilding that behavior. Pond
+  does the same.
 
 ## 3. Direct manipulation: the type responds immediately
 
@@ -94,6 +98,11 @@ went, never decorate.
 - **Motion never blocks.** Clicks and keys work immediately, even mid-animation.
 - **Keep it short.** Most transitions run 150-250ms. Use the motion tokens below, not
   one-off numbers. Watch it at normal speed and check the in-between frames before calling it done.
+- **Tools.** Use the [Motion](https://motion.dev/) library (`motion`, imported from
+  `motion/react`) for enter and exit, layout, and height animations, the things CSS can't
+  do on its own. Plain CSS transitions are fine for hover and press states. Keep Motion's
+  durations and easings in one module that mirrors the CSS motion tokens, so both use the
+  same values.
 
 ## 5. Delight with restraint
 
@@ -107,9 +116,9 @@ Delight works through surprise, and surprise wears off with repetition. Pond cal
   satisfying response: a Favorite star that pops once.
 - **Rare, meaningful moments** (first Import, first Collection, first PNG Export) can carry
   a memorable flourish, shown once.
-- **Sound is optional and quiet.** If interface sounds are added, keep them off by default
-  or limited to one or two soft cues. Put them behind their own setting, separate from
-  reduced motion.
+- **No sound for now.** Book has no interface sounds. If that changes, keep them off by
+  default, limit them to one or two soft cues, and put them behind their own setting,
+  separate from reduced motion.
 - **Personal touches belong in the corners:** the empty-state copy, the About window, the
   default Sample text. That's where a gift can show it was made for her.
 
@@ -119,8 +128,8 @@ She'll use a trackpad most of the time, but browsing hundreds of Families is muc
 from the keyboard.
 
 - **The Library list is keyboard navigable.** Up/Down moves through Styles, Enter opens the
-  Specimen, Space toggles Favorite (or opens a quick look; pick one and be consistent), and
-  Home/End jump.
+  Specimen, Space opens a Quick preview of the highlighted Style (Space or Escape closes it
+  and leaves the selection where it was), and Home/End jump.
 - **Search is one keystroke away:** `Mod+F` or `/` focuses search. `Mod` means Cmd on
   macOS and Ctrl on Windows. Always write shortcuts with `Mod` so they work on both.
 - **Single-key shortcuts never fire while she's typing.** Sample text is a text field, so
@@ -139,7 +148,9 @@ from the keyboard.
   borders carry more of the separation.
 - **Reduced motion.** When the system (or the app setting) asks for reduced motion, every
   transition reaches its final state immediately. No information may depend on seeing an
-  animation. Implement this in **one place** (a CSS rule plus one hook) and reuse it.
+  animation. Implement this in **one place** and reuse it: the CSS rule in the tokens file,
+  plus one `<MotionConfig reducedMotion="user">` around the app so every Motion animation
+  follows the system setting.
 - **Focus is always visible for keyboard users.** Show a clear focus ring when navigating
   by keyboard, and avoid stray rings after mouse clicks.
 - **Everything has a name.** Icon-only buttons, sliders, and toggles need an accessible
@@ -269,4 +280,4 @@ Copy this into the pull request and tick it off. Reviewers and AI agents apply i
 
 **Delight**
 - [ ] Any flourish matches how often it happens (frequent means subtle, rare can be special).
-- [ ] Sounds, if any, are behind their own setting.
+- [ ] No interface sounds were added (see principle 5).

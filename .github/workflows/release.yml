@@ -23,13 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Node runs the tools (electron-vite, tsc, electron-builder); Bun installs
+      # packages and runs the scripts. bun.lock is the lock file.
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Tag matches package.json version
         if: startsWith(github.ref, 'refs/tags/v')
@@ -41,7 +46,7 @@ jobs:
           fi
 
       - name: Verify
-        run: npm run check
+        run: bun run check
 
   mac:
     needs: check
@@ -55,17 +60,22 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Node runs the tools (electron-vite, tsc, electron-builder); Bun installs
+      # packages and runs the scripts. bun.lock is the lock file.
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       # --publish never: the release job below uploads the files.
       - name: Build arm64 dmg and zip
-        run: npm run build:mac -- --publish never
+        run: bun run build:mac -- --publish never
 
       - uses: actions/upload-artifact@v7
         with:
@@ -82,16 +92,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Node runs the tools (electron-vite, tsc, electron-builder); Bun installs
+      # packages and runs the scripts. bun.lock is the lock file.
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Build x64 NSIS installer
-        run: npm run build:win -- --publish never
+        run: bun run build:win -- --publish never
 
       - uses: actions/upload-artifact@v7
         with:
@@ -100,7 +115,7 @@ jobs:
           if-no-files-found: error
 
   # One small job creates the release after both builds pass, so the two build
-  # runners never race to create it, and only this job, which runs no npm
+  # runners never race to create it, and only this job, which runs no project
   # code, gets write access to the repository.
   release:
     needs: [mac, windows]

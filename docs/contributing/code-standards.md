@@ -1,6 +1,6 @@
 # Code standards
 
-These standards apply to hand-written code. Biome owns formatting and lint. `npm run deps:check` owns import boundaries. `npm run knip` owns unused files, exports, and dependencies. All three run in `npm run check` and in CI. [docs/anti-slop.md](../anti-slop.md) lists the specific lint rules and why each exists.
+These standards apply to hand-written code. Biome owns formatting and lint. `bun run deps:check` owns import boundaries. `bun run knip` owns unused files, exports, and dependencies. All three run in `bun run check` and in CI. [docs/anti-slop.md](../anti-slop.md) lists the specific lint rules and why each exists.
 
 ## Naming and files
 

@@ -1,6 +1,6 @@
 # Roadmap
 
-Learning milestones, in order. Each one adds one new idea on top of the last and ends with something you can see working. Finish "Done when" before moving on, commit, and run `npm run check`.
+Learning milestones, in order. Each one adds one new idea on top of the last and ends with something you can see working. Finish "Done when" before moving on, commit, and run `bun run check`.
 
 AI tools working in this repository act as tutors for these milestones: they explain, link docs, and review your code, and you write it. See [AGENTS.md](../AGENTS.md).
 
@@ -10,7 +10,7 @@ AI tools working in this repository act as tutors for these milestones: they exp
 
 **Concepts.** Main process vs renderer process vs preload script. Why the renderer cannot touch the filesystem. How electron-vite builds three bundles. `BrowserWindow` options: `contextIsolation`, `sandbox`, `nodeIntegration`.
 
-**Done when.** The app opens with `npm run dev`. You can explain, in your own words, what `src/main/index.ts`, `src/preload/index.ts`, and `src/renderer/src/main.tsx` each do, and you have changed a line in each and seen the effect (main: window title; preload: an exposed value; renderer: text on screen).
+**Done when.** The app opens with `bun run dev`. You can explain, in your own words, what `src/main/index.ts`, `src/preload/index.ts`, and `src/renderer/src/main.tsx` each do, and you have changed a line in each and seen the effect (main: window title; preload: an exposed value; renderer: text on screen).
 
 **Resources.**
 - [Electron: process model](https://www.electronjs.org/docs/latest/tutorial/process-model)
@@ -22,9 +22,9 @@ AI tools working in this repository act as tutors for these milestones: they exp
 
 **Goal.** Add the tooling that catches mistakes before they reach her Mac: Biome, TypeScript strict checks, Vitest, dependency-cruiser, knip, commitlint, husky, and CI. Follow [docs/setup.md](setup.md).
 
-**Concepts.** What a linter, a type checker, and a test runner each catch. Why import boundaries matter in Electron. Conventional Commits. A CI workflow that runs `npm run check` on every push.
+**Concepts.** What a linter, a type checker, and a test runner each catch. Why import boundaries matter in Electron. Conventional Commits. A CI workflow that runs `bun run check` on every push.
 
-**Done when.** `npm run check` passes locally and in GitHub Actions. A deliberately bad commit message is rejected by the commit hook. A deliberate `any` fails lint.
+**Done when.** `bun run check` passes locally and in GitHub Actions. A deliberately bad commit message is rejected by the commit hook. A deliberate `any` fails lint.
 
 **Resources.**
 - [TypeScript handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -80,7 +80,7 @@ AI tools working in this repository act as tutors for these milestones: they exp
 
 **Goal.** Select a Style and see a Specimen: Sample text you can edit, with size and line-height controls.
 
-**Concepts.** Getting font bytes from main as a `Uint8Array`. The CSS Font Loading API: `new FontFace(...)`, `load()`, `document.fonts.add` and `delete`. Effects that load something and clean it up. Controlled inputs. Deriving values instead of duplicating state. Decide how to handle `.ttc` Font files (see the open question in [architecture](contributing/architecture.md#data-flow)).
+**Concepts.** Getting font bytes from main as a `Uint8Array`. The CSS Font Loading API: `new FontFace(...)`, `load()`, `document.fonts.add` and `delete`. Effects that load something and clean it up. Controlled inputs. Deriving values instead of duplicating state. Decide how to handle `.ttc` Font files (see the open question in [architecture](contributing/architecture.md#data-flow)). This is the first milestone with real UI controls: install [Base UI](https://base-ui.com/) (`bun add @base-ui/react`) for the sliders, and [Motion](https://motion.dev/) (`bun add motion`) once something needs to animate. Add each one in the commit that first uses it, because knip fails the check on dependencies nothing imports.
 
 **Done when.** Switching Styles quickly never shows the wrong Style and does not leak `FontFace` objects. The Specimen shows loading and error states.
 

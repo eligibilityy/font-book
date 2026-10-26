@@ -12,7 +12,7 @@ Files already here, and what each tool does:
 | `knip.json` | [Knip](https://knip.dev/) | Finds unused files, exports, and dependencies. |
 | `commitlint.config.cjs` | [commitlint](https://commitlint.js.org/) | Rejects commit messages that are not [Conventional Commits](https://www.conventionalcommits.org/). |
 | `.husky/pre-commit`, `.husky/commit-msg` | [husky](https://typicode.github.io/husky/) | Git hooks: lint before each commit, check the message after you write it. |
-| `.github/workflows/ci.yml` | GitHub Actions | Runs `npm run check` and `npm run build` on every push and pull request. |
+| `.github/workflows/ci.yml` | GitHub Actions | Runs `bun run check` and `bun run build` on every push and pull request. |
 | `.github/workflows/release.yml` | GitHub Actions | Builds the Mac and Windows installers and publishes a GitHub Release. |
 | `.gitattributes` | Git | Keeps line endings as LF on Windows, so Biome does not see every file as changed. |
 
@@ -24,9 +24,11 @@ In PowerShell, check your tools:
 
 ```powershell
 node -v   # v22.12 or newer (you have 22.19)
-npm -v    # 11.x
+bun -v    # 1.4 or newer
 git --version
 ```
+
+Node still runs the tools (electron-vite, TypeScript, electron-builder). Bun installs packages and runs the `package.json` scripts, and `bun.lock` is the lock file. Do not mix in `npm install`: it would create a second lock file (`package-lock.json`) that disagrees with `bun.lock`.
 
 In VS Code, install the **Biome** extension (`biomejs.biome`).
 
@@ -34,20 +36,22 @@ In VS Code, install the **Biome** extension (`biomejs.biome`).
 
 ### 1. Generate the template in a temporary folder
 
-The generator empties a folder that is not empty, so never point it at `D:\Projects\font-book`. Generate into a fresh folder instead. The last folder name becomes the app's package name, so call it `font-book`:
+The generator empties a folder that is not empty, so never point it at `D:\Projects\font-book`. Generate into a fresh folder instead. The last folder name becomes the app's package name, so call it `book`:
 
 ```powershell
 New-Item -ItemType Directory D:\Projects\font-book-tmp
 cd D:\Projects\font-book-tmp
-npm create @quick-start/electron@1.0.31 font-book -- --template react-ts --skip
+bun create @quick-start/electron@1.0.31 book --template react-ts --skip
 ```
 
 `--skip` answers the remaining questions with "no": no auto-updater (the app is offline) and no download mirror. Version 1.0.31 is the version these instructions were checked against. Only use `--skip` in an empty folder: it also skips the "folder is not empty" warning and wipes the folder.
 
+The generator ends by suggesting `npm install`. Ignore that and use the Bun commands below.
+
 ### 2. Copy it into the repository without overwriting anything
 
 ```powershell
-robocopy D:\Projects\font-book-tmp\font-book D:\Projects\font-book /E /XC /XN /XO
+robocopy D:\Projects\font-book-tmp\book D:\Projects\font-book /E /XC /XN /XO
 ```
 
 - `/E` copies all folders, including empty ones.
@@ -68,11 +72,11 @@ Run `git init` before installing, because the husky setup in Part 2 needs the `.
 ```powershell
 cd D:\Projects\font-book
 git init -b main
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
-`npm install` also downloads the Electron binary (about 100 MB), so the first install is slow. A window titled "Electron" opens. Close it with the window's close button or Ctrl+C in the terminal.
+`bun install` also downloads the Electron binary (about 100 MB), so the first install is slow. Bun only runs the install scripts of packages it trusts. Electron is on its built-in trusted list, so this works without extra setup. If `node_modules\electron\dist` is missing afterwards, run `bun pm trust electron`. A window titled "Electron" opens. Close it with the window's close button or Ctrl+C in the terminal.
 
 Commit the untouched template, so later diffs show only your changes:
 
@@ -91,41 +95,42 @@ Biome replaces both. Delete their config files and packages:
 
 ```powershell
 Remove-Item eslint.config.mjs, .prettierrc.yaml, .prettierignore
-npm uninstall eslint prettier @electron-toolkit/eslint-config-prettier @electron-toolkit/eslint-config-ts eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-react-refresh
+bun remove eslint prettier @electron-toolkit/eslint-config-prettier @electron-toolkit/eslint-config-ts eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-react-refresh
 ```
 
 ### 5. Install the tools at exact versions
 
-`--save-exact` writes `2.6.3` instead of `^2.6.3`, so everyone (and CI) runs the same tool version, and an update happens only when you choose it:
+`--exact` writes `2.6.3` instead of `^2.6.3`, so everyone (and CI) runs the same tool version, and an update happens only when you choose it:
 
 ```powershell
-npm i -D --save-exact @biomejs/biome@2.6.3 dependency-cruiser@18.7.0 knip@6.43.0 vitest@5.0.5 husky@9.1.7 @commitlint/cli@21.2.4 @commitlint/config-conventional@21.2.4
+bun add -d --exact @biomejs/biome@2.6.3 dependency-cruiser@18.7.0 knip@6.43.0 vitest@5.0.5 husky@9.1.7 @commitlint/cli@21.2.4 @commitlint/config-conventional@21.2.4
 ```
 
 ### 6. Replace the scripts in `package.json`
 
-Replace the whole `"scripts"` block with this. Keep the template's `postinstall` line as it is:
+Replace the whole `"scripts"` block with this, and add the `packageManager` line above it. Keep the template's `postinstall` line as it is. `packageManager` records which Bun version the project uses; the CI workflows read it, so CI and your PC run the same Bun.
 
 ```json
+"packageManager": "bun@1.4.4",
 "scripts": {
   "dev": "electron-vite dev",
   "start": "electron-vite preview",
-  "build": "npm run typecheck && electron-vite build",
+  "build": "bun run typecheck && electron-vite build",
   "lint": "biome ci . --error-on-warnings",
   "lint:fix": "biome check --write .",
   "format": "biome format --write .",
   "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
   "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-  "typecheck": "npm run typecheck:node && npm run typecheck:web",
+  "typecheck": "bun run typecheck:node && bun run typecheck:web",
   "test": "vitest run --passWithNoTests",
   "knip": "knip",
   "deps:check": "depcruise src --config .dependency-cruiser.cjs",
-  "check": "npm run lint && npm run typecheck && npm run deps:check && npm run knip && npm run test",
+  "check": "bun run lint && bun run typecheck && bun run deps:check && bun run knip && bun run test",
   "postinstall": "install-electron && electron-builder install-app-deps",
   "prepare": "husky",
-  "build:unpack": "npm run build && electron-builder --dir",
-  "build:mac": "npm run build && electron-builder --mac --arm64",
-  "build:win": "npm run build && electron-builder --win --x64"
+  "build:unpack": "bun run build && electron-builder --dir",
+  "build:mac": "bun run build && electron-builder --mac --arm64",
+  "build:win": "bun run build && electron-builder --win --x64"
 },
 ```
 
@@ -141,7 +146,7 @@ Replace the whole `"scripts"` block with this. Keep the template's `postinstall`
 | `knip` | Reports unused files, exports, and dependencies. |
 | `deps:check` | Checks import boundaries with dependency-cruiser. |
 | `check` | All of the checks above, in order. Run it before every push. |
-| `prepare` | npm runs this after `npm install`; it switches on the husky hooks. |
+| `prepare` | Bun runs this after `bun install`; it switches on the husky hooks. |
 | `build:mac` | Builds the Apple Silicon (`arm64`) `.dmg` and `.zip`. Only works on a Mac, so CI runs it. |
 | `build:win` | Builds the Windows x64 installer. Works on your PC. |
 
@@ -194,10 +199,10 @@ dependency-cruiser reads the alias from `tsconfig.web.json`, so boundary checks 
 [electron-builder](https://www.electron.build/) turns the built app into installers. Replace the whole file with:
 
 ```yaml
-# Placeholder: replace with a reverse-DNS id you control, e.g. com.yourname.fontbook.
+# Placeholder: replace with a reverse-DNS id you control, e.g. com.yourname.book.
 # macOS uses it to tell apps apart, so keep it stable once she has installed one.
-appId: com.example.fontbook
-productName: font-book
+appId: com.example.book
+productName: Book
 directories:
   buildResources: build
 files:
@@ -205,7 +210,7 @@ files:
   - "!src/*"
   - "!electron.vite.config.{js,ts,mjs,cjs}"
   - "!{dev-app-update.yml,CHANGELOG.md,README.md}"
-  - "!{.env,.env.*,.npmrc}"
+  - "!{.env,.env.*,.npmrc,bun.lock}"
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
   # Tooling and docs never ship inside the app.
   - "!{biome.jsonc,knip.json,.dependency-cruiser.cjs,commitlint.config.cjs,.gitattributes}"
@@ -214,7 +219,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: font-book
+  executableName: book
   target:
     - target: nsis
       arch:
@@ -240,8 +245,8 @@ mac:
   notarize: false
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    NSDocumentsFolderUsageDescription: font-book reads font files you keep in Documents.
-    NSDownloadsFolderUsageDescription: font-book reads font files you keep in Downloads.
+    NSDocumentsFolderUsageDescription: Book reads font files you keep in Documents.
+    NSDownloadsFolderUsageDescription: Book reads font files you keep in Downloads.
 dmg:
   artifactName: ${name}-${version}-${arch}.${ext}
 npmRebuild: false
@@ -252,9 +257,10 @@ What changed from the template, and why:
 - **`mac.target`**: one `dmg` (the installer she opens) and one `zip`, both `arm64` only, because her M5 MacBook Air is Apple Silicon.
 - **`identity: "-"`**: there is no paid Apple Developer certificate, so the app is not signed by a known developer. Apple Silicon refuses to run code with no signature at all, so electron-builder signs it "ad-hoc": a signature that proves the files are intact but not who made them. (`identity: null` would skip signing entirely.) Ad-hoc signing requires `hardenedRuntime: false`.
 - **`notarize: false`**: notarization is Apple's malware scan for signed apps. It needs a Developer account, so it is off.
-- **`win.target`**: an NSIS installer (`font-book-0.1.0-setup.exe`) for 64-bit Windows.
+- **`win.target`**: an NSIS installer (`book-0.1.0-setup.exe`) for 64-bit Windows.
 - **Removed**: the Linux targets (not built), the camera and microphone permission texts (the app never uses them), and the `publish` block (the app has no auto-updater; the release workflow uploads the files).
-- **`productName`**: the name shown in Finder and the Dock. You can change it, but do not use exactly "Font Book": that is the name of Apple's built-in font app.
+- **`productName`**: `Book`, the name shown in Finder and the Dock. Do not use exactly "Font Book": that is the name of Apple's built-in font app.
+- **`bun.lock`** is excluded from the app, like the other development-only files.
 
 ### 10. Point VS Code at Biome
 
@@ -265,8 +271,7 @@ Replace `.vscode/settings.json` with:
   "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
+    "source.fixAll.biome": "explicit"
   }
 }
 ```
@@ -276,16 +281,16 @@ In `.vscode/extensions.json`, replace `"dbaeumer.vscode-eslint"` with `"biomejs.
 ### 11. Switch on the Git hooks
 
 ```powershell
-npm run prepare
+bun run prepare
 ```
 
-This tells Git to run the hooks in `.husky/`. Do not run `npx husky init`: it overwrites `.husky/pre-commit` with `npm test`.
+This tells Git to run the hooks in `.husky/`. Do not run `bunx husky init`: it overwrites `.husky/pre-commit` with `npm test`.
 
 ### 12. Format, then fix what is left
 
 ```powershell
-npm run lint:fix
-npm run lint
+bun run lint:fix
+bun run lint
 ```
 
 `lint:fix` reformats every file to Biome's style (double quotes, semicolons), sorts imports, and applies safe fixes. `lint` then lists what you must fix by hand. On a fresh template, expect these, all in demo code:
@@ -302,13 +307,13 @@ Biome may also print `useLiteralKeys` notes about `process.env["ELECTRON_RENDERE
 
 Deleting the demo leaves the `ipcMain` import in `src/main/index.ts` and the `ipcHandle` function in `App.tsx` unused, so Biome flags them next (`noUnusedImports`, `noUnusedVariables`). Delete them too.
 
-Rerun `npm run lint` until it prints no errors. When a rule's message is unclear, its name links to the Biome docs page for that rule.
+Rerun `bun run lint` until it prints no errors. When a rule's message is unclear, its name links to the Biome docs page for that rule.
 
 ### 13. Run every check
 
 ```powershell
-npm run check
-npm run build
+bun run check
+bun run build
 ```
 
 `check` must end without errors: Biome, both typechecks, `no dependency violations found`, no Knip output, and Vitest's `No test files found, exiting with code 0`. If `typecheck` fails after step 7, read the error: it points to a line the stricter settings now reject.
@@ -320,13 +325,13 @@ git add -A
 git commit -m "build: replace eslint and prettier with biome and add guardrails"
 ```
 
-The pre-commit hook runs `npm run lint` first. Then prove the guardrails catch mistakes (roadmap milestone 2, "Done when"):
+The pre-commit hook runs `bun run lint` first. Then prove the guardrails catch mistakes (roadmap milestone 2, "Done when"):
 
 ```powershell
 git commit --allow-empty -m "stuff"   # rejected: "type may not be empty"
 ```
 
-Add `const x: any = 1;` to any `.ts` file and run `npm run lint`: `noExplicitAny` fails. Remove the line.
+Add `const x: any = 1;` to any `.ts` file and run `bun run lint`: `noExplicitAny` fails. Remove the line.
 
 ## Part 3: Put it on GitHub
 
@@ -338,19 +343,19 @@ Add `const x: any = 1;` to any `.ts` file and run `npm run lint`: `noExplicitAny
    git push -u origin main
    ```
 
-3. Open the repository's **Actions** tab. The **CI** workflow runs `npm ci`, `npm run check`, and `npm run build` on Ubuntu. It must be green.
+3. Open the repository's **Actions** tab. The **CI** workflow runs `bun install --frozen-lockfile`, `bun run check`, and `bun run build` on Ubuntu. It must be green.
 
-`npm ci` installs exactly what `package-lock.json` says, so always commit `package-lock.json`. If CI says the lock file is out of sync, run `npm install` locally and commit the updated lock file.
+`bun install --frozen-lockfile` installs exactly what `bun.lock` says and fails if `package.json` changed without the lock file, so always commit `bun.lock`. If CI says the lockfile is out of date, run `bun install` locally and commit the updated `bun.lock`.
 
 ## Part 4: First release
 
-You can build the Windows installer on your PC with `npm run build:win` (output in `dist/`). The Mac build needs macOS, so GitHub Actions builds it on a `macos-latest` runner, which is Apple Silicon like her laptop.
+You can build the Windows installer on your PC with `bun run build:win` (output in `dist/`). The Mac build needs macOS, so GitHub Actions builds it on a `macos-latest` runner, which is Apple Silicon like her laptop.
 
 **Test build, no release.** On GitHub: **Actions → Release → Run workflow**. When it finishes, the run page lists two artifacts: `mac-arm64` (the `.dmg` and `.zip`) and `windows-x64` (the `-setup.exe`).
 
-**Real release.** Follow [CONTRIBUTING.md](../CONTRIBUTING.md#releases): `npm version patch` creates a `vX.Y.Z` tag, and pushing the tag runs the release workflow. It:
+**Real release.** Follow [CONTRIBUTING.md](../CONTRIBUTING.md#releases): `bun pm version patch` creates a `vX.Y.Z` tag, and pushing the tag runs the release workflow. It:
 
-1. Checks that the tag matches `"version"` in `package.json`, then runs `npm run check`.
+1. Checks that the tag matches `"version"` in `package.json`, then runs `bun run check`.
 2. Builds the Mac `arm64` `.dmg` and `.zip` on macOS, and the Windows x64 installer on Windows, at the same time.
 3. Publishes a GitHub Release with all three files and notes generated from the commit messages.
 
@@ -360,27 +365,27 @@ Builds use `--publish never`, and a separate `release` job uploads the files wit
 
 The app is not signed by an identified developer or notarized, so macOS blocks the first launch. This is expected.
 
-1. Download `font-book-<version>-arm64.dmg` from the GitHub Release, open it, and drag **font-book** into **Applications**.
-2. Open font-book from Applications. macOS says it cannot verify the app. Click **Done** (not **Move to Trash**).
-3. Open **System Settings → Privacy & Security**, scroll down to **Security**, and click **Open Anyway** next to the message about font-book. Confirm with her password or Touch ID, then click **Open**.
+1. Download `book-<version>-arm64.dmg` from the GitHub Release, open it, and drag **Book** into **Applications**.
+2. Open Book from Applications. macOS says it cannot verify the app. Click **Done** (not **Move to Trash**).
+3. Open **System Settings → Privacy & Security**, scroll down to **Security**, and click **Open Anyway** next to the message about Book. Confirm with her password or Touch ID, then click **Open**.
 
 From then on it opens normally. Each new version may need step 3 again.
 
-If macOS instead says **"font-book is damaged and can't be opened"**, the download's quarantine flag is the cause, not real damage. In **Terminal**, run:
+If macOS instead says **"Book is damaged and can't be opened"**, the download's quarantine flag is the cause, not real damage. In **Terminal**, run:
 
 ```sh
-xattr -cr /Applications/font-book.app
+xattr -cr /Applications/Book.app
 ```
 
 `xattr -cr` removes the "downloaded from the internet" flag from the app and everything inside it. Then open the app again.
 
 ### Install on Windows
 
-Run `font-book-<version>-setup.exe`. If Windows SmartScreen says "Windows protected your PC", click **More info → Run anyway**. It warns because the installer is not code-signed.
+Run `book-<version>-setup.exe`. If Windows SmartScreen says "Windows protected your PC", click **More info → Run anyway**. It warns because the installer is not code-signed.
 
 ## Troubleshooting
 
 - **Every file shows as unformatted after a checkout.** Git converted line endings to CRLF. `.gitattributes` prevents this for new checkouts; to repair the current one, run `git add --renormalize .` and commit.
-- **Hooks do not run.** Run `npm run prepare` again. `git config core.hooksPath` should print `.husky/_`.
+- **Hooks do not run.** Run `bun run prepare` again. `git config core.hooksPath` should print `.husky/_`.
 - **`deps:check` reports `not-to-unresolvable` for an import that works.** The import uses an alias that is not in `tsconfig.web.json`'s `paths`. Add it there and in `electron.vite.config.ts`.
 - **Knip reports a file as unused that you just created.** Nothing imports it yet. Import it, or delete it.
