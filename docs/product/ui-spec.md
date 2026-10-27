@@ -10,7 +10,7 @@ Conventions: `Mod` is Cmd on macOS and Ctrl on Windows. "Motion row X" means the
 
 1. **Two views in one window.** The main area shows one view at a time: the **Library list** (wide rows, best for job 1), or the **Specimen** (one Style, with an inspector). Pairing becomes a third view in v0.2. The sidebar and toolbar never change. Enter or double-click opens the Specimen; Back returns to the list exactly where she left it. This makes Quick preview meaningful (a look without leaving the list) and avoids squeezing four columns into a 13-inch screen.
 2. **Family rows in the Library, Style rows in Favorites and Collections.** See [Q1](#q1-library-rows).
-3. **One Sample text everywhere.** The toolbar field, every row, the Specimen and Quick preview show the same single line. Editing it anywhere edits it everywhere.
+3. **Names in the list, Sample text in the previews.** Library rows show the Family name in its own Style, with Style count, Variable and Classification beneath. The toolbar field, Quick preview and the Specimen share one Sample text; editing it anywhere edits it everywhere. (Changed on 2026-10-27, after trying v0.1: a column of names scans faster than the same sentence repeated.)
 4. **Missing Glyphs are never silent.** Every Sample text stack ends in a bundled "notdef" font, so a character the Style lacks draws as an empty box instead of borrowing another font (fixes R1 and E19 in every surface at no runtime cost).
 5. **Organizing acts on a Style you can see.** Favorite and Add to Collection work in the Specimen and on Style rows, never on a Family row, so "which Style did I just star?" never comes up. Classification is the exception: it belongs to a Family, so it is set on Family rows and in the Specimen header.
 6. **Classification is a guess until she sets it.** Book guesses each Family's Classification from the Font file and says so; she can correct any Family by hand. See [Classification filter](#classification-filter).
@@ -31,7 +31,9 @@ Conventions: `Mod` is Cmd on macOS and Ctrl on Windows. "Motion row X" means the
 
 ### Q2. Quick preview timing
 
-**Decided: instant, both ways.** Space is a high-frequency key, and Emil Kowalski's rule is that keyboard actions people repeat all day do not animate. The panel appears and disappears in the frame Space is pressed (Motion row "Quick preview open/close"). There is nothing to interrupt, so pressing Space five times quickly simply toggles five times. It needs no Motion: render the panel when it is open and nothing when it is closed. If it ever feels abrupt, try a 100ms opacity-only exit before adding anything to the open.
+**Revised after trying v0.1 (2026-10-27): a short slide, docked on the right.** Quick preview docks on the right of the list, so the selected row's name is never covered. It slides in 16px and fades over 180ms and leaves over 120ms, with Motion retargeting mid-flight, so Space during the animation simply reverses it. Content changes (Up, Down, Left, Right) stay instant, and the last Style stays on screen until the next has loaded. It shows the Sample text large, the alphabet and figures, and a short paragraph, with clickable Style arrows and Open Specimen. The neighbouring rows' Styles load in the background while it is open.
+
+The original decision, kept for the reasoning: **instant, both ways.** Space is a high-frequency key, and Emil Kowalski's rule is that keyboard actions people repeat all day do not animate. The panel appears and disappears in the frame Space is pressed (Motion row "Quick preview open/close"). There is nothing to interrupt, so pressing Space five times quickly simply toggles five times. It needs no Motion: render the panel when it is open and nothing when it is closed. If it ever feels abrupt, try a 100ms opacity-only exit before adding anything to the open.
 
 ### Q3. Inspector
 

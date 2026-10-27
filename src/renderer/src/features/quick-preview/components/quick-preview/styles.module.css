@@ -1,64 +1,191 @@
-/* Centered over the list. No backdrop: the list stays visible and in charge. */
+/* Docked on the right of the list: the selected row's name stays visible. */
 .panel {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: var(--space-3);
+  right: var(--space-3);
+  bottom: var(--space-3);
   z-index: var(--z-popover);
   display: grid;
   grid-template-rows: auto 1fr auto;
-  width: min(880px, calc(100% - 64px));
-  height: max(320px, 60%);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  transform: translate(-50%, -50%);
+  width: min(600px, 58%);
   overflow: hidden;
-  pointer-events: none;
+  border-radius: var(--radius-lg);
+  background: var(--gray-1);
+  box-shadow: var(--shadow-lg);
 }
 
-.header,
-.footer {
+.header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-5);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  opacity: 0.7;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
+  border-bottom: var(--border-width) solid var(--gray-4);
 }
 
-.title {
+.titles {
   flex: 1;
+  min-width: 0;
+}
+
+.family,
+.style {
   overflow: hidden;
-  font-weight: var(--weight-medium);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.stepper {
-  font-variant-numeric: tabular-nums;
+.family {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
 }
 
-.body {
+.style {
+  color: var(--gray-10);
+  font-size: var(--text-sm);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.position {
+  min-width: 52px;
+  color: var(--gray-10);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-10);
+}
+
+.iconButton:hover {
+  background: var(--gray-3);
+  color: var(--gray-12);
+}
+
+.paper {
+  position: relative;
   min-height: 0;
   overflow: hidden;
-  padding: 0 var(--space-5);
-  /* Long text fades out at the bottom instead of being cut mid-line. */
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
 }
 
-.sample {
-  font-size: var(--quick-preview-size);
+/* Long text fades into the paper at the bottom instead of being cut mid-line. */
+.paper::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 48px;
+  background: linear-gradient(to bottom, transparent, var(--paper));
+  content: "";
+}
+
+.specimen {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+/* The last Style stays up while the next loads; it never blinks to empty. */
+.specimen[data-stale] {
+  opacity: 0.6;
+}
+
+.sample,
+.characters,
+.paragraph {
   font-weight: normal;
   font-style: normal;
   font-synthesis: none;
   overflow-wrap: anywhere;
 }
 
+.sample {
+  font-size: 56px;
+}
+
+.characters {
+  display: grid;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.paragraph {
+  max-width: 34em;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 .message {
   display: grid;
   place-items: center;
   height: 100%;
+  padding: var(--space-5);
   font-family: var(--font-ui);
   font-size: var(--text-md);
+  text-align: center;
   opacity: 0.7;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5);
+  border-top: var(--border-width) solid var(--gray-4);
+  color: var(--gray-10);
+  font-size: var(--text-sm);
+}
+
+.keys {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.footer kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: var(--border-width) solid var(--gray-6);
+  border-radius: 5px;
+  background: var(--gray-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+}
+
+/* Space between one key's label and the next key. */
+.keyLabel {
+  margin-right: var(--space-3);
+}
+
+.openButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-sm);
+  padding: 0 var(--space-1) 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--gray-3);
+  font-weight: var(--weight-medium);
+}
+
+.openButton:hover:not(:disabled) {
+  background: var(--gray-4);
 }

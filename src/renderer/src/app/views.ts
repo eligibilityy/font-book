@@ -105,7 +105,12 @@ export function buildRows({
     for (const family of matching) {
       const value = count(family);
       if (classification === "any" || value === classification) {
-        rows.push({ kind: "family", key: family.key, family });
+        rows.push({
+          kind: "family",
+          key: family.key,
+          family,
+          classification: value,
+        });
       }
     }
     return { rows, total: families.length, counts };
@@ -124,7 +129,13 @@ export function buildRows({
         ? familiesByKey.get(familyKey(style.familyName))
         : undefined;
       return style && family
-        ? { kind: "style", key: ref.styleId, style, family }
+        ? {
+            kind: "style",
+            key: ref.styleId,
+            style,
+            family,
+            classification: classify(family).classification,
+          }
         : { kind: "missing", key: ref.styleId, ref };
     })
     .sort((a, b) => {

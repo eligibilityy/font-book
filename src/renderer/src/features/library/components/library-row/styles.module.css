@@ -4,17 +4,35 @@
   top: 0;
   left: 0;
   display: grid;
-  grid-template-rows: 40px auto;
+  grid-template-rows: 44px auto;
   align-content: center;
   width: 100%;
   height: var(--row-height);
-  padding: 0 var(--space-4);
-  border-bottom: var(--border-width) solid var(--gray-3);
+  padding: 0 var(--space-5);
   contain: strict;
 }
 
+/* A hairline between rows, inset so the list reads as one column. */
+.row::after {
+  position: absolute;
+  right: var(--space-5);
+  bottom: 0;
+  left: var(--space-5);
+  height: var(--border-width);
+  background: var(--gray-4);
+  content: "";
+}
+
 .row[aria-selected="true"] {
-  background: var(--accent-a4);
+  background: var(--selection-unfocused);
+}
+
+[role="listbox"]:focus .row[aria-selected="true"] {
+  background: var(--selection);
+}
+
+.row[aria-selected="true"]::after {
+  opacity: 0;
 }
 
 @media (hover: hover) {
@@ -23,48 +41,65 @@
   }
 }
 
-/* Only Sample text renders in the Style, never the names (design principles 1). */
-.sample {
+/* Only the name renders in the Style; everything else is the interface font. */
+.name {
   overflow: hidden;
+  color: var(--gray-12);
   font-size: var(--row-sample-size);
-  line-height: 40px;
+  line-height: 44px;
   font-weight: normal;
   font-style: normal;
   font-synthesis: none;
   white-space: nowrap;
   /* A fade, not an ellipsis: the last letters still show the Style. */
-  mask-image: linear-gradient(to right, #000 calc(100% - 64px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
 }
 
-.notice {
-  display: flex;
-  align-items: center;
-  height: 40px;
+.placeholder {
+  color: var(--gray-8);
+  font-family: var(--font-ui);
+  font-weight: var(--weight-regular);
+  letter-spacing: -0.02em;
+}
+
+.missingName {
+  color: var(--gray-9);
+  font-family: var(--font-ui);
+  letter-spacing: -0.02em;
+}
+
+.note {
+  margin-left: var(--space-3);
   color: var(--gray-10);
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
+  letter-spacing: 0;
 }
 
-.names {
+.details {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   overflow: hidden;
-  color: var(--gray-11);
+  color: var(--gray-10);
   font-size: var(--text-sm);
   white-space: nowrap;
 }
 
-.familyName {
-  overflow: hidden;
-  color: var(--gray-12);
-  font-weight: var(--weight-medium);
-  text-overflow: ellipsis;
+/* A thin dot between details, drawn rather than typed, so it sits centred. */
+.details > span + span::before {
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-right: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--gray-8);
+  vertical-align: middle;
+  content: "";
 }
 
 .favorite {
   flex-shrink: 0;
   width: 12px;
   height: 12px;
-  margin-left: auto;
   color: var(--accent-9);
 }

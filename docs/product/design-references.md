@@ -87,7 +87,7 @@ Tokens are from [design principles](../design-principles.md#tokens-to-define): `
 
 | Interaction | Tier | Animate? | Property | Duration (enter / exit) | Easing | Origin | Interruption | Reduced motion | Justified by |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Quick preview open/close (Space) | High, keyboard | No (decided 2026-10-27) | none | 0ms / 0ms | none | none | Nothing to interrupt; each Space toggles. Down/Up while open swaps Sample text instantly. | Same | Emil 2, 10; Raphael 2 |
+| Quick preview open/close (Space) | High, keyboard | Briefly (revised 2026-10-27) | opacity, translateX 16px to 0 | 180ms / 120ms | `--ease-out` | Right edge (it docks there) | Motion retargets: Space mid-animation reverses from the current frame. Up/Down/Left/Right swap content instantly. | Fade only | Emil 2, 7; Benji 2, 4; Raphael 2 |
 | Popover from trigger (Add to Collection, colour) | Occasional | Yes | opacity, scale 0.97 to 1 | 180ms / 100ms | `--ease-out` | `var(--transform-origin)` from Base UI | CSS transition retargets; reopening mid-exit grows back from the current frame | Opacity only | Emil 5, 6, 7; Benji 2 |
 | Context menu (right-click a row) | Medium | Exit only | opacity | 0ms / 100ms | `--ease-out` | none | Instant on every open | Same | Raphael 2; Emil 2 |
 | Inspector show/hide | Occasional | Yes | transform translateX(100%) to 0, opacity | 280ms / 180ms | `--ease-out` | Right edge | Toggling mid-slide reverses from the current position | Fade only (Motion drops the slide) | Benji 2, 3; Emil 3, 8 |

@@ -59,7 +59,9 @@ try {
     await page.waitForSelector('[aria-label="Quick preview"]');
     await shot("2-quick-preview");
     await page.keyboard.press("ArrowRight");
+    await shot("2b-quick-preview-next-style");
     await page.keyboard.press("Space");
+    await page.waitForTimeout(300);
     const focused = await page.evaluate(() => {
       const element = document.activeElement;
       return element
@@ -133,9 +135,20 @@ try {
     await page.keyboard.press("Escape");
     await page.fill('input[aria-label="Search"]', "");
     await page.click('button[aria-label="Classification"]');
-    await page.click('[role="option"]:has-text("Serif") >> nth=0');
+    // Library rows are options too; the Select's item reads exactly "Serif" plus its count.
+    await page.locator('[role="option"]', { hasText: /^Serif\s*\d+$/ }).click();
     await page.waitForTimeout(300);
     await shot("9-serif");
+  });
+
+  await step("dark theme", async () => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.keyboard.press("Escape");
+    await page.click('nav[aria-label="Library"] button:has-text("All")');
+    await page.waitForSelector('[role="option"]');
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Space");
+    await shot("10-dark");
   });
 } finally {
   await app.close();

@@ -129,3 +129,54 @@ export function CloseIcon({ className }: IconProps): React.JSX.Element {
     </Icon>
   );
 }
+
+/** All: every Family. */
+export function GridIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1" />
+      <rect x="9" y="2.5" width="4.5" height="4.5" rx="1" />
+      <rect x="2.5" y="9" width="4.5" height="4.5" rx="1" />
+      <rect x="9" y="9" width="4.5" height="4.5" rx="1" />
+    </Icon>
+  );
+}
+
+/** My Fonts: the ones she installed. */
+export function PersonIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <circle cx="8" cy="5.5" r="2.75" />
+      <path d="M2.75 13.5c.6-2.6 2.7-4 5.25-4s4.65 1.4 5.25 4" />
+    </Icon>
+  );
+}
+
+/** System: the operating system's own. */
+export function ComputerIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <rect x="2" y="3" width="12" height="8" rx="1.5" />
+      <path d="M5.5 13.5h5M8 11v2.5" />
+    </Icon>
+  );
+}
+
+/** Couldn't Read. */
+export function WarningIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <path d="M8 2.5l6 10.5H2z" />
+      <path d="M8 6.75v2.5M8 11.25v.01" />
+    </Icon>
+  );
+}
+
+/** A Collection. */
+export function FolderIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <path d="M2 4.5a1 1 0 0 1 1-1h3.25l1.5 1.5H13a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
+    </Icon>
+  );
+}

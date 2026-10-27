@@ -15,7 +15,6 @@ export interface LibraryListHandle {
 interface LibraryListProps {
   rows: ListRow[];
   selectedIndex: number;
-  sampleText: string;
   /** Style IDs she has starred, for the star on each row. */
   favoriteIds: ReadonlySet<string>;
   label: string;
@@ -24,6 +23,8 @@ interface LibraryListProps {
   onOpen: (index: number) => void;
   onToggleQuickPreview: () => void;
   onCloseQuickPreview: () => void;
+  /** Focus moved to something outside the list (the sidebar, the toolbar). */
+  onFocusLeave: () => void;
   /** Left and Right while Quick preview shows a Family: step through its Styles. */
   onStepQuickPreview: (delta: number) => void;
   onToggleFavorite: () => void;
@@ -43,7 +44,6 @@ interface LibraryListProps {
 export function LibraryList({
   rows,
   selectedIndex,
-  sampleText,
   favoriteIds,
   label,
   isQuickPreviewOpen,
@@ -51,6 +51,7 @@ export function LibraryList({
   onOpen,
   onToggleQuickPreview,
   onCloseQuickPreview,
+  onFocusLeave,
   onStepQuickPreview,
   onToggleFavorite,
   contextMenuItems,
@@ -155,6 +156,11 @@ export function LibraryList({
         tabIndex={0}
         className={styles.scroller}
         onKeyDown={handleKeyDown}
+        onBlur={(event) => {
+          const next = event.relatedTarget;
+          if (!(next instanceof Node) || !event.currentTarget.contains(next))
+            onFocusLeave();
+        }}
         onScroll={(event) =>
           onScrollOffsetChange(event.currentTarget.scrollTop)
         }
@@ -174,7 +180,6 @@ export function LibraryList({
                 row={row}
                 top={item.start}
                 isSelected={item.index === selectedIndex}
-                sampleText={sampleText}
                 hasFavorite={rowHasFavorite(row, favoriteIds)}
                 onSelect={handleSelect}
                 onOpen={handleOpen}

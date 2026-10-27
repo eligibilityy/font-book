@@ -1,3 +1,4 @@
+import type { Classification } from "@shared/classification";
 import type { Style } from "@shared/contracts/library";
 import type { StyleRef } from "@shared/contracts/storage";
 import type { Family } from "./families";
@@ -8,8 +9,19 @@ import type { Family } from "./families";
  * whose Font file is gone shows as a Missing row.
  */
 export type ListRow =
-  | { kind: "family"; key: string; family: Family }
-  | { kind: "style"; key: string; style: Style; family: Family }
+  | {
+      kind: "family";
+      key: string;
+      family: Family;
+      classification: Classification;
+    }
+  | {
+      kind: "style";
+      key: string;
+      style: Style;
+      family: Family;
+      classification: Classification;
+    }
   | { kind: "missing"; key: string; ref: StyleRef };
 
 /** The Style a row stands for: what Quick preview shows and Enter opens. */

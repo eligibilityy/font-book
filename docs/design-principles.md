@@ -70,9 +70,12 @@ walk in.
 Designers learn a typeface by playing with it. Every control should feel connected to the
 glyphs.
 
-- **One Sample text everywhere.** A single line (it wraps in the Specimen) shared by the
-  toolbar field, every Library row, the Specimen and Quick preview. Editing it in any of them
-  edits it everywhere.
+- **Names in the list, Sample text in the previews.** Library rows show each Family's name
+  set in its own Style: a column of names is quickest to scan. One Sample text (a single
+  line that wraps) is shared by the toolbar field, Quick preview and the Specimen; editing it
+  in any of them edits it everywhere.
+- **The interface font is Inter**, bundled (SIL OFL) and registered as "Book UI", so the
+  chrome looks the same on every computer and never borrows a font she is judging.
 - **Sliders update live.** Size, tracking, leading, and Axis sliders update the Specimen on
   every movement, not on release. If anything needs slowing down, delay *saving* the
   preference, never the visual update.

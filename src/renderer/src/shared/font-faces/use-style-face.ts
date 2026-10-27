@@ -1,5 +1,5 @@
 import type { Style } from "@shared/contracts/library";
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import {
   acquireFace,
   type FaceStatus,
@@ -48,4 +48,29 @@ export function useStyleFace(
 
   if (!style) return "idle";
   return status ?? "loading";
+}
+
+/**
+ * Loads these Styles in the background and keeps them loaded while they are
+ * listed, so showing one next is instant. Nothing renders from them here.
+ */
+export function useWarmFaces(styles: readonly (Style | null)[]): void {
+  const latest = useRef(styles);
+  latest.current = styles;
+  const ids = styles.map((style) => style?.id ?? "").join("|");
+
+  useEffect(() => {
+    const byId = new Map(
+      latest.current.flatMap((style) =>
+        style ? [[style.id, style] as const] : [],
+      ),
+    );
+    const releases = ids.split("|").flatMap((id) => {
+      const style = byId.get(id);
+      return style ? [acquireFace(style, false)] : [];
+    });
+    return () => {
+      for (const release of releases) release();
+    };
+  }, [ids]);
 }

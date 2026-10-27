@@ -40,7 +40,7 @@ Settled on 2026-10-27:
 | # | Question | Decision | Where |
 | --- | --- | --- | --- |
 | 1 | Library rows: one per Family or one per Style? | One per Family; Style rows in Favorites and Collections | [ui-spec Q1](ui-spec.md#q1-library-rows) |
-| 2 | Quick preview: 100ms fade or instant? | Instant, both open and close | [ui-spec Q2](ui-spec.md#q2-quick-preview-timing) |
+| 2 | Quick preview: 100ms fade or instant? | First instant; revised after trying it: docked right, 180ms slide in, 120ms out | [ui-spec Q2](ui-spec.md#q2-quick-preview-timing) |
 | 3 | Inspector: overlay or resize the Specimen? | Resize once (two reflows per toggle), never animate width | [ui-spec Q3](ui-spec.md#q3-inspector) |
 | 4 | Default Sample text and empty-state tone | "Sphinx of black quartz, judge my vow."; warm empty states (tone B) | [ui-spec Q4](ui-spec.md#q4-default-sample-text-and-empty-state-tone) |
 | 5 | Pairing in v0.1, or first in v0.2? | v0.2. Cores first | [ui-spec 8.6](ui-spec.md#86-pairing-v02) |

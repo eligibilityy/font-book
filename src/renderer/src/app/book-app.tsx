@@ -28,6 +28,7 @@ import {
 } from "@/features/library";
 import { QuickPreview } from "@/features/quick-preview";
 import { type SpecimenSettings, SpecimenView } from "@/features/specimen";
+import { useWarmFaces } from "@/shared/font-faces/use-style-face";
 import { countOf, formatNumber } from "@/shared/text";
 import controls from "@/shared/ui/controls.module.css";
 import { useSavedFile } from "@/shared/use-saved-file";
@@ -208,6 +209,16 @@ export function BookApp({
     return rowStyle(selectedRow);
   }, [selectedRow, quickPreview.styleId]);
 
+  // While Quick preview is open, load the rows above and below too, so Up and
+  // Down land on a Style that is already drawn.
+  useWarmFaces(
+    quickPreview.open
+      ? [rows[selectedIndex - 1], rows[selectedIndex + 1]].map((row) =>
+          row ? rowStyle(row) : null,
+        )
+      : [],
+  );
+
   const specimenFamily: Family | null =
     mode.kind === "specimen"
       ? (familiesByKey.get(mode.familyKey) ?? null)
@@ -238,6 +249,9 @@ export function BookApp({
     setMode({ kind: "list" });
     setUnstarred([]);
     setQuickPreview({ open: false, styleId: null });
+    // Choosing a view hands the keyboard to its list, even when it is the
+    // view already showing (the list doesn't remount then).
+    requestAnimationFrame(() => listRef.current?.focus());
   }, []);
 
   const select = useCallback(
@@ -275,6 +289,10 @@ export function BookApp({
   );
 
   const goBack = useCallback(() => setMode({ kind: "list" }), []);
+  const closeQuickPreview = useCallback(
+    () => setQuickPreview({ open: false, styleId: null }),
+    [],
+  );
 
   const toggleQuickPreview = useCallback(() => {
     if (!selectedRow) return;
@@ -496,40 +514,40 @@ export function BookApp({
   const selectedFamily = selectedRow ? rowFamily(selectedRow) : null;
 
   return (
-    <div className={styles.shell}>
-      <Toolbar
-        sidebarVisible={prefs.data.sidebarVisible}
-        onToggleSidebar={() =>
-          prefs.update((previous) => ({
-            ...previous,
-            sidebarVisible: !previous.sidebarVisible,
-          }))
-        }
-        backLabel={mode.kind === "list" ? null : title}
-        onBack={goBack}
-        search={search}
-        searchPlaceholder={`Search ${title}`}
-        onSearchChange={setSearch}
-        onSearchExit={() => listRef.current?.focus()}
-        searchRef={searchRef}
-        sampleText={prefs.data.sampleText}
-        onSampleTextChange={setSampleText}
-      />
-      <div
-        className={styles.workspace}
-        data-sidebar={prefs.data.sidebarVisible ? "" : undefined}
-      >
-        {prefs.data.sidebarVisible && (
-          <Sidebar
-            view={view}
-            onViewChange={changeView}
-            failedCount={library.failed.length}
-            collections={collections}
-            isCreatingCollection={isCreatingCollection}
-            onCreatingCollectionChange={setIsCreatingCollection}
-            recentlyAddedId={recentlyAddedId}
-          />
-        )}
+    <div
+      className={styles.shell}
+      data-sidebar={prefs.data.sidebarVisible ? "" : undefined}
+    >
+      {prefs.data.sidebarVisible && (
+        <Sidebar
+          view={view}
+          onViewChange={changeView}
+          failedCount={library.failed.length}
+          collections={collections}
+          isCreatingCollection={isCreatingCollection}
+          onCreatingCollectionChange={setIsCreatingCollection}
+          recentlyAddedId={recentlyAddedId}
+        />
+      )}
+      <div className={styles.content}>
+        <Toolbar
+          sidebarVisible={prefs.data.sidebarVisible}
+          onToggleSidebar={() =>
+            prefs.update((previous) => ({
+              ...previous,
+              sidebarVisible: !previous.sidebarVisible,
+            }))
+          }
+          backLabel={mode.kind === "list" ? null : title}
+          onBack={goBack}
+          search={search}
+          searchPlaceholder={`Search ${title}`}
+          onSearchChange={setSearch}
+          onSearchExit={() => listRef.current?.focus()}
+          searchRef={searchRef}
+          sampleText={prefs.data.sampleText}
+          onSampleTextChange={setSampleText}
+        />
         <main className={styles.main}>
           {mode.kind === "specimen" && specimenFamily && specimenStyle ? (
             <SpecimenView
@@ -663,15 +681,13 @@ export function BookApp({
                     rows={rows}
                     label={title}
                     selectedIndex={selectedIndex}
-                    sampleText={prefs.data.sampleText}
                     favoriteIds={collections.favoriteIds}
                     isQuickPreviewOpen={quickPreview.open}
                     onSelect={select}
                     onOpen={openRow}
                     onToggleQuickPreview={toggleQuickPreview}
-                    onCloseQuickPreview={() =>
-                      setQuickPreview({ open: false, styleId: null })
-                    }
+                    onCloseQuickPreview={closeQuickPreview}
+                    onFocusLeave={closeQuickPreview}
                     onStepQuickPreview={stepQuickPreview}
                     onToggleFavorite={toggleFavorite}
                     initialScrollOffset={scrollOffsets.current[key] ?? 0}
@@ -728,33 +744,27 @@ export function BookApp({
                     }
                   />
                 )}
-                {quickPreview.open && selectedRow && (
-                  <QuickPreview
-                    style={quickPreviewStyle}
-                    title={
-                      quickPreviewStyle
-                        ? `${quickPreviewStyle.familyName}, ${quickPreviewStyle.styleName}`
-                        : selectedRow.kind === "missing"
-                          ? `${selectedRow.ref.familyName}, ${selectedRow.ref.styleName}`
-                          : ""
-                    }
-                    stepper={
-                      selectedRow.kind === "family" && quickPreviewStyle
-                        ? {
-                            index:
-                              selectedRow.family.styles.indexOf(
-                                quickPreviewStyle,
-                              ),
-                            count: selectedRow.family.styles.length,
-                          }
-                        : null
-                    }
-                    sampleText={prefs.data.sampleText}
-                    lineHeight={settings.lineHeight}
-                    tracking={settings.tracking}
-                    paperReversed={settings.paperReversed}
-                  />
-                )}
+                <QuickPreview
+                  open={quickPreview.open && selectedRow !== null}
+                  style={quickPreviewStyle}
+                  fallbackTitle={
+                    selectedRow?.kind === "missing"
+                      ? `${selectedRow.ref.familyName} ${selectedRow.ref.styleName}`
+                      : ""
+                  }
+                  familyStyles={
+                    selectedRow?.kind === "family"
+                      ? selectedRow.family.styles
+                      : null
+                  }
+                  sampleText={prefs.data.sampleText}
+                  lineHeight={settings.lineHeight}
+                  tracking={settings.tracking}
+                  paperReversed={settings.paperReversed}
+                  onStep={stepQuickPreview}
+                  onOpenSpecimen={() => openRow(selectedIndex)}
+                  onClose={closeQuickPreview}
+                />
               </div>
               {mode.kind === "list" && targetStyle && (
                 <AddToCollectionPopover

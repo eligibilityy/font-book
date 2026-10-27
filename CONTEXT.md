@@ -111,7 +111,7 @@ The inspector section that shows the Font file's own credits: designer, foundry,
 _Avoid_: info, metadata (in UI copy), license check
 
 **Sample text**:
-The words a Specimen or Pairing renders. The user can type their own. One Sample text is shared by every Library row, the Specimen, and Quick preview.
+The words a Specimen or Pairing renders. The user can type their own. One Sample text is shared by the Specimen and Quick preview. Library rows show the Family name instead.
 _Avoid_: pangram (unless it is one), placeholder, lorem
 
 **Pairing**:

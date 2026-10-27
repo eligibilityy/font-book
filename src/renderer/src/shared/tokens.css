@@ -9,6 +9,20 @@
 }
 
 /*
+ * Inter is the interface font: bundled so Book looks the same on every Mac
+ * and PC, and never borrowed from the fonts she is judging. Registered as
+ * "Book UI" so it can't be confused with an installed Inter. SIL OFL 1.1,
+ * see assets/fonts/Inter-LICENSE.txt.
+ */
+@font-face {
+  font-family: "Book UI";
+  src: url("../assets/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+/*
  * Design tokens: named values every component uses instead of raw numbers.
  * See docs/design-principles.md#tokens-to-define. Add a token when a second
  * component needs the same value.
@@ -30,13 +44,16 @@
   --gray-11: #646464;
   --gray-12: #1b1b1b;
 
-  --accent-9: #0b68cb;
-  --accent-11: #0d5bb0;
-  --accent-a4: rgb(11 104 203 / 0.12);
-  --focus-ring: #0b68cb;
+  --accent-9: #3e63dd;
+  --accent-11: #3451b2;
+  --accent-a4: rgb(62 99 221 / 0.12);
+  /* A selected row: accent while the list has focus, gray when it doesn't. */
+  --selection: rgb(62 99 221 / 0.14);
+  --selection-unfocused: var(--gray-4);
+  --focus-ring: #3e63dd;
   --danger: #c62a2f;
 
-  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-ui: "Book UI", system-ui, -apple-system, "Segoe UI", sans-serif;
   --text-xs: 11px;
   --text-sm: 12px;
   --text-md: 13px;
@@ -63,8 +80,8 @@
   --control-sm: 28px;
   --control-md: 32px;
   --toolbar-height: 48px;
-  --list-header-height: 40px;
-  --sidebar-width: 200px;
+  --list-header-height: 52px;
+  --sidebar-width: 220px;
   --inspector-width: 272px;
   --row-height: 80px;
   --row-sample-size: 32px;
@@ -114,10 +131,12 @@
     --gray-11: #b4b4b4;
     --gray-12: #eeeeee;
 
-    --accent-9: #3b8eea;
-    --accent-11: #70b8ff;
-    --accent-a4: rgb(59 142 234 / 0.2);
-    --focus-ring: #3b8eea;
+    --accent-9: #5472e4;
+    --accent-11: #9eb1ff;
+    --accent-a4: rgb(84 114 228 / 0.22);
+    --selection: rgb(84 114 228 / 0.28);
+    --selection-unfocused: var(--gray-4);
+    --focus-ring: #5472e4;
     --danger: #ff6369;
 
     --shadow-md: 0 0 0 1px rgb(255 255 255 / 0.08), 0 4px 16px rgb(0 0 0 / 0.5);
@@ -158,6 +177,8 @@ body {
   font-family: var(--font-ui);
   font-size: var(--text-md);
   line-height: 1.4;
+  /* Tell l, I and 1 apart: font names are full of them. */
+  font-feature-settings: "cv05", "cv08";
   -webkit-font-smoothing: antialiased;
   /* A desktop app: chrome isn't selectable text, and the cursor stays an arrow. */
   user-select: none;

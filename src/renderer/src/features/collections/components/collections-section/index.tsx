@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { countOf } from "@/shared/text";
 import controls from "@/shared/ui/controls.module.css";
 import { IconButton } from "@/shared/ui/icon-button";
-import { PlusIcon } from "@/shared/ui/icons";
+import { FolderIcon, PlusIcon } from "@/shared/ui/icons";
 import type { Collections } from "../../hooks/use-collections";
 import styles from "./styles.module.css";
 
@@ -93,6 +93,7 @@ export function CollectionsSection({
                     />
                   }
                 >
+                  <FolderIcon className={styles.icon} />
                   <span className={styles.itemName}>{collection.name}</span>
                   <span className={styles.count}>
                     {collection.styles.length}

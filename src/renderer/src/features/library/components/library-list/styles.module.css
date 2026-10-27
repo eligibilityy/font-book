@@ -5,10 +5,8 @@
   overscroll-behavior: contain;
 }
 
-/* The focus ring sits on the selected row, not around the whole list. */
-.scroller:focus-visible [aria-selected="true"] {
-  box-shadow: inset 0 0 0 2px var(--focus-ring);
-}
+/* Focus shows as the selected row turning from gray to the accent tint
+   (library-row styles), like a macOS list, not as a ring around the list. */
 
 .rows {
   position: relative;

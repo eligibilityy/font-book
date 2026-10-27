@@ -1,75 +1,217 @@
 import type { Style } from "@shared/contracts/library";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import { sampleFontFamily } from "@/shared/font-faces/registry";
 import { useStyleFace } from "@/shared/font-faces/use-style-face";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseIcon,
+} from "@/shared/ui/icons";
 import styles from "./styles.module.css";
 
 interface QuickPreviewProps {
+  open: boolean;
   /** null for a Missing Style: its Font file is gone. */
   style: Style | null;
-  title: string;
-  /** Position among the Family's Styles, when the row is a Family. */
-  stepper: { index: number; count: number } | null;
+  /** Shown when there is no Style to name (a Missing Style's saved names). */
+  fallbackTitle: string;
+  /** The Family's Styles, when the row is a Family: Left and Right step through them. */
+  familyStyles: Style[] | null;
   sampleText: string;
   lineHeight: number;
   tracking: number;
   paperReversed: boolean;
+  onStep: (delta: number) => void;
+  onOpenSpecimen: () => void;
+  onClose: () => void;
 }
 
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+const CHARACTERS = [
+  "ABCDEFGHIJKLM",
+  "NOPQRSTUVWXYZ",
+  "abcdefghijklm",
+  "nopqrstuvwxyz",
+  "0123456789 &?!(@)",
+];
+
+const PARAGRAPH =
+  "Good type disappears into the reading. Set small, a few lines of ordinary prose show what a single line can't: the texture of the page, the rhythm of the spacing, and how evenly the colour falls.";
+
 /**
- * A larger look at the selected row without leaving the list. It is a plain
- * region, not a dialog, so focus stays in the list and Up/Down keep working.
- * It appears and disappears instantly: Space is pressed far too often to
- * wait for an animation.
+ * A larger look at the selected row without leaving the list. It docks on
+ * the list's right side, so the selected row is never hidden, and it is a
+ * plain region, not a dialog: focus stays in the list, and Up and Down keep
+ * moving the selection while the preview follows.
+ *
+ * It slides in over 180ms and out over 120ms. Motion retargets mid-flight,
+ * so pressing Space during either just reverses it.
  */
-export function QuickPreview({
+export function QuickPreview(props: QuickPreviewProps): React.JSX.Element {
+  return (
+    <AnimatePresence>
+      {props.open && (
+        <motion.section
+          key="quick-preview"
+          className={styles.panel}
+          aria-label="Quick preview"
+          initial={{ opacity: 0, x: 16 }}
+          animate={{
+            opacity: 1,
+            x: 0,
+            transition: { duration: 0.18, ease: EASE_OUT },
+          }}
+          exit={{
+            opacity: 0,
+            x: 12,
+            transition: { duration: 0.12, ease: EASE_OUT },
+          }}
+          // Clicks inside must not take focus from the list, or the keys stop working.
+          onMouseDown={(event) => event.preventDefault()}
+        >
+          <QuickPreviewContent {...props} />
+        </motion.section>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function QuickPreviewContent({
   style,
-  title,
-  stepper,
+  fallbackTitle,
+  familyStyles,
   sampleText,
   lineHeight,
   tracking,
   paperReversed,
+  onStep,
+  onOpenSpecimen,
+  onClose,
 }: QuickPreviewProps): React.JSX.Element {
   const status = useStyleFace(style, { priority: true });
+
+  // Keep showing the last Style that loaded until the next one is ready, so
+  // holding Down never flashes an empty panel between rows.
+  const [shown, setShown] = useState<Style | null>(null);
+  if (status === "ready" && style && shown?.id !== style.id) setShown(style);
+  const shownStatus = useStyleFace(shown, { priority: true });
+  const display =
+    status === "ready"
+      ? style
+      : status === "loading" && shownStatus === "ready"
+        ? shown
+        : null;
+
+  const index = style && familyStyles ? familyStyles.indexOf(style) : -1;
+  const canStep = familyStyles !== null && familyStyles.length > 1;
   const ink = paperReversed ? "var(--specimen-paper)" : "var(--specimen-ink)";
   const paper = paperReversed ? "var(--specimen-ink)" : "var(--specimen-paper)";
+  // --paper lets the bottom fade end in the paper colour, light or reversed.
+  const paperStyle: React.CSSProperties & Record<"--paper", string> = {
+    background: paper,
+    color: ink,
+    "--paper": paper,
+  };
+  const textStyle = display
+    ? {
+        fontFamily: sampleFontFamily(display.id),
+        letterSpacing: `${tracking / 1000}em`,
+      }
+    : undefined;
 
   return (
-    <section
-      className={styles.panel}
-      aria-label="Quick preview"
-      style={{ background: paper, color: ink }}
-    >
+    <>
       <header className={styles.header}>
-        <span className={styles.title}>{title}</span>
-        {stepper && stepper.count > 1 && (
-          <span className={styles.stepper}>
-            {stepper.index + 1} of {stepper.count} Styles
-          </span>
-        )}
-      </header>
-      <div className={styles.body}>
-        {style && status === "ready" ? (
-          <p
-            className={styles.sample}
-            style={{
-              fontFamily: sampleFontFamily(style.id),
-              lineHeight,
-              letterSpacing: `${tracking / 1000}em`,
-            }}
-          >
-            {sampleText || `${style.familyName} ${style.styleName}`}
+        <div className={styles.titles}>
+          <p className={styles.family}>
+            {style ? style.familyName : fallbackTitle}
           </p>
+          {style && <p className={styles.style}>{style.styleName}</p>}
+        </div>
+        {canStep && (
+          <div className={styles.stepper}>
+            <button
+              type="button"
+              tabIndex={-1}
+              className={styles.iconButton}
+              aria-label="Previous Style"
+              onClick={() => onStep(-1)}
+            >
+              <ChevronLeftIcon />
+            </button>
+            <span className={styles.position}>
+              {index + 1} of {familyStyles.length}
+            </span>
+            <button
+              type="button"
+              tabIndex={-1}
+              className={styles.iconButton}
+              aria-label="Next Style"
+              onClick={() => onStep(1)}
+            >
+              <ChevronRightIcon />
+            </button>
+          </div>
+        )}
+        <button
+          type="button"
+          tabIndex={-1}
+          className={styles.iconButton}
+          aria-label="Close Quick preview"
+          onClick={onClose}
+        >
+          <CloseIcon />
+        </button>
+      </header>
+
+      <div className={styles.paper} style={paperStyle}>
+        {display && textStyle ? (
+          <div
+            className={styles.specimen}
+            data-stale={display !== style ? "" : undefined}
+          >
+            <p className={styles.sample} style={{ ...textStyle, lineHeight }}>
+              {sampleText || `${display.familyName} ${display.styleName}`}
+            </p>
+            <p className={styles.characters} style={textStyle}>
+              {CHARACTERS.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </p>
+            <p className={styles.paragraph} style={textStyle}>
+              {PARAGRAPH}
+            </p>
+          </div>
         ) : (
           <p className={styles.message}>{messageFor(style, status)}</p>
         )}
       </div>
+
       <footer className={styles.footer}>
-        {stepper && stepper.count > 1
-          ? "Left and Right for Styles. Space to close."
-          : "Space to close."}
+        <span className={styles.keys}>
+          {canStep && (
+            <>
+              <kbd>←</kbd>
+              <kbd>→</kbd>
+              <span className={styles.keyLabel}>Styles</span>
+            </>
+          )}
+          <kbd>Space</kbd>
+          <span className={styles.keyLabel}>Close</span>
+        </span>
+        <button
+          type="button"
+          tabIndex={-1}
+          className={styles.openButton}
+          disabled={!style}
+          onClick={onOpenSpecimen}
+        >
+          Open Specimen <kbd>↵</kbd>
+        </button>
       </footer>
-    </section>
+    </>
   );
 }
 
@@ -80,5 +222,5 @@ function messageFor(style: Style | null, status: string): string {
   if (status === "failed") {
     return "This Style can't be previewed. The Font file may be damaged, or use a format Book can't draw.";
   }
-  return `${style.familyName} ${style.styleName}`;
+  return "";
 }
