@@ -92,6 +92,7 @@ function startBook(): void {
       (): AppInfo => ({
         fileManagerName:
           process.platform === "darwin" ? "Finder" : "File Explorer",
+        version: app.getVersion(),
       }),
     );
 

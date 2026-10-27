@@ -50,6 +50,8 @@ export const prefsFileSchema = z.object({
   inspectorOpen: z.boolean(),
   sidebarVisible: z.boolean(),
   firstLaunchHintSeen: z.boolean(),
+  /** The dedication shows once, at first launch. Defaulted, so older prefs files still load. */
+  dedicationSeen: z.boolean().default(false),
 });
 export type PrefsFile = z.infer<typeof prefsFileSchema>;
 
@@ -63,6 +65,7 @@ export const defaultPrefs: PrefsFile = {
   inspectorOpen: false,
   sidebarVisible: true,
   firstLaunchHintSeen: false,
+  dedicationSeen: false,
 };
 
 /**

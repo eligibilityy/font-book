@@ -47,6 +47,15 @@ try {
     }
   };
 
+  await step("dedication", async () => {
+    // Fresh data: the dedication opens by itself on the first launch.
+    await page.waitForSelector('[role="dialog"]', { timeout: 30_000 });
+    await page.waitForTimeout(2600);
+    await shot("0-dedication");
+    await page.keyboard.press("Escape");
+    await page.waitForSelector('[role="dialog"]', { state: "detached" });
+  });
+
   await step("library list", async () => {
     await page.waitForSelector('[role="option"]', { timeout: 30_000 });
     await page.waitForTimeout(1200);

@@ -12,6 +12,7 @@ import {
   styleRefOf,
   useCollections,
 } from "@/features/collections";
+import { DedicationPage } from "@/features/dedication";
 import {
   type ClassificationFilter,
   ClassificationSelect,
@@ -112,6 +113,11 @@ export function BookApp({
   // pressing F again undoes a mistake.
   const [unstarred, setUnstarred] = useState<StyleRef[]>([]);
   const [announcement, setAnnouncement] = useState("");
+  // The dedication opens by itself the first time, and from About Book after.
+  const [dedication, setDedication] = useState(() => ({
+    open: !stored.prefs.data.dedicationSeen,
+    isFirstTime: !stored.prefs.data.dedicationSeen,
+  }));
   const scrollOffsets = useRef<Record<string, number>>({});
   const listRef = useRef<LibraryListHandle | null>(null);
   const specimenRef = useRef<HTMLElement | null>(null);
@@ -498,6 +504,9 @@ export function BookApp({
         if (style) showInFolder(style);
         return;
       }
+      case "show-about":
+        setDedication({ open: true, isFirstTime: false });
+        return;
     }
   };
   const commandRef = useRef(handleCommand);
@@ -782,6 +791,17 @@ export function BookApp({
           )}
         </main>
       </div>
+      <DedicationPage
+        open={dedication.open}
+        isFirstTime={dedication.isFirstTime}
+        version={appInfo.version}
+        onClose={() => {
+          setDedication((previous) => ({ ...previous, open: false }));
+          if (!prefs.data.dedicationSeen) {
+            prefs.update((previous) => ({ ...previous, dedicationSeen: true }));
+          }
+        }}
+      />
       {toast}
       <p className="visually-hidden" aria-live="polite">
         {announcement}

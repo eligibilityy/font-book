@@ -1,4 +1,5 @@
 import {
+  app,
   type BaseWindow,
   BrowserWindow,
   Menu,
@@ -152,11 +153,25 @@ export function buildApplicationMenu({
     { role: "windowMenu" },
   ];
 
+  // About Book opens Book's own page (with the dedication), not Electron's panel.
+  const about = command(`About ${app.name}`, "show-about");
   if (isMac) {
-    // The Book menu: About, Hide, Hide Others, Quit.
-    template.unshift({ role: "appMenu" });
+    template.unshift({
+      label: app.name,
+      submenu: [
+        about,
+        { type: "separator" },
+        { role: "services" },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideOthers" },
+        { role: "unhide" },
+        { type: "separator" },
+        { role: "quit" },
+      ],
+    });
   } else {
-    template.push({ role: "help", submenu: [{ role: "about" }] });
+    template.push({ role: "help", submenu: [about] });
   }
 
   if (isDevelopment) {

@@ -1,0 +1,177 @@
+/*
+ * Instrument Serif, bundled for this page only (SIL OFL, see
+ * ../../assets/InstrumentSerif-OFL.txt): Book can't know which fonts are on
+ * her computer, and this page has to look the same everywhere.
+ */
+@font-face {
+  font-family: "Book Dedication";
+  src: url("../../assets/InstrumentSerif-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Book Dedication";
+  src: url("../../assets/InstrumentSerif-Italic.ttf") format("truetype");
+  font-style: italic;
+  font-display: block;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  background: rgb(0 0 0 / 0.28);
+  backdrop-filter: blur(6px);
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+
+.backdrop[data-starting-style],
+.backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+.page {
+  --page-paper: #fbf8f3;
+  --page-ink: #1d1a17;
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: var(--z-dialog);
+  display: grid;
+  gap: var(--space-5);
+  width: min(560px, calc(100vw - 64px));
+  padding: var(--space-7) var(--space-7) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--page-paper);
+  color: var(--page-ink);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --page-paper: #1b1917;
+    --page-ink: #f1ece4;
+  }
+}
+
+.page[data-starting-style] {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 8px));
+}
+
+.page[data-ending-style] {
+  opacity: 0;
+  transition-duration: var(--duration-base);
+}
+
+.book {
+  color: color-mix(in srgb, var(--page-ink) 55%, transparent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.to {
+  font-family: "Book Dedication", serif;
+  font-size: 64px;
+  font-style: italic;
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.message {
+  font-family: "Book Dedication", serif;
+  font-size: 28px;
+  line-height: 1.3;
+  text-wrap: pretty;
+  user-select: text;
+}
+
+.closing {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.signature {
+  width: 200px;
+  height: 64px;
+  background: var(--page-ink);
+  mask-position: left center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.number {
+  color: color-mix(in srgb, var(--page-ink) 55%, transparent);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid
+    color-mix(in srgb, var(--page-ink) 12%, transparent);
+  color: color-mix(in srgb, var(--page-ink) 55%, transparent);
+  font-size: var(--text-sm);
+}
+
+.close {
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid
+    color-mix(in srgb, var(--page-ink) 20%, transparent);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--page-ink);
+  font-weight: var(--weight-medium);
+}
+
+.close:hover {
+  background: color-mix(in srgb, var(--page-ink) 6%, transparent);
+}
+
+/*
+ * The first launch is the one rare moment in Book that takes its time: the
+ * page arrives, then each line follows. From About Book it opens briskly.
+ */
+.page[data-first-time] {
+  transition-duration: 600ms;
+}
+
+.page[data-first-time] .line {
+  transition:
+    opacity 900ms var(--ease-out),
+    transform 900ms var(--ease-out);
+}
+
+.page[data-first-time][data-starting-style] .line {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page[data-first-time] .to {
+  transition-delay: 300ms;
+}
+
+.page[data-first-time] .message {
+  transition-delay: 800ms;
+}
+
+.page[data-first-time] .closing {
+  transition-delay: 1400ms;
+}

@@ -23,9 +23,12 @@ export type AppCommand =
   | "quick-preview"
   | "toggle-favorite"
   | "add-to-collection"
-  | "show-in-folder";
+  | "show-in-folder"
+  | "show-about";
 
 export interface AppInfo {
   /** "Finder" on macOS, "File Explorer" on Windows: main knows the OS, the renderer doesn't. */
   fileManagerName: string;
+  /** Book's version, from package.json. */
+  version: string;
 }
