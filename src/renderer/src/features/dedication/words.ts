@@ -3,6 +3,8 @@
  * without touching anything else.
  */
 
+import signature from "./assets/signature.svg";
+
 interface Dedication {
   to: string;
   message: string;
@@ -21,5 +23,5 @@ export const dedication: Dedication = {
     //   is a non-breaking space: it keeps ":)" and "I love" from being split across lines.
     "I wanted to try and create a font book so you can look through all the specimens you have :) I love you!",
   number: "252628",
-  signature: null,
+  signature,
 };
