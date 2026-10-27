@@ -72,8 +72,14 @@ export function LibraryList({
 
   useEffect(() => {
     listRef.current = { focus: () => scrollerRef.current?.focus() };
-    // Focus lands on the list whenever it appears, so the keys work at once.
-    scrollerRef.current?.focus();
+    // Focus lands on the list whenever it appears, so the keys work at once,
+    // unless she is typing: search switches from the Specimen to the list on
+    // the first letter, and the rest of the word must still reach the field.
+    const active = document.activeElement;
+    const isTyping =
+      active instanceof HTMLInputElement ||
+      active instanceof HTMLTextAreaElement;
+    if (!isTyping) scrollerRef.current?.focus();
   }, [listRef]);
 
   // Keep the selected row in view as it moves.
