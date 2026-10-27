@@ -26,10 +26,6 @@
     "build:mac": "bun run build && electron-builder --mac --arm64",
     "build:win": "bun run build && electron-builder --win --x64"
   },
-  "dependencies": {
-    "@electron-toolkit/preload": "^3.0.2",
-    "@electron-toolkit/utils": "^4.0.0"
-  },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",
     "@commitlint/cli": "21.2.4",

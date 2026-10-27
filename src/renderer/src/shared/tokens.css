@@ -1,0 +1,147 @@
+/*
+ * Design tokens: named values every component uses instead of raw numbers.
+ * See docs/design-principles.md#tokens-to-define. Add a token when a second
+ * component needs the same value.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  --gray-1: #ffffff;
+  --gray-2: #f9f9f9;
+  --gray-3: #f0f0f0;
+  --gray-4: #e8e8e8;
+  --gray-5: #e0e0e0;
+  --gray-6: #d9d9d9;
+  --gray-7: #cecece;
+  --gray-8: #bbbbbb;
+  --gray-9: #8d8d8d;
+  --gray-10: #838383;
+  --gray-11: #646464;
+  --gray-12: #1b1b1b;
+
+  --accent-9: #0b68cb;
+  --accent-11: #0d5bb0;
+  --accent-a4: rgb(11 104 203 / 0.12);
+  --focus-ring: #0b68cb;
+  --danger: #c62a2f;
+
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+  --text-xl: 20px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+
+  --control-sm: 28px;
+  --toolbar-height: 48px;
+  --list-header-height: 32px;
+  /* main sets this to 80px on macOS, beside the traffic lights. */
+  --titlebar-inset: 0px;
+
+  --border-width: 1px;
+  --border-subtle: var(--gray-5);
+
+  --duration-fast: 100ms;
+  --duration-base: 180ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-resolution: 2dppx) {
+  :root {
+    --border-width: 0.5px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gray-1: #0a0a0a;
+    --gray-2: #191919;
+    --gray-3: #222222;
+    --gray-4: #2a2a2a;
+    --gray-5: #313131;
+    --gray-6: #3a3a3a;
+    --gray-7: #484848;
+    --gray-8: #606060;
+    --gray-9: #6e6e6e;
+    --gray-10: #7b7b7b;
+    --gray-11: #b4b4b4;
+    --gray-12: #eeeeee;
+
+    --accent-9: #3b8eea;
+    --accent-11: #70b8ff;
+    --accent-a4: rgb(59 142 234 / 0.2);
+    --focus-ring: #3b8eea;
+    --danger: #ff6369;
+  }
+}
+
+/* Transforms jump to their end state; short fades stay (matches MotionConfig reducedMotion="user"). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: this one rule must beat every component's own transition. */
+    transition-property:
+      opacity, color, background-color, border-color !important;
+    animation: none !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: end of the reduced-motion override. */
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--gray-1);
+  color: var(--gray-12);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  /* A desktop app: chrome isn't selectable text, and the cursor stays an arrow. */
+  user-select: none;
+  cursor: default;
+}
+
+h1,
+h2,
+p,
+ul {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

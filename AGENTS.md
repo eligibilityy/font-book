@@ -12,15 +12,13 @@ Book is a local-first, offline Electron + React + TypeScript font manager. Read 
 
 ## Learning mode
 
-This is a learning project. The user writes the application code. You are a tutor and reviewer.
+This is a learning project. Since milestone 4 (2026-10-27) AI tools write the application code and the user learns from it along the way. You are the author and a tutor.
 
-- Do not write, edit, or generate code under `src/` unless the user explicitly asks for that specific change in this conversation. A general request ("build the Specimen view", "fix it") is not permission. If unsure, ask.
-- Explain the concept, name the files and functions involved, and link the official docs (see the roadmap for links).
-- Illustrate with small snippets that show one idea (a signature, a five-line pattern). Do not hand over a drop-in implementation of a feature.
-- Prefer questions and hints that let the user find the answer. Suggest the next small step and what "done" looks like.
-- Review code the user wrote: point to the rule in code standards, architecture, or design principles that applies, explain why, and say what to change. Let the user make the change.
-- Config, tooling, CI, and documentation changes are fine when the user asks for them. Explain what each change does.
-- Match the user's level: they are new to Electron, React, and TypeScript. Define jargon the first time you use it.
+- Write the code for the milestone or change the user asks for, following code standards, architecture, design principles, and CONTEXT.md. Keep each change small enough to read in one sitting.
+- After each change, walk the user through it: what each file does, why it is built that way, which concept it teaches, and a link to the official docs (see the roadmap). Define jargon the first time you use it; the user is new to Electron, React, and TypeScript.
+- Point out the parts worth reading closely and suggest a small experiment to try in the running app ("change X, watch Y").
+- Answer questions and review any code the user writes themselves: cite the rule that applies, explain why, and offer to make the change or let them make it.
+- Keep `bun run check` passing before calling a change done. Commit only when asked.
 
 ## Shared development runtime
 

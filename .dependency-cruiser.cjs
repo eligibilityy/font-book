@@ -15,7 +15,7 @@ module.exports = {
     {
       name: "renderer-not-to-main-or-preload",
       comment:
-        "The renderer is a web page. It reaches main only through window.api, which preload exposes. Shared types belong in src/shared.",
+        "The renderer is a web page. It reaches main only through window.fontBook, which preload exposes. Shared types belong in src/shared.",
       severity: "error",
       from: { path: RENDERER },
       to: { path: [MAIN, PRELOAD] },
@@ -31,7 +31,7 @@ module.exports = {
     {
       name: "renderer-not-to-electron",
       comment:
-        "Electron APIs exist only in main and preload. The renderer calls window.api instead.",
+        "Electron APIs exist only in main and preload. The renderer calls window.fontBook instead.",
       severity: "error",
       from: { path: RENDERER },
       to: { path: ELECTRON },

@@ -2,7 +2,7 @@
 
 Learning milestones, in order. Each one adds one new idea on top of the last and ends with something you can see working. Finish "Done when" before moving on, commit, and run `bun run check`.
 
-AI tools working in this repository act as tutors for these milestones: they explain, link docs, and review your code, and you write it. See [AGENTS.md](../AGENTS.md).
+From milestone 4 on, AI tools working in this repository write the code for each milestone and explain it as they go; the concepts and resources below are what to read alongside. See [AGENTS.md](../AGENTS.md).
 
 ## 1. Scaffold and explore the processes
 
@@ -52,7 +52,7 @@ AI tools working in this repository act as tutors for these milestones: they exp
 
 **Concepts.** `ipcMain.handle` and `ipcRenderer.invoke`. `contextBridge.exposeInMainWorld`. Why preload exposes named functions instead of `ipcRenderer`. `app.getPath`, `path.join`, and branching on `process.platform` in main only. Reading folders with `fs/promises`. Typing `window.fontBook` in `index.d.ts`. Follow "Add an IPC operation" in [architecture](contributing/architecture.md#add-an-ipc-operation).
 
-**Template gap to close here.** The scaffold ships with `sandbox: false`, and its preload exposes `@electron-toolkit/preload`'s `electronAPI` (a general-purpose `ipcRenderer` wrapper) as `window.electron`. Both break the security baseline in [AGENTS.md](../AGENTS.md). electron-vite leaves `@electron-toolkit/preload` as a runtime `require`, and a sandboxed preload can't load packages, so switching to `sandbox: true` before rewriting the preload makes the window fail to get its API. Rewrite the preload to import only `electron` and `src/shared`, expose `window.fontBook` instead, then turn the sandbox on. Also replace the template's `optimizer.watchWindowShortcuts`: in packaged builds it cancels Mod+R, Mod+Alt+I and Mod+Minus, which also silently disables those menu shortcuts on her Mac. See [first build](product/first-build.md#build-order) for the rest of this milestone's v0.1 work. Finding out why the old preload broke is a good exercise. See [Electron: process sandboxing](https://www.electronjs.org/docs/latest/tutorial/sandbox).
+**Template gap to close here** (closed on 2026-10-27). The scaffold ships with `sandbox: false`, and its preload exposes `@electron-toolkit/preload`'s `electronAPI` (a general-purpose `ipcRenderer` wrapper) as `window.electron`. Both break the security baseline in [AGENTS.md](../AGENTS.md). electron-vite leaves `@electron-toolkit/preload` as a runtime `require`, and a sandboxed preload can't load packages, so switching to `sandbox: true` before rewriting the preload makes the window fail to get its API. Rewrite the preload to import only `electron` and `src/shared`, expose `window.fontBook` instead, then turn the sandbox on. Also replace the template's `optimizer.watchWindowShortcuts`: in packaged builds it cancels Mod+R, Mod+Alt+I and Mod+Minus, which also silently disables those menu shortcuts on her Mac. See [first build](product/first-build.md#build-order) for the rest of this milestone's v0.1 work. Finding out why the old preload broke is a good exercise. See [Electron: process sandboxing](https://www.electronjs.org/docs/latest/tutorial/sandbox).
 
 **Done when.** The renderer shows a plain list of Font file names from the real Font folders on both Windows and macOS. The scanning function has a test that uses a temporary directory with fixture files.
 

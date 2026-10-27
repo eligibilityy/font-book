@@ -1,71 +1,71 @@
 import { join } from "node:path";
-import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { app, BrowserWindow, shell } from "electron";
-import icon from "../../resources/icon.png?asset";
+import { app, BrowserWindow, Menu } from "electron";
+import { registerLibraryHandlers } from "./ipc/library";
+import { listFontFolders } from "./library/font-folders";
+import { buildApplicationMenu } from "./menu";
+import { createMainWindow } from "./window";
 
-function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === "linux" ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
-      sandbox: false,
-    },
-  });
+const isDevelopment = !app.isPackaged;
 
-  mainWindow.on("ready-to-show", () => {
-    mainWindow.show();
-  });
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url);
-    return { action: "deny" };
-  });
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
-  } else {
-    mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
-  }
+if (isDevelopment) {
+  // Dev builds keep their own data, so `bun run dev` never reads or writes the
+  // installed Book's Collections. Must happen before the app is ready.
+  app.setName("Book Dev");
+  app.setPath("userData", join(app.getPath("appData"), "Book Dev"));
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId("com.example.book");
+// A second copy of Book would write the same files; focus this one instead.
+if (app.requestSingleInstanceLock()) {
+  startBook();
+} else {
+  app.quit();
+}
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on("browser-window-created", (_, window) => {
-    optimizer.watchWindowShortcuts(window);
+function startBook(): void {
+  let mainWindow: BrowserWindow | undefined;
+
+  const openMainWindow = (): void => {
+    mainWindow = createMainWindow({
+      platform: process.platform,
+      rendererUrl: isDevelopment
+        ? process.env.ELECTRON_RENDERER_URL
+        : undefined,
+    });
+  };
+
+  app.on("second-instance", () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
   });
 
-  createWindow();
+  void app.whenReady().then(() => {
+    // Groups Book's windows and notifications under one taskbar entry.
+    if (process.platform === "win32") {
+      app.setAppUserModelId("studio.yiliya.book");
+    }
 
-  app.on("activate", () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    registerLibraryHandlers(
+      listFontFolders({
+        platform: process.platform,
+        homePath: app.getPath("home"),
+        windowsPath: process.env.WINDIR,
+        localAppDataPath: process.env.LOCALAPPDATA,
+      }),
+    );
+    Menu.setApplicationMenu(
+      buildApplicationMenu({ platform: process.platform, isDevelopment }),
+    );
+    openMainWindow();
+
+    // macOS: clicking the Dock icon with no windows open reopens one.
+    app.on("activate", () => {
+      if (BrowserWindow.getAllWindows().length === 0) openMainWindow();
+    });
   });
-});
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+  // macOS apps keep running with no windows until she quits with Cmd+Q.
+  app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") app.quit();
+  });
+}

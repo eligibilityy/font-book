@@ -1,0 +1,27 @@
+.shell {
+  display: grid;
+  grid-template-rows: var(--toolbar-height) 1fr;
+  height: 100%;
+}
+
+/* Empty toolbar space drags the window; every control inside must opt out with no-drag. */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) 0 calc(var(--titlebar-inset) + var(--space-4));
+  border-bottom: var(--border-width) solid var(--border-subtle);
+  background: var(--gray-1);
+  -webkit-app-region: drag;
+}
+
+.wordmark {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--gray-11);
+}
+
+.main {
+  min-height: 0;
+  overflow: hidden;
+}

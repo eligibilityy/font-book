@@ -20,7 +20,9 @@ Electron runs your code in separate processes. Each one can do different things,
 ```text
 src/
 ├── main/
-│   ├── index.ts            # Startup: create window, register IPC handlers, menus
+│   ├── index.ts            # Startup: single-instance lock, dev data folder, IPC handlers, menu, window
+│   ├── window.ts           # The main window: size, title bar, security options, --titlebar-inset
+│   ├── menu.ts             # The application menu; its accelerators are Book's shortcuts
 │   ├── ipc/                # One file per domain; each handler parses input, calls an operation
 │   ├── library/            # Font folders per platform, Scan, parse Font files, Import
 │   ├── storage/            # Read/parse/write JSON files in userData
@@ -39,6 +41,8 @@ src/
     │       └── *.test.ts(x)
     └── shared/             # Reusable UI primitives, the fontBook client, theme tokens
 ```
+
+The renderer imports `src/shared` as `@shared/...` (an alias in `tsconfig.web.json` and `electron.vite.config.ts`); main and preload use relative paths.
 
 `bun run deps:check` enforces these boundaries: no main/renderer cross-imports, no Node or Electron in `src/shared`, renderer `shared/` never imports a feature, and features import each other only through their root `index.ts`.
 

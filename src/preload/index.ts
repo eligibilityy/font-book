@@ -1,22 +1,22 @@
-import { electronAPI } from "@electron-toolkit/preload";
-import { contextBridge } from "electron";
+// The preload runs sandboxed: it may import only `electron` and code that
+// bundles into this file (src/shared). It forwards calls to main and holds no
+// logic, so the web page never gets ipcRenderer or Node itself.
+import { contextBridge, ipcRenderer } from "electron";
+import type { FontBookApi } from "../shared/contracts/font-book-api";
+import { libraryChannels } from "../shared/contracts/library";
 
-// Custom APIs for renderer
-const api = {};
+const fontBook: FontBookApi = {
+  library: {
+    listFontFiles: () => ipcRenderer.invoke(libraryChannels.listFontFiles),
+    onScanRequested: (callback) => {
+      // Drop the IPC event object: it carries `sender`, which the page must not get.
+      const listener = (): void => callback();
+      ipcRenderer.on(libraryChannels.scanRequested, listener);
+      return () => {
+        ipcRenderer.removeListener(libraryChannels.scanRequested, listener);
+      };
+    },
+  },
+};
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld("electron", electronAPI);
-    contextBridge.exposeInMainWorld("api", api);
-  } catch (error) {
-    console.error(error);
-  }
-} else {
-  // @ts-expect-error (define in dts)
-  window.electron = electronAPI;
-  // @ts-expect-error (define in dts)
-  window.api = api;
-}
+contextBridge.exposeInMainWorld("fontBook", fontBook);

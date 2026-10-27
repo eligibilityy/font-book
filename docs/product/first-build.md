@@ -11,7 +11,7 @@ The plan for Book v0.1, the first version she uses every day. It ties together f
 
 Their conclusions are already folded into [architecture](../contributing/architecture.md), [design principles](../design-principles.md), and [CONTEXT.md](../../CONTEXT.md). If those disagree with a research document, the research document is older; fix the one that is wrong.
 
-You write the code (see [AGENTS.md](../../AGENTS.md)). This plan says what to build and in what order, not how.
+AI tools write the code and explain it as they go (see [AGENTS.md](../../AGENTS.md)). This plan says what to build and in what order, not how.
 
 ## What v0.1 is
 

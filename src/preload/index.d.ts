@@ -1,8 +1,7 @@
-import { ElectronAPI } from "@electron-toolkit/preload";
+import type { FontBookApi } from "../shared/contracts/font-book-api";
 
 declare global {
   interface Window {
-    electron: ElectronAPI;
-    api: unknown;
+    fontBook: FontBookApi;
   }
 }

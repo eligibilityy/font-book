@@ -4,10 +4,6 @@
   "workspaces": {
     "": {
       "name": "book",
-      "dependencies": {
-        "@electron-toolkit/preload": "^3.0.2",
-        "@electron-toolkit/utils": "^4.0.0",
-      },
       "devDependencies": {
         "@biomejs/biome": "2.6.3",
         "@commitlint/cli": "21.2.4",
@@ -130,11 +126,7 @@
 
     "@electron-internal/extract-zip": ["@electron-internal/extract-zip@1.0.6", "", {}, "sha512-/aQLgFDdCSnwChfUwqekSmE1q2dCTzhUy5saIHBb5vyYn5LzWaKPaIz1wM0lDMCZYBoIG4svJNvAJb6vkI8BuA=="],
 
-    "@electron-toolkit/preload": ["@electron-toolkit/preload@3.0.2", "", { "peerDependencies": { "electron": ">=13.0.0" } }, "sha512-TWWPToXd8qPRfSXwzf5KVhpXMfONaUuRAZJHsKthKgZR/+LqX1dZVSSClQ8OTAEduvLGdecljCsoT2jSshfoUg=="],
-
     "@electron-toolkit/tsconfig": ["@electron-toolkit/tsconfig@2.0.0", "", { "peerDependencies": { "@types/node": "*" } }, "sha512-AdPsP770WhW7b260h13SHMdmjEEHJL6xFtgi3jwgdsSQbJOkJLeNnnpZW9qxTPCvmRI6vmdzWz5K3gibFS6SNg=="],
-
-    "@electron-toolkit/utils": ["@electron-toolkit/utils@4.0.0", "", { "peerDependencies": { "electron": ">=13.0.0" } }, "sha512-qXSntwEzluSzKl4z5yFNBknmPGjPa3zFhE4mp9+h0cgokY5ornAeP+CJQDBhKsL1S58aOQfcwkD3NwLZCl+64g=="],
 
     "@electron/asar": ["@electron/asar@3.4.1", "", { "dependencies": { "commander": "^5.0.0", "glob": "^7.1.6", "minimatch": "^3.0.4" }, "bin": { "asar": "bin/asar.js" } }, "sha512-i4/rNPRS84t0vSRa2HorerGRXWyF4vThfHesw0dmcWHp+cspK743UanA0suA5Q5y8kzY2y6YKrvbIUn69BCAiA=="],
 
