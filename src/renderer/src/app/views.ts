@@ -57,6 +57,31 @@ export function showsFamilies(view: View): boolean {
   );
 }
 
+/** The on-off filters beside Classification: cheap, and exact from the Font file. */
+export interface Facets {
+  /** Has Axes. */
+  variable: boolean;
+  /** Has an italic or oblique Style, or an `ital` or `slnt` Axis. */
+  italics: boolean;
+}
+
+export const noFacets: Facets = { variable: false, italics: false };
+
+export function hasFacets(facets: Facets): boolean {
+  return facets.variable || facets.italics;
+}
+
+const slants = (style: Style) =>
+  style.isItalic ||
+  style.axes.some((axis) => axis.tag === "ital" || axis.tag === "slnt");
+
+function matchesFacets(styles: readonly Style[], facets: Facets): boolean {
+  return (
+    (!facets.variable || styles.some((style) => style.axes.length > 0)) &&
+    (!facets.italics || styles.some(slants))
+  );
+}
+
 interface BuildRowsInput {
   view: View;
   styles: Style[];
@@ -65,6 +90,7 @@ interface BuildRowsInput {
   refs: readonly StyleRef[];
   search: string;
   classification: ClassificationFilter;
+  facets: Facets;
   classify: (family: Family) => FamilyClassification;
 }
 
@@ -72,11 +98,11 @@ export interface BuiltRows {
   rows: ListRow[];
   /** Rows in the view before search and the Classification filter: "8 of 312 Families". */
   total: number;
-  /** Per Classification, after search, before the Classification filter. */
+  /** Per Classification, after search and facets, before the Classification filter. */
   counts: Map<Classification, number>;
 }
 
-/** The rows a view shows, after search and the Classification filter. */
+/** The rows a view shows, after search, facets and the Classification filter. */
 export function buildRows({
   view,
   styles,
@@ -84,6 +110,7 @@ export function buildRows({
   refs,
   search,
   classification,
+  facets,
   classify,
 }: BuildRowsInput): BuiltRows {
   const query = searchKey(search.trim());
@@ -113,10 +140,11 @@ export function buildRows({
     // "arabic" finds the Families whose rows say Arabic.
     const matching = families.filter(
       (family) =>
-        query === "" ||
-        searchKey(
-          `${family.name} ${family.representative.ownScriptName?.script ?? ""}`,
-        ).includes(query),
+        (query === "" ||
+          searchKey(
+            `${family.name} ${family.representative.ownScriptName?.script ?? ""}`,
+          ).includes(query)) &&
+        matchesFacets(family.styles, facets),
     );
     const rows: ListRow[] = [];
     for (const family of matching) {
@@ -170,7 +198,9 @@ export function buildRows({
     });
 
   const rows = resolved.filter((row) => {
-    if (row.kind !== "style") return classification === "any";
+    if (row.kind !== "style")
+      return classification === "any" && !hasFacets(facets);
+    if (!matchesFacets([row.style], facets)) return false;
     const value = count(row.family);
     return classification === "any" || value === classification;
   });

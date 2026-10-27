@@ -2,7 +2,7 @@ import { guessClassification } from "@shared/classification";
 import type { Style } from "@shared/contracts/library";
 import { describe, expect, it } from "vitest";
 import { type Family, familyKey, groupIntoFamilies } from "@/features/library";
-import { buildRows } from "./views";
+import { buildRows, noFacets } from "./views";
 
 function style(familyName: string, changes: Partial<Style> = {}): Style {
   const id = `${familyName}-${changes.styleName ?? "Regular"}-${changes.fontFile?.folderKind ?? "user"}`;
@@ -69,6 +69,7 @@ const base = {
   refs: [],
   search: "",
   classification: "any",
+  facets: noFacets,
   classify,
 } as const;
 
@@ -117,6 +118,38 @@ describe("buildRows", () => {
       "lora",
       "zilla",
     ]);
+  });
+
+  it("narrows to variable Families, or ones with italics", () => {
+    const withFacets = [
+      ...styles,
+      style("Inconsolata", {
+        axes: [
+          { tag: "wght", name: "Weight", min: 200, default: 400, max: 900 },
+        ],
+      }),
+      style("Inter", { styleName: "Italic", isItalic: true }),
+      style("Recursive", {
+        axes: [{ tag: "slnt", name: "Slant", min: -15, default: 0, max: 0 }],
+      }),
+    ];
+    const rows = (facets: { variable: boolean; italics: boolean }) =>
+      buildRows({
+        ...base,
+        styles: withFacets,
+        view: { kind: "all" },
+        facets,
+      }).rows.map((row) => row.key);
+
+    expect(rows({ variable: true, italics: false })).toEqual([
+      "inconsolata",
+      "recursive",
+    ]);
+    expect(rows({ variable: false, italics: true })).toEqual([
+      "inter",
+      "recursive",
+    ]);
+    expect(rows({ variable: true, italics: true })).toEqual(["recursive"]);
   });
 
   it("searches without regard to case or accents, and counts Classifications", () => {

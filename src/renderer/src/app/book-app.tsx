@@ -1,3 +1,5 @@
+import { Toggle } from "@base-ui/react/toggle";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { classificationLabels } from "@shared/classification";
 import type { AppCommand, AppInfo } from "@shared/contracts/app";
 import type { ExportPngResult } from "@shared/contracts/export";
@@ -50,6 +52,9 @@ import { useToast } from "./toast";
 import { Toolbar } from "./toolbar";
 import {
   buildRows,
+  type Facets,
+  hasFacets,
+  noFacets,
   showsFamilies,
   type View,
   viewKey,
@@ -110,6 +115,7 @@ export function BookApp({
   const [mode, setMode] = useState<Mode>({ kind: "list" });
   const [selectedKeys, setSelectedKeys] = useState<Record<string, string>>({});
   const [searches, setSearches] = useState<Record<string, string>>({});
+  const [facetsByView, setFacetsByView] = useState<Record<string, Facets>>({});
   const [filters, setFilters] = useState<Record<string, ClassificationFilter>>(
     {},
   );
@@ -151,6 +157,7 @@ export function BookApp({
   const key = viewKey(view);
   const search = searches[key] ?? "";
   const filter = filters[key] ?? "any";
+  const facets = facetsByView[key] ?? noFacets;
   const settings: SpecimenSettings = {
     size: prefs.data.specimenSize,
     lineHeight: prefs.data.lineHeight,
@@ -217,6 +224,7 @@ export function BookApp({
         refs,
         search,
         classification: filter,
+        facets,
         classify: classifications.classify,
       }),
     [
@@ -226,6 +234,7 @@ export function BookApp({
       refs,
       search,
       filter,
+      facets,
       classifications.classify,
     ],
   );
@@ -862,6 +871,37 @@ export function BookApp({
                     }}
                   />
                 )}
+                {view.kind !== "couldnt-read" && (
+                  <ToggleGroup
+                    className={controls.segmented}
+                    aria-label="Filters"
+                    multiple
+                    value={[
+                      ...(facets.variable ? ["variable"] : []),
+                      ...(facets.italics ? ["italics"] : []),
+                    ]}
+                    onValueChange={(value) => {
+                      setFacetsByView((previous) => ({
+                        ...previous,
+                        [key]: {
+                          variable: value.includes("variable"),
+                          italics: value.includes("italics"),
+                        },
+                      }));
+                      setSelectedKeys((previous) => {
+                        const { [key]: _removed, ...rest } = previous;
+                        return rest;
+                      });
+                    }}
+                  >
+                    <Toggle value="variable" className={controls.segment}>
+                      Variable
+                    </Toggle>
+                    <Toggle value="italics" className={controls.segment}>
+                      Has Italics
+                    </Toggle>
+                  </ToggleGroup>
+                )}
                 <p className={styles.listCount} aria-live="polite">
                   {isScanning
                     ? "Scanning..."
@@ -871,7 +911,7 @@ export function BookApp({
                         rows.length,
                         built.total,
                         search,
-                        filter,
+                        filter !== "any" || hasFacets(facets),
                       )}
                 </p>
                 {!prefs.data.firstLaunchHintSeen && rows.length > 0 && (
@@ -902,10 +942,15 @@ export function BookApp({
                     title={title}
                     search={search}
                     filter={filter}
+                    facets={facets}
                     onClearSearch={() => setSearch("")}
-                    onShowAll={() =>
-                      setFilters((previous) => ({ ...previous, [key]: "any" }))
-                    }
+                    onShowAll={() => {
+                      setFilters((previous) => ({ ...previous, [key]: "any" }));
+                      setFacetsByView((previous) => ({
+                        ...previous,
+                        [key]: noFacets,
+                      }));
+                    }}
                     onScanAgain={onScanAgain}
                   />
                 ) : (
@@ -1069,14 +1114,14 @@ function listCount(
   shown: number,
   total: number,
   search: string,
-  filter: ClassificationFilter,
+  isFiltered: boolean,
 ): string {
   if (view.kind === "couldnt-read")
     return countOf(library.failed.length, "Font file", "Font files");
   const [one, many] = showsFamilies(view)
     ? ["Family", "Families"]
     : ["Style", "Styles"];
-  if (search.trim() !== "" || filter !== "any") {
+  if (search.trim() !== "" || isFiltered) {
     return `${formatNumber(shown)} of ${countOf(total, one, many)}`;
   }
   if (view.kind === "all") {
@@ -1118,6 +1163,7 @@ function EmptyView({
   title,
   search,
   filter,
+  facets,
   onClearSearch,
   onShowAll,
   onScanAgain,
@@ -1127,6 +1173,7 @@ function EmptyView({
   title: string;
   search: string;
   filter: ClassificationFilter;
+  facets: Facets;
   onClearSearch: () => void;
   onShowAll: () => void;
   onScanAgain: () => void;
@@ -1144,6 +1191,18 @@ function EmptyView({
           onClick={onClearSearch}
         >
           Clear Search
+        </button>
+      </div>
+    );
+  }
+  if (hasFacets(facets)) {
+    return (
+      <div className={styles.empty}>
+        <p>
+          No {unit} in {title} match these filters.
+        </p>
+        <button type="button" className={controls.button} onClick={onShowAll}>
+          Clear Filters
         </button>
       </div>
     );
