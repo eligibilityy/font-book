@@ -122,6 +122,15 @@ export function SearchIcon({ className }: IconProps): React.JSX.Element {
   );
 }
 
+/** An arrow out of a tray: Export PNG. */
+export function ExportIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <path d="M8 9.5v-7M5 5.25L8 2.5l3 2.75M2.5 9.5v2.75a1.25 1.25 0 0 0 1.25 1.25h8.5a1.25 1.25 0 0 0 1.25-1.25V9.5" />
+    </Icon>
+  );
+}
+
 /** An arrow into a tray: Import, and the Imported Library filter. */
 export function ImportIcon({ className }: IconProps): React.JSX.Element {
   return (

@@ -26,6 +26,7 @@ export type AppCommand =
   | "quick-preview"
   | "toggle-favorite"
   | "add-to-collection"
+  | "export-png"
   | "use-as-heading"
   | "use-as-body"
   | "show-in-folder"

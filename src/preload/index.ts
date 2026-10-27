@@ -10,6 +10,7 @@ import {
 import type { AppCommand } from "../shared/contracts/app";
 import {
   appChannels,
+  exportChannels,
   libraryChannels,
   storageChannels,
 } from "../shared/contracts/channels";
@@ -59,6 +60,9 @@ const fontBook: FontBookApi = {
     saveClassifications: (file) =>
       ipcRenderer.invoke(storageChannels.saveClassifications, file),
     savePrefs: (file) => ipcRenderer.invoke(storageChannels.savePrefs, file),
+  },
+  export: {
+    savePng: (input) => ipcRenderer.invoke(exportChannels.savePng, input),
   },
   app: {
     getInfo: () => ipcRenderer.invoke(appChannels.getInfo),

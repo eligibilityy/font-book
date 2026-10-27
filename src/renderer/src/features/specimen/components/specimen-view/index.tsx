@@ -15,6 +15,7 @@ import { IconButton } from "@/shared/ui/icon-button";
 import {
   CheckIcon,
   ChevronDownIcon,
+  ExportIcon,
   InspectorIcon,
   PaperInkIcon,
   PlusIcon,
@@ -64,6 +65,8 @@ interface SpecimenViewProps {
   /** Puts this Style in the Pairing, with the Axis values it has here. */
   onUseAs: (role: "heading" | "body", axisValues: AxisValues) => void;
   onOpenPairing: () => void;
+  /** Export PNG of the paper as it looks now. */
+  onExport: () => void;
   onBack: () => void;
   regionRef: React.RefObject<HTMLElement | null>;
 }
@@ -139,10 +142,12 @@ export function SpecimenView(props: SpecimenViewProps): React.JSX.Element {
       />
 
       <div className={styles.body}>
+        {/* data-export-region: what Export PNG pictures (features/export). */}
         <div
           className={styles.paper}
           style={{ background: paper, color: ink }}
           data-inspector-space={hasInspectorSpace ? "" : undefined}
+          data-export-region=""
         >
           {status === "ready" ? (
             <textarea
@@ -224,6 +229,7 @@ function SpecimenHeader({
   onAxisValuesChange,
   onUseAs,
   onOpenPairing,
+  onExport,
 }: SpecimenViewProps & {
   axisValues: AxisValues;
   onAxisValuesChange: (values: AxisValues) => void;
@@ -288,6 +294,9 @@ function SpecimenHeader({
             }
           >
             <InspectorIcon />
+          </IconButton>
+          <IconButton label="Export PNG" onClick={onExport}>
+            <ExportIcon />
           </IconButton>
         </div>
       </div>

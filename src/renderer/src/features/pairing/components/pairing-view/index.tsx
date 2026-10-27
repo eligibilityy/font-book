@@ -12,7 +12,12 @@ import { useStyleFace } from "@/shared/font-faces/use-style-face";
 import { DURATION, EASE_IN_OUT, EASE_OUT } from "@/shared/motion";
 import controls from "@/shared/ui/controls.module.css";
 import { IconButton } from "@/shared/ui/icon-button";
-import { InspectorIcon, PaperInkIcon, SwapIcon } from "@/shared/ui/icons";
+import {
+  ExportIcon,
+  InspectorIcon,
+  PaperInkIcon,
+  SwapIcon,
+} from "@/shared/ui/icons";
 import { LabeledSlider } from "@/shared/ui/labeled-slider";
 import {
   type PairingRole,
@@ -38,6 +43,8 @@ interface PairingViewProps {
   inspectorOpen: boolean;
   onInspectorOpenChange: (open: boolean) => void;
   onOpenSpecimen: (style: Style) => void;
+  /** Export PNG of the page as it looks now. */
+  onExport: () => void;
   onBack: () => void;
   regionRef: React.RefObject<HTMLElement | null>;
 }
@@ -56,6 +63,7 @@ export function PairingView({
   inspectorOpen,
   onInspectorOpenChange,
   onOpenSpecimen,
+  onExport,
   onBack,
   regionRef,
 }: PairingViewProps): React.JSX.Element {
@@ -140,14 +148,23 @@ export function PairingView({
           >
             <InspectorIcon />
           </IconButton>
+          <IconButton
+            label="Export PNG"
+            disabled={heading.status === "empty" && body.status === "empty"}
+            onClick={onExport}
+          >
+            <ExportIcon />
+          </IconButton>
         </div>
       </header>
 
       <div className={styles.body}>
+        {/* data-export-region: what Export PNG pictures (features/export). */}
         <div
           className={styles.paper}
           style={{ background: paper, color: ink }}
           data-inspector-space={hasInspectorSpace ? "" : undefined}
+          data-export-region=""
         >
           <article className={styles.page}>
             <RoleText

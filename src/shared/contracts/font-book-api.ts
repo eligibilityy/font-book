@@ -1,4 +1,5 @@
 import type { AppCommand, AppInfo } from "./app";
+import type { ExportPngInput, ExportPngResult } from "./export";
 import type {
   ImportResult,
   Library,
@@ -39,6 +40,10 @@ export interface FontBookApi {
     saveCollections(file: CollectionsFile): Promise<SaveResult>;
     saveClassifications(file: ClassificationsFile): Promise<SaveResult>;
     savePrefs(file: PrefsFile): Promise<SaveResult>;
+  };
+  export: {
+    /** Captures part of the window, then asks where to save it as a PNG. */
+    savePng(input: ExportPngInput): Promise<ExportPngResult>;
   };
   app: {
     getInfo(): Promise<AppInfo>;

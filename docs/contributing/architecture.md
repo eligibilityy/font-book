@@ -153,7 +153,7 @@ Follow Electron's [security checklist](https://www.electronjs.org/docs/latest/tu
 
 ## Export (v0.2)
 
-`webContents.capturePage(rect)` returns an image in device pixels (2x on her Retina display), clips a rectangle larger than the viewport, and throws when the rectangle is partly off-screen (verified). Either clamp the capture to the visible Specimen, or render the Specimen in a hidden window sized to the content and capture that. Report the PNG's real pixel size in the UI.
+Built in `main/export/save-png.ts` (the order of steps, tested) and `main/ipc/export.ts` (Electron). The renderer sends the visible paper's rectangle; main clamps it to the page, captures, then shows the save dialog. `webContents.capturePage(rect)` returns an image in device pixels (2x on her Retina display), clips a rectangle larger than the viewport, and throws when the rectangle is partly off-screen (verified). Either clamp the capture to the visible Specimen, or render the Specimen in a hidden window sized to the content and capture that. Report the PNG's real pixel size in the UI.
 
 ## Changes by example
 

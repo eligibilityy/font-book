@@ -502,6 +502,15 @@ Built in v0.2 (2026-10-28).
 - **After.** The Imported view opens with the first Imported Family selected (or the Collection, when dropped on one), and a toast sums up: "Imported 3 Font files. 1 file couldn't be read, so it was left out."
 - **Imported** is a Library filter under System, newest Import first. Empty: "Nothing Imported yet." with how to Import.
 
+### 8.11 PNG Export (v0.2)
+
+Built in v0.2 (2026-10-28).
+
+- **Ways in.** The Export PNG icon button at the end of the Specimen's and the Pairing's header row 1, and File > Export PNG... (Mod+E). In the list it says "Open a Specimen or the Pairing to Export a PNG."
+- **What it saves.** The paper exactly as she sees it, in device pixels (2x on her Retina display), without the inspector, the caret, a text selection or the scrollbar. Text below the visible area is not included: scroll or shrink the size first.
+- **Where.** Main captures first, then shows the save dialog (a sheet on macOS would otherwise appear in the picture), suggesting "Inter Bold.png" or "Inter Bold and Source Serif 4 Regular.png", starting on the Desktop, then where she saved last.
+- **After.** A toast, rising from the bottom edge (Motion row "Toast after Export"): "Exported "Inter Bold.png", 2,400 by 1,320 pixels." A failed capture or write: "Book couldn't save the PNG. Try another folder."
+
 ### Room left for v0.2
 
 Pairing, PNG Export and Import are v0.2; the rest of this list moved to v0.3 on 2026-10-28 (see [features: v0.2 scope](features.md#v02-scope)).

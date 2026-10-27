@@ -67,6 +67,8 @@ export function buildApplicationMenu({
         command("Import...", "import", "CommandOrControl+O"),
         command("Scan Again", "scan-again", "CommandOrControl+R"),
         { type: "separator" },
+        command("Export PNG...", "export-png", "CommandOrControl+E"),
+        { type: "separator" },
         isMac ? { role: "close" } : { role: "quit" },
       ],
     },

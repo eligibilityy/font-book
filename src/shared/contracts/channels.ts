@@ -19,6 +19,10 @@ export const storageChannels = {
   savePrefs: "storage:save-prefs",
 } as const;
 
+export const exportChannels = {
+  savePng: "export:save-png",
+} as const;
+
 export const appChannels = {
   getInfo: "app:get-info",
   command: "app:command",

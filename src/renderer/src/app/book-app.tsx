@@ -1,5 +1,6 @@
 import { classificationLabels } from "@shared/classification";
 import type { AppCommand, AppInfo } from "@shared/contracts/app";
+import type { ExportPngResult } from "@shared/contracts/export";
 import type { ImportResult, Library, Style } from "@shared/contracts/library";
 import {
   DEFAULT_SAMPLE_TEXT,
@@ -13,6 +14,7 @@ import {
   useCollections,
 } from "@/features/collections";
 import { DedicationPage } from "@/features/dedication";
+import { exportPaper } from "@/features/export";
 import { ImportDropZone, importMessage } from "@/features/import";
 import {
   type ClassificationFilter,
@@ -507,6 +509,34 @@ export function BookApp({
     }
   };
 
+  /** Export PNG of the Specimen or the Pairing, as it looks now. */
+  const exportCurrent = async (): Promise<void> => {
+    const { heading, body } = prefs.data.pairing;
+    const name =
+      mode.kind === "specimen" && specimenStyle
+        ? `${specimenStyle.familyName} ${specimenStyle.styleName}`
+        : mode.kind === "pairing"
+          ? [heading.style, body.style]
+              .flatMap((ref) =>
+                ref ? [`${ref.familyName} ${ref.styleName}`] : [],
+              )
+              .join(" and ")
+          : "";
+    if (name === "") {
+      showToast("Open a Specimen or the Pairing to Export a PNG.");
+      return;
+    }
+    const result = await exportPaper(name).catch(
+      (): ExportPngResult => ({ status: "failed" }),
+    );
+    if (!result || result.status === "cancelled") return;
+    showToast(
+      result.status === "saved"
+        ? `Exported "${result.fileName}", ${formatNumber(result.width)} by ${formatNumber(result.height)} pixels.`
+        : "Book couldn't save the PNG. Try another folder.",
+    );
+  };
+
   const showInFolder = useCallback((style: Style) => {
     void window.fontBook.library.showInFolder({
       kind: "style",
@@ -630,6 +660,9 @@ export function BookApp({
         return toggleFavorite();
       case "add-to-collection":
         return openAddToCollection();
+      case "export-png":
+        void exportCurrent();
+        return;
       case "show-in-folder": {
         const style =
           mode.kind === "specimen"
@@ -753,6 +786,7 @@ export function BookApp({
                 putInPairing(role, specimenStyle, axisValues)
               }
               onOpenPairing={openPairing}
+              onExport={() => void exportCurrent()}
               onBack={goBack}
               regionRef={specimenRef}
             />
@@ -783,6 +817,7 @@ export function BookApp({
                   fromPairing: true,
                 })
               }
+              onExport={() => void exportCurrent()}
               onBack={goBack}
               regionRef={specimenRef}
             />

@@ -209,6 +209,11 @@ textarea {
   color: inherit;
 }
 
+/* While Export PNG pictures an element, its scrollbar stays out of the image. */
+[data-exporting] {
+  scrollbar-width: none;
+}
+
 /* Hidden on screen, still read by screen readers. */
 .visually-hidden {
   position: absolute;

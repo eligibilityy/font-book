@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme } from "electron";
 import type { AppInfo } from "../shared/contracts/app";
 import { appChannels, libraryChannels } from "../shared/contracts/channels";
+import { registerExportHandlers } from "./ipc/export";
 import { registerLibraryHandlers } from "./ipc/library";
 import { registerStorageHandlers } from "./ipc/storage";
 import { listFontFolders } from "./library/font-folders";
@@ -93,6 +94,7 @@ function startBook(): void {
 
     registerLibraryHandlers(library);
     registerStorageHandlers(stores);
+    registerExportHandlers();
     ipcMain.handle(
       appChannels.getInfo,
       (): AppInfo => ({
