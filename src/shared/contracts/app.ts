@@ -5,6 +5,7 @@
  */
 export type AppCommand =
   | "scan-again"
+  | "import"
   | "find"
   | "new-collection"
   | "toggle-sidebar"
@@ -18,6 +19,7 @@ export type AppCommand =
   | "go-all"
   | "go-my-fonts"
   | "go-system"
+  | "go-imported"
   | "go-favorites"
   | "go-pairing"
   | "open-specimen"

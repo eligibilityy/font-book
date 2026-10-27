@@ -13,7 +13,12 @@ export type LibraryState =
   | { status: "error" };
 
 /** The Library from main: loaded once, and again on Scan Again. */
-export function useLibrary(): { state: LibraryState; scanAgain: () => void } {
+export function useLibrary(): {
+  state: LibraryState;
+  scanAgain: () => void;
+  /** Shows a Library main has just Scanned, such as after an Import. */
+  replaceLibrary: (library: Library) => void;
+} {
   const [state, setState] = useState<LibraryState>({
     status: "loading",
     progress: null,
@@ -61,5 +66,11 @@ export function useLibrary(): { state: LibraryState; scanAgain: () => void } {
   }, [request]);
 
   const scanAgain = useCallback(() => request(true), [request]);
-  return { state, scanAgain };
+  const replaceLibrary = useCallback((library: Library) => {
+    // Newer than any request still in flight, so a late answer can't win.
+    latestRequest.current += 1;
+    forgetUnusedFaces();
+    setState({ status: "ready", library, isScanning: false, progress: null });
+  }, []);
+  return { state, scanAgain, replaceLibrary };
 }

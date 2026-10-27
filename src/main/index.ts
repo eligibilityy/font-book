@@ -35,13 +35,19 @@ function startBook(): void {
   let mainWindow: BrowserWindow | undefined;
   const stores = openStores(app.getPath("userData"));
 
+  // Imported Font files are copies Book owns, so they live under userData.
+  const importedFolder = join(app.getPath("userData"), "imported-fonts");
   const library = createLibraryService({
-    folders: listFontFolders({
-      platform: process.platform,
-      homePath: app.getPath("home"),
-      windowsPath: process.env.WINDIR,
-      localAppDataPath: process.env.LOCALAPPDATA,
-    }),
+    folders: [
+      ...listFontFolders({
+        platform: process.platform,
+        homePath: app.getPath("home"),
+        windowsPath: process.env.WINDIR,
+        localAppDataPath: process.env.LOCALAPPDATA,
+      }),
+      { path: importedFolder, kind: "imported" },
+    ],
+    importedFolder,
     indexFile: stores.libraryIndex,
     onProgress: (progress) => {
       if (mainWindow && !mainWindow.isDestroyed()) {

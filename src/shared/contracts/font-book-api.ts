@@ -1,5 +1,6 @@
 import type { AppCommand, AppInfo } from "./app";
 import type {
+  ImportResult,
   Library,
   ScanProgress,
   ShowInFolderInput,
@@ -26,6 +27,10 @@ export interface FontBookApi {
     /** One Style's font bytes, ready for `new FontFace(...)`. */
     readStyleBytes(styleId: string): Promise<StyleBytesResult>;
     showInFolder(target: ShowInFolderInput): Promise<void>;
+    /** Imports dropped files and folders, then Scans. */
+    importFiles(files: readonly File[]): Promise<ImportResult>;
+    /** File > Import...: main shows the open dialog, Imports, then Scans. */
+    importWithDialog(): Promise<ImportResult>;
     /** Returns an unsubscribe function. */
     onScanProgress(callback: (progress: ScanProgress) => void): () => void;
   };

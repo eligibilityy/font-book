@@ -64,6 +64,7 @@ export function buildApplicationMenu({
       label: "File",
       submenu: [
         command("New Collection", "new-collection", "CommandOrControl+N"),
+        command("Import...", "import", "CommandOrControl+O"),
         command("Scan Again", "scan-again", "CommandOrControl+R"),
         { type: "separator" },
         isMac ? { role: "close" } : { role: "quit" },
@@ -127,6 +128,7 @@ export function buildApplicationMenu({
         command("All", "go-all", "CommandOrControl+1"),
         command("My Fonts", "go-my-fonts", "CommandOrControl+2"),
         command("System", "go-system", "CommandOrControl+3"),
+        command("Imported", "go-imported"),
         command("Favorites", "go-favorites", "CommandOrControl+4"),
         command("Pairing", "go-pairing", "CommandOrControl+5"),
       ],

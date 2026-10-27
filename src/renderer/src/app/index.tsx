@@ -16,7 +16,7 @@ type Startup =
   | { status: "error" };
 
 export function App(): React.JSX.Element {
-  const { state: library, scanAgain } = useLibrary();
+  const { state: library, scanAgain, replaceLibrary } = useLibrary();
   const [startup, setStartup] = useState<Startup>({ status: "loading" });
 
   useEffect(() => {
@@ -44,6 +44,7 @@ export function App(): React.JSX.Element {
               stored={startup.stored}
               appInfo={startup.appInfo}
               onScanAgain={scanAgain}
+              onLibraryChange={replaceLibrary}
             />
             <StoredFileNotice stored={startup.stored} />
           </>

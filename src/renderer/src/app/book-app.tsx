@@ -1,6 +1,6 @@
 import { classificationLabels } from "@shared/classification";
 import type { AppCommand, AppInfo } from "@shared/contracts/app";
-import type { Library, Style } from "@shared/contracts/library";
+import type { ImportResult, Library, Style } from "@shared/contracts/library";
 import {
   DEFAULT_SAMPLE_TEXT,
   type StoredData,
@@ -13,6 +13,7 @@ import {
   useCollections,
 } from "@/features/collections";
 import { DedicationPage } from "@/features/dedication";
+import { ImportDropZone, importMessage } from "@/features/import";
 import {
   type ClassificationFilter,
   ClassificationSelect,
@@ -77,6 +78,8 @@ interface BookAppProps {
   stored: StoredData;
   appInfo: AppInfo;
   onScanAgain: () => void;
+  /** After an Import, main has Scanned again: show its new Library. */
+  onLibraryChange: (library: Library) => void;
 }
 
 /** Book, once the Library and the stored files are loaded. */
@@ -86,6 +89,7 @@ export function BookApp({
   stored,
   appInfo,
   onScanAgain,
+  onLibraryChange,
 }: BookAppProps): React.JSX.Element {
   const { toast, showToast } = useToast();
   const onSaveFailed = useCallback(() => showToast(SAVE_FAILED), [showToast]);
@@ -124,6 +128,10 @@ export function BookApp({
   });
   const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
   const [isPairingFlashing, setIsPairingFlashing] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [dropTargetCollectionId, setDropTargetCollectionId] = useState<
+    string | null
+  >(null);
   // Un-starred while looking at Favorites: stays listed until she leaves, so
   // pressing F again undoes a mistake.
   const [unstarred, setUnstarred] = useState<StyleRef[]>([]);
@@ -164,7 +172,11 @@ export function BookApp({
   );
   const { duplicateFolders, otherCopyFolders } = useMemo(() => {
     const ownLabel = (style: Style) =>
-      style.fontFile.folderKind === "system" ? "System" : "My Fonts";
+      style.fontFile.folderKind === "system"
+        ? "System"
+        : style.fontFile.folderKind === "imported"
+          ? "Imported"
+          : "My Fonts";
     const own = new Map<string, string>();
     const other = new Map<string, string>();
     for (const [id, group] of findDuplicates(library.styles)) {
@@ -446,6 +458,55 @@ export function BookApp({
     [prefs],
   );
 
+  /**
+   * Imports, then shows what arrived: the Imported view with the first new
+   * Family selected, or the Collection she dropped onto with them added.
+   */
+  const runImport = async (
+    request: () => Promise<ImportResult>,
+    collectionId: string | null,
+  ): Promise<void> => {
+    if (isImporting) return;
+    setIsImporting(true);
+    try {
+      const result = await request();
+      if (result.status === "cancelled") return;
+      onLibraryChange(result.library);
+      const { summary } = result;
+      const byId = new Map(
+        result.library.styles.map((style) => [style.id, style]),
+      );
+      const imported = summary.styleIds.flatMap((id) => {
+        const style = byId.get(id);
+        return style ? [style] : [];
+      });
+      const collection =
+        collectionId && !collections.isReadOnly
+          ? (collections.collections.find(
+              (candidate) => candidate.id === collectionId,
+            ) ?? null)
+          : null;
+      const first = imported[0];
+      if (collection && imported.length > 0) {
+        collections.addToCollection(collection.id, imported);
+        flashCollection(collection.id);
+        changeView({ kind: "collection", id: collection.id });
+      } else if (first) {
+        changeView({ kind: "imported" });
+        setSelectedKeys((previous) => ({
+          ...previous,
+          [viewKey({ kind: "imported" })]: familyKey(first.familyName),
+        }));
+      }
+      showToast(importMessage(summary, collection?.name ?? null));
+    } catch (error) {
+      console.error("Import failed", error);
+      showToast("Book couldn't Import those files. Try again in a moment.");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const showInFolder = useCallback((style: Style) => {
     void window.fontBook.library.showInFolder({
       kind: "style",
@@ -493,6 +554,9 @@ export function BookApp({
     switch (command) {
       case "scan-again":
         return onScanAgain();
+      case "import":
+        void runImport(window.fontBook.library.importWithDialog, null);
+        return;
       case "find":
         searchRef.current?.focus();
         searchRef.current?.select();
@@ -534,6 +598,8 @@ export function BookApp({
         return changeView({ kind: "my-fonts" });
       case "go-system":
         return changeView({ kind: "system" });
+      case "go-imported":
+        return changeView({ kind: "imported" });
       case "go-favorites":
         return changeView({ kind: "favorites" });
       case "go-pairing":
@@ -609,6 +675,7 @@ export function BookApp({
           isPairingOpen={mode.kind === "pairing"}
           onOpenPairing={openPairing}
           isPairingFlashing={isPairingFlashing}
+          dropTargetCollectionId={dropTargetCollectionId}
         />
       )}
       <div className={styles.content}>
@@ -910,6 +977,24 @@ export function BookApp({
           )}
         </main>
       </div>
+      <ImportDropZone
+        collectionNames={
+          new Map(
+            collections.collections.map((collection) => [
+              collection.id,
+              collection.name,
+            ]),
+          )
+        }
+        isImporting={isImporting}
+        onDropTargetChange={setDropTargetCollectionId}
+        onDrop={(files, collectionId) =>
+          void runImport(
+            () => window.fontBook.library.importFiles(files),
+            collectionId,
+          )
+        }
+      />
       <DedicationPage
         open={dedication.open}
         isFirstTime={dedication.isFirstTime}
@@ -1038,7 +1123,22 @@ function EmptyView({
     return (
       <div className={styles.empty}>
         <p className={styles.emptyTitle}>Nothing in {title} yet.</p>
-        <p>Open a Style and choose Add to Collection.</p>
+        <p>
+          Open a Style and choose Add to Collection, or drop Font files on{" "}
+          {title} in the sidebar.
+        </p>
+      </div>
+    );
+  }
+  if (view.kind === "imported") {
+    return (
+      <div className={styles.empty}>
+        <p className={styles.emptyTitle}>Nothing Imported yet.</p>
+        <p>
+          Drop Font files or a folder anywhere in Book, or choose File &gt;
+          Import. Book keeps its own copy, so a class download can be deleted
+          afterwards.
+        </p>
       </div>
     );
   }
@@ -1047,8 +1147,8 @@ function EmptyView({
       <div className={styles.empty}>
         <p className={styles.emptyTitle}>No Styles found yet.</p>
         <p>
-          Install Font files or put them in your Fonts folder, then choose Scan
-          Again.
+          Drop Font files anywhere in Book to Import them, or put them in your
+          Fonts folder and choose Scan Again.
         </p>
         <p>Book looked in:</p>
         <ul className={styles.folderList}>

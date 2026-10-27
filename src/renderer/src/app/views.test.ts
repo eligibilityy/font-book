@@ -34,6 +34,7 @@ function style(familyName: string, changes: Partial<Style> = {}): Style {
       folderPath: "/fonts",
       folderKind: "user",
       size: 1,
+      modifiedMs: 0,
       faceCount: 1,
     },
     ...changes,
@@ -46,6 +47,7 @@ const system = {
   folderPath: "/System",
   folderKind: "system",
   size: 1,
+  modifiedMs: 0,
   faceCount: 1,
 } as const;
 const styles = [
@@ -83,6 +85,38 @@ describe("buildRows", () => {
     ]);
     expect(names("my-fonts")).toEqual(["café serif", "inter"]);
     expect(names("system")).toEqual(["courier", "helvetica"]);
+  });
+
+  it("lists Imported Families newest first, and counts them in My Fonts", () => {
+    const imported = (name: string, modifiedMs: number) =>
+      style(name, {
+        fontFile: {
+          ...system,
+          path: `/imported/${name}.otf`,
+          folderPath: "/imported",
+          folderKind: "imported",
+          modifiedMs,
+        },
+      });
+    const withImports = [
+      ...styles,
+      imported("Amatic", 1_000),
+      imported("Zilla", 3_000),
+      imported("Lora", 2_000),
+    ];
+    const rows = (kind: "imported" | "my-fonts") =>
+      buildRows({ ...base, styles: withImports, view: { kind } }).rows.map(
+        (row) => row.key,
+      );
+
+    expect(rows("imported")).toEqual(["zilla", "lora", "amatic"]);
+    expect(rows("my-fonts")).toEqual([
+      "amatic",
+      "café serif",
+      "inter",
+      "lora",
+      "zilla",
+    ]);
   });
 
   it("searches without regard to case or accents, and counts Classifications", () => {

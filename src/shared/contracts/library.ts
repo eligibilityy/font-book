@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 /**
- * "system" is the operating system's own Font folder. Every other Font folder
- * is "user", which is what the My Fonts Library filter shows.
+ * "system" is the operating system's own Font folder; "imported" is Book's own
+ * folder of Imported Font files; every other Font folder is "user". My Fonts
+ * shows everything except "system".
  */
-export type FontFolderKind = "system" | "user";
+export type FontFolderKind = "system" | "user" | "imported";
 
 export interface FontFolder {
   path: string;
@@ -112,6 +113,8 @@ export interface StyleFontFile {
   folderKind: FontFolderKind;
   /** Bytes on disk. For a .ttc this is the whole file, shared by its Styles. */
   size: number;
+  /** Last modified, in ms. For an Imported Font file, when it was Imported. */
+  modifiedMs: number;
   faceCount: number;
 }
 
@@ -147,6 +150,29 @@ export type StyleBytesResult =
   | { status: "ready"; bytes: Uint8Array<ArrayBuffer> }
   | { status: "missing" }
   | { status: "unreadable" };
+
+/** Font files or folders to Import: dropped on the window or chosen in a dialog. */
+export const importPathsSchema = z
+  .array(z.string().min(1).max(4096))
+  .min(1)
+  .max(1000);
+
+export interface ImportSummary {
+  /** Font files copied into Book's imported-fonts folder. */
+  importedCount: number;
+  /** Font files identical to one Book had already Imported. */
+  alreadyImportedCount: number;
+  /** Font files that couldn't be read, so weren't copied. */
+  failedCount: number;
+  /** Files in formats Book can't preview, such as .fon or Type 1. */
+  skippedCount: number;
+  /** Every Style in the Font files she Imported, new or already there. */
+  styleIds: string[];
+}
+
+export type ImportResult =
+  | { status: "imported"; summary: ImportSummary; library: Library }
+  | { status: "cancelled" };
 
 export const showInFolderInputSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("style"), styleId: styleIdSchema }),

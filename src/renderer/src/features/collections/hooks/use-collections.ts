@@ -26,6 +26,8 @@ export interface Collections {
     isIncluded: boolean,
   ) => void;
   removeFromCollection: (collectionId: string, styleId: string) => void;
+  /** Adds Styles that aren't in the Collection yet, in the order given. */
+  addToCollection: (collectionId: string, styles: readonly Style[]) => void;
   isNameTaken: (name: string, exceptId?: string) => boolean;
 }
 
@@ -166,6 +168,19 @@ export function useCollections(
     [changeCollection],
   );
 
+  const addToCollection = useCallback(
+    (collectionId: string, styles: readonly Style[]) => {
+      changeCollection(collectionId, (collection) => {
+        const present = new Set(collection.styles.map((ref) => ref.styleId));
+        const added = styles
+          .filter((style) => !present.has(style.id))
+          .map(styleRefOf);
+        return { ...collection, styles: [...collection.styles, ...added] };
+      });
+    },
+    [changeCollection],
+  );
+
   return {
     favorites: data.favorites,
     collections: data.collections,
@@ -178,6 +193,7 @@ export function useCollections(
     deleteCollection,
     setInCollection,
     removeFromCollection,
+    addToCollection,
     isNameTaken,
   };
 }

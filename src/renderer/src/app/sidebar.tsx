@@ -2,6 +2,7 @@ import { type Collections, CollectionsSection } from "@/features/collections";
 import {
   ComputerIcon,
   GridIcon,
+  ImportIcon,
   PairingIcon,
   PersonIcon,
   StarIcon,
@@ -23,6 +24,8 @@ interface SidebarProps {
   onOpenPairing: () => void;
   /** Briefly true after a Style was put in the Pairing. */
   isPairingFlashing: boolean;
+  /** The Collection Font files are being dragged over. */
+  dropTargetCollectionId: string | null;
 }
 
 /** Chooses what the Library list shows. It never changes between views. */
@@ -37,6 +40,7 @@ export function Sidebar({
   isPairingOpen,
   onOpenPairing,
   isPairingFlashing,
+  dropTargetCollectionId,
 }: SidebarProps): React.JSX.Element {
   const item = (
     target: View,
@@ -71,6 +75,7 @@ export function Sidebar({
           {item({ kind: "all" }, "All", <GridIcon />)}
           {item({ kind: "my-fonts" }, "My Fonts", <PersonIcon />)}
           {item({ kind: "system" }, "System", <ComputerIcon />)}
+          {item({ kind: "imported" }, "Imported", <ImportIcon />)}
           {failedCount > 0 &&
             item(
               { kind: "couldnt-read" },
@@ -109,6 +114,7 @@ export function Sidebar({
         isCreating={isCreatingCollection}
         onCreatingChange={onCreatingCollectionChange}
         recentlyAddedId={recentlyAddedId}
+        dropTargetId={dropTargetCollectionId}
       />
     </nav>
   );

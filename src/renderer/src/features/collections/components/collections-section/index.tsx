@@ -18,6 +18,8 @@ interface CollectionsSectionProps {
   onCreatingChange: (isCreating: boolean) => void;
   /** The Collection that just received a Style, for a one-time tint. */
   recentlyAddedId: string | null;
+  /** The Collection Font files are being dragged over, to Import into it. */
+  dropTargetId: string | null;
 }
 
 /** The sidebar's Collections: one row per Collection, plus New, Rename and Delete. */
@@ -28,6 +30,7 @@ export function CollectionsSection({
   isCreating,
   onCreatingChange,
   recentlyAddedId,
+  dropTargetId,
 }: CollectionsSectionProps): React.JSX.Element {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Collection | null>(null);
@@ -87,6 +90,10 @@ export function CollectionsSection({
                       }
                       data-recently-added={
                         collection.id === recentlyAddedId ? "" : undefined
+                      }
+                      data-collection-id={collection.id}
+                      data-drop-target={
+                        collection.id === dropTargetId ? "" : undefined
                       }
                       onClick={() => onOpen(collection.id)}
                       title={collection.name}

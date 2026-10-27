@@ -1,0 +1,67 @@
+/*
+ * Covers the window while files are dragged over it. It never takes the
+ * pointer, so a Collection row underneath still knows it is the target.
+ * A fade only: dragging in happens now and then, and nothing moves.
+ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.overlay[data-visible] {
+  opacity: 1;
+  transition-duration: var(--duration-base);
+}
+
+/* A dashed edge inset from the window, the usual sign for "drop here". */
+.overlay::before {
+  position: absolute;
+  inset: var(--space-3);
+  border: 2px dashed var(--accent-9);
+  border-radius: var(--radius-lg);
+  background: var(--accent-a4);
+  content: "";
+}
+
+/* Over a Collection: the sidebar row carries the focus, so the edge steps back. */
+.overlay[data-over-collection]::before {
+  border-color: transparent;
+  background: transparent;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  max-width: 360px;
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--gray-1);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: var(--space-1);
+  color: var(--accent-9);
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.detail {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+}

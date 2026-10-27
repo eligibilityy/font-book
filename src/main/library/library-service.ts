@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import type {
   FontFolder,
+  ImportSummary,
   Library,
   ScanProgress,
   Style,
@@ -8,6 +9,7 @@ import type {
 } from "../../shared/contracts/library";
 import { errorCode, type JsonFile } from "../storage/json-file";
 import { extractFace, isCollection } from "./extract-face";
+import { importFontFiles } from "./import-font-files";
 import {
   emptyLibraryIndex,
   type LibraryIndex,
@@ -20,6 +22,10 @@ export interface LibraryService {
   /** Scans again. If a Scan is already running, waits for that one instead. */
   scan(): Promise<Library>;
   readStyleBytes(styleId: string): Promise<StyleBytesResult>;
+  /** Copies Font files into the imported-fonts folder, then Scans. */
+  importFontFiles(
+    paths: readonly string[],
+  ): Promise<{ summary: ImportSummary; library: Library }>;
   /** The Font file path of a Style or Failed entry in the Library, or null. */
   findFontFilePath(
     target:
@@ -30,6 +36,8 @@ export interface LibraryService {
 
 interface LibraryServiceOptions {
   folders: FontFolder[];
+  /** Book's own folder of Imported Font files; also one of `folders`. */
+  importedFolder: string;
   indexFile: JsonFile<LibraryIndex>;
   onProgress: (progress: ScanProgress) => void;
 }
@@ -40,6 +48,7 @@ interface LibraryServiceOptions {
  */
 export function createLibraryService({
   folders,
+  importedFolder,
   indexFile,
   onProgress,
 }: LibraryServiceOptions): LibraryService {
@@ -106,6 +115,26 @@ export function createLibraryService({
       } catch {
         return { status: "unreadable" };
       }
+    },
+    async importFontFiles(paths) {
+      const outcome = await importFontFiles(paths, { folder: importedFolder });
+      // Wait for a Scan already running, then Scan once more: that one may
+      // have listed the folder before the copies landed.
+      await running?.catch(() => null);
+      const library = await scan();
+      const importedPaths = new Set(outcome.importedPaths);
+      return {
+        summary: {
+          importedCount: outcome.importedCount,
+          alreadyImportedCount: outcome.alreadyImportedCount,
+          failedCount: outcome.failedCount,
+          skippedCount: outcome.skippedCount,
+          styleIds: library.styles
+            .filter((style) => importedPaths.has(style.fontFile.path))
+            .map((style) => style.id),
+        },
+        library,
+      };
     },
     findFontFilePath(target) {
       if (target.kind === "style") {

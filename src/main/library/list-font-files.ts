@@ -156,7 +156,7 @@ async function collectFontFiles(context: CollectContext): Promise<void> {
   }
 }
 
-function isFontFileName(name: string): boolean {
+export function isFontFileName(name: string): boolean {
   return FONT_FILE_EXTENSIONS.has(extname(name).toLowerCase());
 }
 

@@ -1,7 +1,12 @@
 // The preload runs sandboxed: it may import only `electron` and code that
 // bundles into this file (src/shared). It forwards calls to main and holds no
 // logic, so the web page never gets ipcRenderer or Node itself.
-import { contextBridge, type IpcRendererEvent, ipcRenderer } from "electron";
+import {
+  contextBridge,
+  type IpcRendererEvent,
+  ipcRenderer,
+  webUtils,
+} from "electron";
 import type { AppCommand } from "../shared/contracts/app";
 import {
   appChannels,
@@ -35,6 +40,15 @@ const fontBook: FontBookApi = {
       ipcRenderer.invoke(libraryChannels.readStyleBytes, styleId),
     showInFolder: (target) =>
       ipcRenderer.invoke(libraryChannels.showInFolder, target),
+    // A dropped File's path is only readable here, in the preload; the page
+    // hands over the Files and never sees a path.
+    importFiles: (files) =>
+      ipcRenderer.invoke(
+        libraryChannels.importPaths,
+        files.map((file) => webUtils.getPathForFile(file)),
+      ),
+    importWithDialog: () =>
+      ipcRenderer.invoke(libraryChannels.importWithDialog),
     onScanProgress: (callback) =>
       subscribe<ScanProgress>(libraryChannels.scanProgress, callback),
   },

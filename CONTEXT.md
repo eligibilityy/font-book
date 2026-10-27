@@ -25,7 +25,7 @@ Adding Font files that are not in a Font folder (dragged in or chosen in a file 
 _Avoid_: add, upload, install, activate
 
 **Library filter**:
-A sidebar item that narrows the Library list by where Styles come from: All, My Fonts (every Font folder except the operating system's own), and System (later, Imported).
+A sidebar item that narrows the Library list by where Styles come from: All, My Fonts (every Font folder except the operating system's own, Imported included), System, and Imported (newest Import first).
 _Avoid_: source, location, tab
 
 **Failed entry**:

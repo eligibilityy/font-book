@@ -16,6 +16,7 @@ export type View =
   | { kind: "all" }
   | { kind: "my-fonts" }
   | { kind: "system" }
+  | { kind: "imported" }
   | { kind: "couldnt-read" }
   | { kind: "favorites" }
   | { kind: "collection"; id: string };
@@ -32,6 +33,8 @@ export function viewTitle(view: View, collections: Collection[]): string {
       return "My Fonts";
     case "system":
       return "System";
+    case "imported":
+      return "Imported";
     case "couldnt-read":
       return "Couldn't Read";
     case "favorites":
@@ -47,7 +50,10 @@ export function viewTitle(view: View, collections: Collection[]): string {
 /** Family rows (the Library filters) or Style rows (Favorites, a Collection). */
 export function showsFamilies(view: View): boolean {
   return (
-    view.kind === "all" || view.kind === "my-fonts" || view.kind === "system"
+    view.kind === "all" ||
+    view.kind === "my-fonts" ||
+    view.kind === "system" ||
+    view.kind === "imported"
   );
 }
 
@@ -93,11 +99,17 @@ export function buildRows({
       view.kind === "all"
         ? styles
         : styles.filter((style) =>
-            view.kind === "system"
-              ? style.fontFile.folderKind === "system"
-              : style.fontFile.folderKind === "user",
+            view.kind === "my-fonts"
+              ? style.fontFile.folderKind !== "system"
+              : style.fontFile.folderKind === view.kind,
           );
     const families = groupIntoFamilies(inView);
+    // Imported lists the newest Import first, so what she just dropped is on top.
+    if (view.kind === "imported") {
+      const importedAt = (family: Family) =>
+        Math.max(...family.styles.map((style) => style.fontFile.modifiedMs));
+      families.sort((a, b) => importedAt(b) - importedAt(a));
+    }
     // "arabic" finds the Families whose rows say Arabic.
     const matching = families.filter(
       (family) =>

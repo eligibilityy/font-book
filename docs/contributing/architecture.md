@@ -109,7 +109,7 @@ The app reads Font folders and never writes into them. Everything it writes live
 ├── classifications.json  # Classifications she set by hand, keyed by Family
 ├── prefs.json            # Sample text, Specimen size, line height, tracking, paper and ink, panels
 ├── app-state.json        # Main's own: window size and position, theme
-└── imported-fonts/       # Copies of imported Font files
+└── imported-fonts/       # Copies of Imported Font files: a Font folder of kind "imported"
 ```
 
 - **Cache vs user data.** `library-index.json` can always be deleted and rebuilt by a Scan. `collections.json`, `classifications.json` and `prefs.json` are the user's work: never silently overwrite them. The cache holds each Family's guessed Classification; only hand-set ones go in `classifications.json`.
@@ -147,7 +147,7 @@ Follow Electron's [security checklist](https://www.electronjs.org/docs/latest/tu
 
 - `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false` on every window.
 - Preload exposes intended capabilities only. A sandboxed preload can use only a limited set of modules; keep its imports to `electron` and `src/shared`. See [sandbox](https://www.electronjs.org/docs/latest/tutorial/sandbox).
-- Main parses every IPC input with zod, including IDs and paths. Main checks that any path it reads belongs to a known Font file in the Library.
+- Main parses every IPC input with zod, including IDs and paths. Main checks that any path it reads belongs to a known Font file in the Library. The one exception is Import: it reads the files and folders she dropped or chose in main's open dialog, which is what she asked for. A dropped `File`'s path is read in the preload with `webUtils.getPathForFile`, so the page never handles paths.
 - Keep the template's Content Security Policy. Load fonts from bytes, not from `file://` URLs. A custom protocol (`book://`) would also work but needs CSP and privilege changes; keep it as a later option, not v1.
 - The app makes no network requests.
 

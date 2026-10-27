@@ -492,6 +492,16 @@ Title Case for buttons and menu items; sentence case for messages. Book never sa
 | 8. Collections and Favorites | Favorites and Collections in the sidebar, Style-row views, Add to Collection, New, Rename, Delete, Missing Styles, optimistic changes with toasts, corrupt and newer file handling, View > Theme, remembered state, About Book. Set Classification by hand, saved in `classifications.json`. | Everything survives a restart; a forced save failure undoes the change and says so. |
 | 9. Designer features (part) | Axes section with `opsz` Match Size and Reset Axes, Named instances in the Style picker. | A variable Google Fonts file shows real weights, never a fake bold. |
 
+### 8.10 Import (v0.2)
+
+Built in v0.2 (2026-10-28).
+
+- **Ways in.** Drop Font files or folders anywhere on the window; File > Import... (Mod+O) opens main's dialog (files and folders on macOS, Font files on Windows). Dropping onto a Collection in the sidebar Imports and adds the Styles there in one step.
+- **What happens.** Main parses each Font file first and copies only those that parse into `<userData>/imported-fonts/`, walking dropped folders like a Font folder (licences and readmes are ignored). An identical file already Imported isn't copied again; a different file with the same name becomes "Name 2.otf". Then main Scans and returns the new Library.
+- **Drop overlay.** While files are dragged over the window: a dashed accent edge and a card, "Drop to Import" / "Book keeps its own copy of each Font file. The originals stay where they are." Over a Collection row, the row gets an accent outline and the card says "Import into [name]". While copying: "Importing...". It fades (100ms out, 180ms in); nothing moves. It never takes the pointer, so the row under it stays the target.
+- **After.** The Imported view opens with the first Imported Family selected (or the Collection, when dropped on one), and a toast sums up: "Imported 3 Font files. 1 file couldn't be read, so it was left out."
+- **Imported** is a Library filter under System, newest Import first. Empty: "Nothing Imported yet." with how to Import.
+
 ### Room left for v0.2
 
 Pairing, PNG Export and Import are v0.2; the rest of this list moved to v0.3 on 2026-10-28 (see [features: v0.2 scope](features.md#v02-scope)).

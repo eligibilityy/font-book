@@ -41,6 +41,7 @@ function style(
       folderPath: "/fonts",
       folderKind: "user",
       size: 1000,
+      modifiedMs: 0,
       faceCount: 1,
     },
     ...changes,

@@ -85,7 +85,10 @@ export async function scanLibrary(
   const list = await listFontFiles(folders, reader);
   const cacheIsUsable = previousIndex.parserVersion === PARSER_VERSION;
   const index = emptyLibraryIndex();
-  const results = new Map<FontFile, { size: number; result: ParsedFontFile }>();
+  const results = new Map<
+    FontFile,
+    { size: number; modifiedMs: number; result: ParsedFontFile }
+  >();
 
   let done = 0;
   const total = list.fontFiles.length;
@@ -126,7 +129,11 @@ export async function scanLibrary(
       modifiedMs: info.mtimeMs,
       result,
     };
-    results.set(fontFile, { size: info.size, result });
+    results.set(fontFile, {
+      size: info.size,
+      modifiedMs: info.mtimeMs,
+      result,
+    });
     done += 1;
     if (done % 25 === 0) onProgress?.({ done, total });
   });
@@ -158,6 +165,7 @@ export async function scanLibrary(
           folderPath: fontFile.folder.path,
           folderKind: fontFile.folder.kind,
           size: entry.size,
+          modifiedMs: entry.modifiedMs,
           faceCount: entry.result.faceCount,
         },
       });

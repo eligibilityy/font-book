@@ -7,6 +7,8 @@ export const libraryChannels = {
   scan: "library:scan",
   readStyleBytes: "library:read-style-bytes",
   showInFolder: "library:show-in-folder",
+  importPaths: "library:import-paths",
+  importWithDialog: "library:import-with-dialog",
   scanProgress: "library:scan-progress",
 } as const;
 
