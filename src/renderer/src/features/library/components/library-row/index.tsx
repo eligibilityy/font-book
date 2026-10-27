@@ -59,43 +59,61 @@ export const LibraryRow = memo(function LibraryRow({
           </p>
         </>
       ) : (
-        <>
-          <RowName
-            style={
-              row.kind === "family" ? row.family.representative : row.style
-            }
-            name={
-              row.kind === "family"
-                ? row.family.name
-                : `${row.style.familyName} ${row.style.styleName}`
-            }
-          />
-          <p className={styles.details}>
-            {row.kind === "family" ? (
-              <span>
-                {countOf(row.family.styles.length, "Style", "Styles")}
-              </span>
-            ) : (
-              <span>{row.style.styleName}</span>
-            )}
-            {(row.kind === "family"
-              ? row.family.hasAxes
-              : row.style.axes.length > 0) && <span>Variable</span>}
-            <span>{classificationLabels[row.classification]}</span>
-            {hasFavorite && <StarIcon filled className={styles.favorite} />}
-          </p>
-        </>
+        <RowContent row={row} hasFavorite={hasFavorite} />
       )}
     </div>
   );
 });
 
+function RowContent({
+  row,
+  hasFavorite,
+}: {
+  row: Exclude<ListRow, { kind: "missing" }>;
+  hasFavorite: boolean;
+}): React.JSX.Element {
+  const style = row.kind === "family" ? row.family.representative : row.style;
+  const name =
+    row.kind === "family"
+      ? row.family.name
+      : `${row.style.familyName} ${row.style.styleName}`;
+  // A Style without Latin letters shows a name in its own script on line 1,
+  // so its Latin name moves down to the details.
+  const ownScript = style.ownScriptName;
+  return (
+    <>
+      <RowName style={style} text={ownScript ? ownScript.text : name} />
+      <p className={styles.details}>
+        {ownScript && (
+          <span className={styles.latinName}>
+            {row.kind === "family" ? row.family.name : row.style.familyName}
+          </span>
+        )}
+        {row.kind === "family" ? (
+          <span>{countOf(row.family.styles.length, "Style", "Styles")}</span>
+        ) : (
+          <span>{row.style.styleName}</span>
+        )}
+        {(row.kind === "family"
+          ? row.family.hasAxes
+          : row.style.axes.length > 0) && <span>Variable</span>}
+        {ownScript && <span>{ownScript.script}</span>}
+        {/* Most Families are Unclassified; saying so on every row is noise. */}
+        {row.classification !== "unclassified" && (
+          <span>{classificationLabels[row.classification]}</span>
+        )}
+        {hasFavorite && <StarIcon filled className={styles.favorite} />}
+      </p>
+    </>
+  );
+}
+
 function RowName({
   style,
-  name,
+  text,
 }: {
   style: Style;
-  name: string;
+  text: string;
 }): React.JSX.Element {
   // Wait 100ms on screen before loading, so scrolling fast loads nothing.
   const status = useStyleFace(style, { delayMs: 100 });
@@ -104,9 +122,10 @@ function RowName({
     return (
       <p
         className={styles.name}
+        dir="auto"
         style={{ fontFamily: sampleFontFamily(style.id) }}
       >
-        {name}
+        {text}
       </p>
     );
   }
@@ -121,8 +140,8 @@ function RowName({
           ? "Large file, opens in the Specimen"
           : null;
   return (
-    <p className={`${styles.name} ${styles.placeholder}`}>
-      {name}
+    <p className={`${styles.name} ${styles.placeholder}`} dir="auto">
+      {text}
       {note && <span className={styles.note}>{note}</span>}
     </p>
   );

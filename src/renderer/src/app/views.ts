@@ -98,8 +98,13 @@ export function buildRows({
               : style.fontFile.folderKind === "user",
           );
     const families = groupIntoFamilies(inView);
+    // "arabic" finds the Families whose rows say Arabic.
     const matching = families.filter(
-      (family) => query === "" || searchKey(family.name).includes(query),
+      (family) =>
+        query === "" ||
+        searchKey(
+          `${family.name} ${family.representative.ownScriptName?.script ?? ""}`,
+        ).includes(query),
     );
     const rows: ListRow[] = [];
     for (const family of matching) {

@@ -50,6 +50,7 @@
   font-weight: normal;
   font-style: normal;
   font-synthesis: none;
+  text-align: left;
   white-space: nowrap;
   /* A fade, not an ellipsis: the last letters still show the Style. */
   mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
@@ -95,6 +96,12 @@
   background: var(--gray-8);
   vertical-align: middle;
   content: "";
+}
+
+/* The Latin Family name, when line 1 shows the Style's own script instead. */
+.latinName {
+  color: var(--gray-12);
+  font-weight: var(--weight-medium);
 }
 
 .favorite {

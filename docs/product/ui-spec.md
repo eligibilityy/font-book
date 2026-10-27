@@ -190,6 +190,7 @@ The two-view layout fits at the minimum size: Specimen view needs 200 + 400 + 27
 | Row loading | Family name in the UI font, `--gray-9`, on line 1, same height. Swaps to the Style with no animation. |
 | Row can't be previewed (F3) | Line 1: Family name in the UI font, `--gray-9`, with a small warning icon. Line 2 adds "Can't be previewed". Reported to main once so it is not retried on scroll. |
 | Missing Glyphs | Empty boxes where the Style has no Glyph for a character (the notdef font). No extra text in rows. |
+| No Latin letters (added 2026-10-28) | A Style that draws fewer than half the letters of its Family name (Al Bayan, Geeza Pro) shows, on line 1, its Family name in another language from the Font file if it can draw that, else its script's own name ("العربية"). Line 2 starts with the Latin Family name and adds the script ("Al Bayan, 2 Styles, Arabic"). Search matches the script name. Quick preview shows the same text large, with one line saying why. Main works this out while parsing (`ownScriptName`). |
 | Empty Library (U3) | See the [microcopy](#11-microcopy) row "Empty Library": message, the Font folders Book looked in (each marked "Couldn't be read" if so), **Scan Again**. |
 | Some Font folders unreadable | A one-line notice under the header: "Book couldn't read /Library/Fonts. Check its permissions in Finder, then choose Scan Again." Dismissible; returns on the next failing Scan. |
 | Empty Favorites / Collection | Centered message and next step (microcopy). |

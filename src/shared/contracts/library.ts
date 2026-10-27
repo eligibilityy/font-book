@@ -53,6 +53,17 @@ export const namedInstanceSchema = z.object({
 });
 export type NamedInstance = z.infer<typeof namedInstanceSchema>;
 
+/**
+ * For a Style that can't draw its own Family name (an Arabic Style named
+ * "Al Bayan"): a name in a script it does draw, and that script's English
+ * name, such as { text: "العربية", script: "Arabic" }.
+ */
+export const ownScriptNameSchema = z.object({
+  text: z.string(),
+  script: z.string(),
+});
+export type OwnScriptName = z.infer<typeof ownScriptNameSchema>;
+
 /** What the Font file's `OS/2.fsType` says about embedding, in plain words. */
 export const embeddingSchema = z.enum([
   "installable",
@@ -89,6 +100,8 @@ export const parsedFaceSchema = z.object({
   license: z.string().nullable(),
   licenseUrl: z.string().nullable(),
   embedding: embeddingSchema,
+  /** What a Library row draws instead of the Family name; null when it draws the name. */
+  ownScriptName: ownScriptNameSchema.nullable(),
 });
 export type ParsedFace = z.infer<typeof parsedFaceSchema>;
 

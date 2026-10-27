@@ -172,17 +172,41 @@ function QuickPreviewContent({
             className={styles.specimen}
             data-stale={display !== style ? "" : undefined}
           >
-            <p className={styles.sample} style={{ ...textStyle, lineHeight }}>
-              {sampleText || `${display.familyName} ${display.styleName}`}
-            </p>
-            <p className={styles.characters} style={textStyle}>
-              {CHARACTERS.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-            </p>
-            <p className={styles.paragraph} style={textStyle}>
-              {PARAGRAPH}
-            </p>
+            {display.ownScriptName ? (
+              // No Latin letters: her Sample text and the alphabet would be a
+              // page of boxes, so show the script it does draw, and say why.
+              <>
+                <p
+                  className={styles.sample}
+                  style={{ ...textStyle, lineHeight }}
+                  dir="auto"
+                >
+                  {display.ownScriptName.text}
+                </p>
+                <p className={styles.note}>
+                  {display.familyName} has no Latin letters, so it shows{" "}
+                  {display.ownScriptName.script} here. Open the Specimen to type
+                  your own text.
+                </p>
+              </>
+            ) : (
+              <>
+                <p
+                  className={styles.sample}
+                  style={{ ...textStyle, lineHeight }}
+                >
+                  {sampleText || `${display.familyName} ${display.styleName}`}
+                </p>
+                <p className={styles.characters} style={textStyle}>
+                  {CHARACTERS.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                </p>
+                <p className={styles.paragraph} style={textStyle}>
+                  {PARAGRAPH}
+                </p>
+              </>
+            )}
           </div>
         ) : (
           <p className={styles.message}>{messageFor(style, status)}</p>

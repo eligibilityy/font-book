@@ -27,6 +27,7 @@ function style(familyName: string, changes: Partial<Style> = {}): Style {
     license: null,
     licenseUrl: null,
     embedding: "installable",
+    ownScriptName: null,
     fontFile: {
       path: `/fonts/${id}.otf`,
       name: `${id}.otf`,

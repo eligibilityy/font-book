@@ -34,6 +34,7 @@ function style(
     license: null,
     licenseUrl: null,
     embedding: "installable",
+    ownScriptName: null,
     fontFile: {
       path: `/fonts/${familyName}-${styleName}.otf`,
       name: `${familyName}-${styleName}.otf`,

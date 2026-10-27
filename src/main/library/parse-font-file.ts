@@ -1,12 +1,13 @@
 import { create, type Font } from "fontkit";
 import { z } from "zod";
 import type { Embedding, ParsedFace } from "../../shared/contracts/library";
+import { findOwnScriptName } from "./own-script-name";
 
 /**
  * Bump when parsing changes what it stores, so every cached result from an
  * older Book is thrown away and the Font file is parsed again.
  */
-export const PARSER_VERSION = 1;
+export const PARSER_VERSION = 2;
 
 export type ParsedFontFile =
   | { status: "parsed"; faces: ParsedFace[]; faceCount: number }
@@ -79,6 +80,11 @@ const axesSchema = z.record(
   }),
 );
 
+/** Name records by key, then by language: { fontFamily: { en: "Al Bayan", ar: "البيان" } }. */
+const nameRecordsSchema = z.object({
+  records: z.record(z.string(), z.record(z.string(), z.unknown())),
+});
+
 const namedVariationsSchema = z.record(
   z.string(),
   z.record(z.string(), z.number()),
@@ -127,6 +133,11 @@ function parseFace(face: Font, faceIndex: number): ParsedFace {
     license: readName(face, "license"),
     licenseUrl: readName(face, "licenseURL"),
     embedding: readEmbedding(os2.fsType),
+    ownScriptName: findOwnScriptName(
+      familyName,
+      readLocalizedFamilyNames(face),
+      (codePoint) => hasGlyph(face, codePoint),
+    ),
   };
 }
 
@@ -144,6 +155,29 @@ function cleanName(value: unknown): string | null {
   // biome-ignore lint/suspicious/noControlCharactersInRegex: NUL padding is exactly what this strips.
   const cleaned = value.replace(/\u0000/g, "").trim();
   return cleaned === "" ? null : cleaned;
+}
+
+/** The Family name in every language the Font file gives, English excluded. */
+function readLocalizedFamilyNames(face: Font): string[] {
+  const records = nameRecordsSchema.safeParse("name" in face ? face.name : null)
+    .data?.records;
+  if (!records) return [];
+  const names = new Set<string>();
+  for (const key of ["preferredFamily", "fontFamily"]) {
+    for (const [language, value] of Object.entries(records[key] ?? {})) {
+      const name = language === "en" ? null : cleanName(value);
+      if (name) names.add(name);
+    }
+  }
+  return [...names];
+}
+
+function hasGlyph(face: Font, codePoint: number): boolean {
+  try {
+    return face.hasGlyphForCodePoint(codePoint);
+  } catch {
+    return false;
+  }
 }
 
 function readAxes(face: Font): ParsedFace["axes"] {

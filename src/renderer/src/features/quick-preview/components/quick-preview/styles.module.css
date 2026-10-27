@@ -128,6 +128,14 @@
   line-height: 1.5;
 }
 
+/* Interface text on the paper: why a Style shows its own script instead. */
+.note {
+  max-width: 34em;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  opacity: 0.7;
+}
+
 .message {
   display: grid;
   place-items: center;
