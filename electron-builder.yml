@@ -46,6 +46,7 @@ mac:
   extendInfo:
     NSDocumentsFolderUsageDescription: Book reads font files you keep in Documents.
     NSDownloadsFolderUsageDescription: Book reads font files you keep in Downloads.
+    NSDesktopFolderUsageDescription: Book reads font files you keep on the Desktop.
 dmg:
   artifactName: ${name}-${version}-${arch}.${ext}
 npmRebuild: false

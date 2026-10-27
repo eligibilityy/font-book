@@ -37,6 +37,10 @@ Every screen exists to show type. The interface around it should be neutral, qui
   white paper while the app is in dark mode. Give the canvas a one-click paper/ink swap.
 - **Desktop density.** Small UI text (12-13px), compact 28px controls, hairline borders.
   Large type belongs to Specimens, not to the chrome.
+- **Honest type.** Sample text uses `font-synthesis: none`, so Book never shows a faked bold
+  or italic, and leaves `font-optical-sizing` on auto unless she sets the `opsz` Axis. A
+  character the Style lacks draws as an empty box from a bundled notdef font; Book never lets
+  another font stand in. See [architecture](contributing/architecture.md#rendering-a-style).
 
 ## 2. Gradual revelation: show the basics, reveal the depth
 
@@ -66,8 +70,9 @@ walk in.
 Designers learn a typeface by playing with it. Every control should feel connected to the
 glyphs.
 
-- **Sample text is edited in place.** Click the Specimen and type. No separate "edit
-  text" field is required, though a field in the toolbar is fine as a second way in.
+- **One Sample text everywhere.** A single line (it wraps in the Specimen) shared by the
+  toolbar field, every Library row, the Specimen and Quick preview. Editing it in any of them
+  edits it everywhere.
 - **Sliders update live.** Size, tracking, leading, and Axis sliders update the Specimen on
   every movement, not on release. If anything needs slowing down, delay *saving* the
   preference, never the visual update.
@@ -86,18 +91,36 @@ glyphs.
 Treat the app as one continuous space. Motion should explain what changed and where things
 went, never decorate.
 
-- **New UI eases into place.** Popovers grow from their trigger. The inspector slides in
-  from the side it lives on. Revealed sections animate their height so content below moves
-  smoothly instead of jumping.
+- **New UI eases into place.** Popovers grow from their trigger: start at scale 0.97 or
+  higher (never 0) from Base UI's `var(--transform-origin)`. Centred dialogs scale from the
+  centre. The inspector slides in from the side it lives on. Height may animate only for
+  small inspector sections; never animate layout properties (width, height, padding) inside
+  the Library list or the Glyph grid. Animate `transform` and `opacity`.
+- **Frequent actions are instant.** Actions repeated many times in a row (list navigation,
+  slider steps, keyboard shortcuts, switching between the list and the Specimen, hiding the
+  sidebar) and context menus appear instantly. A context menu may fade out. Frequency
+  decides how much something animates (Emil Kowalski; see
+  [design references](product/design-references.md)).
 - **Direction follows the layout.** Things on the right enter from the right. A Style
-  added to a Collection should visibly travel toward, or pulse in, that Collection in the
-  sidebar.
+  added to a Collection gets one focal response: its sidebar Collection row pulses with a
+  280ms accent tint that fades out. No flying copies of the row.
 - **Don't animate the type while it's being adjusted.** Slider changes and typing are
   instant. Easing a font-size change makes the tool feel laggy. Swapping the Style in a
   Specimen is also instant: it's content updating in place, not a new object arriving.
 - **Motion never blocks.** Clicks and keys work immediately, even mid-animation.
 - **Keep it short.** Most transitions run 150-250ms. Use the motion tokens below, not
   one-off numbers. Watch it at normal speed and check the in-between frames before calling it done.
+- **Exits are quicker, never ease-in.** An exit retraces its entrance's path but is never
+  longer than it. Use ease-out to enter and to exit; ease-in-out only for something moving
+  from one place on screen to another; never ease-in. Nothing a user starts runs longer than
+  280ms.
+- **Interruptible by construction.** Base UI overlays use CSS transitions on their
+  open/closed style attributes; the inspector uses Motion. Quick preview is instant and needs neither. Never use
+  `@keyframes` or `transition: all` for UI that can be toggled. Key `AnimatePresence`
+  children by the overlay's open state, not by the Style, or every arrow press replays the
+  entrance.
+- **The full motion table** for each interaction lives in
+  [design references](product/design-references.md#2-motion-spec-for-books-key-interactions).
 - **Tools.** Use the [Motion](https://motion.dev/) library (`motion`, imported from
   `motion/react`) for enter and exit, layout, and height animations, the things CSS can't
   do on its own. Plain CSS transitions are fine for hover and press states. Keep Motion's
@@ -113,28 +136,35 @@ Delight works through surprise, and surprise wears off with repetition. Pond cal
   get restrained polish only: crisp hover states, a tiny press effect, nothing that slows
   her down.
 - **Occasional actions** (adding a Favorite, creating a Collection) can have a small,
-  satisfying response: a Favorite star that pops once.
+  satisfying response: a Favorite star that pops once when favorited by click. The keyboard
+  shortcut and un-favoriting are instant.
 - **Rare, meaningful moments** (first Import, first Collection, first PNG Export) can carry
   a memorable flourish, shown once.
 - **No sound for now.** Book has no interface sounds. If that changes, keep them off by
   default, limit them to one or two soft cues, and put them behind their own setting,
   separate from reduced motion.
-- **Personal touches belong in the corners:** the empty-state copy, the About window, the
-  default Sample text. That's where a gift can show it was made for her.
+- **Personal touches belong in the corners:** the empty-state copy and the About window.
+  That's where a gift can show it was made for her. The default Sample text stays a plain
+  pangram ("Sphinx of black quartz, judge my vow.") because it is the most-seen line in the
+  app and has to work in a critique.
 
 ## 6. Keyboard-first for power use, friendly for the mouse
 
 She'll use a trackpad most of the time, but browsing hundreds of Families is much faster
 from the keyboard.
 
-- **The Library list is keyboard navigable.** Up/Down moves through Styles, Enter opens the
-  Specimen, Space opens a Quick preview of the highlighted Style (Space or Escape closes it
-  and leaves the selection where it was), and Home/End jump.
+- **The Library list is keyboard navigable.** Up/Down moves through rows (Families in the
+  Library, Styles in Favorites and Collections), Enter opens the Specimen, Space opens a Quick
+  preview of the highlighted row (Space or Escape closes it and leaves the selection where it
+  was), Left/Right step through a Family's Styles while Quick preview is open, and Home/End
+  jump. The full map is in the [UI spec](product/ui-spec.md#9-keyboard-map).
 - **Search is one keystroke away:** `Mod+F` or `/` focuses search. `Mod` means Cmd on
   macOS and Ctrl on Windows. Always write shortcuts with `Mod` so they work on both.
 - **Single-key shortcuts never fire while she's typing.** Sample text is a text field, so
   pressing "F" in it must type an F, not toggle a Favorite. Check whether focus is in an
-  editable element before running any shortcut.
+  editable element before running any shortcut. Single-key shortcuts (Space, F) still appear
+  in the menu, with `registerAccelerator: false`, so the menu shows them without them
+  stealing keystrokes.
 - **One list of shortcuts.** Define every shortcut once, with a label. The app menu, the
   in-app key handling, and any shortcut help screen all read from that list.
 - **Real menus.** Put important actions in the macOS menu bar with their shortcuts shown.
@@ -146,11 +176,12 @@ from the keyboard.
 - **Light and dark.** Follow the system appearance by default, with a manual override.
   Both themes must be designed, not just inverted. In dark mode, shadows get darker and
   borders carry more of the separation.
-- **Reduced motion.** When the system (or the app setting) asks for reduced motion, every
-  transition reaches its final state immediately. No information may depend on seeing an
-  animation. Implement this in **one place** and reuse it: the CSS rule in the tokens file,
-  plus one `<MotionConfig reducedMotion="user">` around the app so every Motion animation
-  follows the system setting.
+- **Reduced motion.** When the system asks for reduced motion, nothing moves, scales, or
+  slides. Opacity and colour fades of up to 180ms may stay, so changes are still noticeable.
+  No information may depend on seeing an animation. Implement this in **one place** and
+  reuse it: the CSS rule in the tokens file (which stops animating transforms, matching Motion), plus
+  one `<MotionConfig reducedMotion="user">` around the app. That setting already keeps
+  opacity and colour and drops transforms, so CSS and Motion behave the same.
 - **Focus is always visible for keyboard users.** Show a clear focus ring when navigating
   by keyboard, and avoid stray rings after mouse clicks.
 - **Everything has a name.** Icon-only buttons, sliders, and toggles need an accessible
@@ -161,7 +192,8 @@ from the keyboard.
 A screen isn't finished until all of its states are.
 
 - **Empty states teach.** Each one explains what belongs there and offers one next step:
-  - Empty Library: "No fonts found yet. Import Font files or drag them onto this window."
+  - Empty Library: "No Styles found yet." Name the Font folders Book looked in and offer
+    **Scan Again**. (Import arrives in v0.2.)
   - Empty Collection: "Add Styles from the Library with **Add to Collection**."
   - No Favorites: "Star a Style to keep it close."
   - No search results: say what was searched for and offer **Clear Search**.
@@ -169,11 +201,13 @@ A screen isn't finished until all of its states are.
   folders, 1,240 Styles so far"). While a Style's font loads, show its name in the UI font
   in the same space it will occupy, so nothing shifts when it arrives.
 - **Errors are human and specific.** Say what happened and what to do: "This Font file
-  couldn't be read. It may be damaged. **Remove from Library**." Never show a raw error
-  code as the main message.
+  couldn't be read. It may be damaged." with **Show in Finder**. (Book never deletes or
+  hides files in Font folders.) Never show a raw error code or an engine name such as
+  "Chromium" as the main message.
 - **Handle edge cases on purpose.** Plan for very long Family names, Styles missing Glyphs
-  for the Sample text (show which characters fell back), a Library of 2,000+ Styles, and a
-  Collection with one Style.
+  for the Sample text (they draw as boxes), Font files that parse but can't be previewed, a
+  Library of 2,000+ Styles, Missing Styles in a Collection, and a Collection with one Style.
+  The [edge cases](product/edge-cases.md) doc lists them with severity.
 - **Show changes first, confirm later.** Favoriting or adding to a Collection updates the UI
   at once and saves in the background. If saving fails, put it back and say so.
 
@@ -219,10 +253,11 @@ Start small. Add a token when a second component needs the same value.
 | UI type | `--font-ui`, `--font-mono`, `--text-xs` ... `--text-xl`, `--weight-regular/medium/semibold` | `--font-ui: system-ui, -apple-system, "Segoe UI", sans-serif`. Sizes 11 / 12 / 13 (body) / 15 / 20 / 24 px. |
 | Spacing | `--space-1` ... `--space-8` | A 4px base: 4, 8, 12, 16, 24, 32, 48, 64. |
 | Radius | `--radius-sm/md/lg/full` | 6, 8, 12 px, 9999px. |
-| Size | `--control-sm/md`, `--toolbar-height`, `--row-height` | Controls 28 / 32 px, toolbar 44-48 px, Library row fixed (for example 56 px). |
+| Size | `--control-sm/md`, `--toolbar-height`, `--row-height` | Controls 28 / 32 px, toolbar 48 px, Library row fixed at 80 px. |
+| Layout | `--titlebar-inset`, `--sidebar-width`, `--inspector-width`, `--list-header-height`, `--specimen-min-width`, `--row-sample-size`, `--quick-preview-size` | 80 px on macOS (set by main), 200, 272, 32, 400, 32, 80 px. See the [UI spec](product/ui-spec.md#sizes-and-tokens). |
 | Border | `--border-width`, `--border-subtle` | Hairline `0.5px` on Retina, `1px` fallback. |
 | Shadow | `--shadow-sm/md/lg` | A 1px translucent ring plus a soft drop shadow. Darker in dark mode. |
-| Motion | `--duration-fast/base/slow`, `--ease-out`, `--ease-in-out` | 100 / 180 / 280 ms. `--ease-out: cubic-bezier(0.22, 1, 0.36, 1)`. |
+| Motion | `--duration-fast/base/slow`, `--ease-out`, `--ease-in-out` | 100 / 180 / 280 ms. `--ease-out: cubic-bezier(0.22, 1, 0.36, 1)`. `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` (judge by eye at 180 ms). One spring, for the Favorite pop only: `{ type: "spring", duration: 0.25, bounce: 0.3 }`. |
 | Layers | `--z-toolbar`, `--z-popover`, `--z-dialog`, `--z-toast` | A small fixed ladder, for example 10 / 100 / 200 / 300. |
 | Specimen defaults | `--specimen-size`, `--specimen-leading`, `--specimen-padding` | 64 px, 1.1, 48-56 px. |
 
@@ -231,7 +266,8 @@ Start small. Add a token when a second component needs the same value.
 :root { --gray-1: #fff; --gray-12: #1b1b1b; --duration-base: 180ms; }
 [data-theme="dark"] { --gray-1: #0a0a0a; --gray-12: #eee; }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  /* Transforms jump to their end state; short fades stay (matches MotionConfig reducedMotion="user"). */
+  *, *::before, *::after { transition-property: opacity, color, background-color, border-color !important; animation: none !important; }
 }
 ```
 
@@ -266,7 +302,10 @@ Copy this into the pull request and tick it off. Reviewers and AI agents apply i
 **Motion**
 - [ ] New or revealed UI transitions into place using motion tokens. Nothing teleports or decorates.
 - [ ] Sliders and typing update the type instantly, with no easing on the type.
-- [ ] With reduced motion on, everything reaches its final state immediately and nothing is lost.
+- [ ] With reduced motion on, nothing moves or scales, fades are 180ms or less, and nothing is lost.
+- [ ] No `transition: all` and no `@keyframes` on toggleable UI.
+- [ ] `AnimatePresence` keys follow the overlay, not the Style.
+- [ ] Repeated and keyboard-driven actions are instant (see the motion table in [design references](product/design-references.md)).
 
 **Theme and visual**
 - [ ] Checked in both light and dark mode.

@@ -68,9 +68,29 @@ src/
                               -> render Sample text with Axes and OpenType features
 ```
 
-The renderer never receives a file path it can open itself. It asks main for Styles by ID and for font bytes by ID. Bytes cross IPC as a `Uint8Array`, which `FontFace` accepts directly, so the Content Security Policy does not need loosening to load fonts.
+The renderer never receives a file path it can open itself. It asks main for Styles by ID and for font bytes by ID. Bytes cross IPC as a `Uint8Array`, which `FontFace` accepts directly, so the Content Security Policy does not need loosening to load fonts. `blob:`, `data:`, and custom-scheme URLs are blocked by the template's CSP; this was verified, along with IPC speed (37 MB in under 100 ms), in [edge cases](../product/edge-cases.md).
 
-Open question for milestone 6: a `.ttc` Font file holds several Styles, and `FontFace` takes a whole file. Decide how the renderer gets one Style out of a `.ttc` before supporting them in the Specimen.
+**`.ttc` and `.otc` collections.** `FontFace` always renders face 0 of a collection, and `url(file.ttc#1)` is ignored (verified). So `library:read-style-bytes` returns **only the requested Style's face**: main extracts that face into a standalone font (copying its tables from the collection's table directory) and sends those bytes. The renderer never sees a collection.
+
+**Send copies, not views.** When returning part of a `Buffer`, send `Buffer.from(view)` or `new Uint8Array(view)`. A `subarray` view silently serializes the entire underlying file over IPC (verified: a 10-byte view of a 37 MB file sent 37 MB).
+
+## Rendering a Style
+
+Installed fonts and loaded `FontFace` objects share one namespace in the renderer, and the browser quietly substitutes other fonts when something is missing. These rules keep the Specimen honest:
+
+- **Generated family names.** Register each `FontFace` under a name derived from its Style ID (for example `book-<hash>`), never its real Family name. A `FontFace` named "Arial" replaces the installed Arial everywhere in the page, including UI text (verified).
+- **No fake styles.** Load each `FontFace` with `weight` and `style` left at normal, and render Sample text with `font-synthesis: none`. Otherwise the browser fakes bold and italic on Styles that have neither (verified: 34% extra ink at the same width).
+- **One property per job.** Drive Axes only with `font-variation-settings`, and OpenType features only with `font-feature-settings`. Do not mix in `font-weight` or `font-variant-*` for the same thing; mixing gave inconsistent results (verified). When Axis sliders are under the user's control, set `font-optical-sizing: none`, or `opsz` silently follows the font size.
+- **Two separate statuses.** A Style has a *parse status* (main could read it) and a *render status* (Chromium accepted it). fontkit reads some files that Chromium's font sanitizer rejects with a generic `Invalid font data`. When `FontFace.load()` fails, show the Style as failed-to-render and tell main, so the Library can mark it.
+- **Coverage, not fallback.** If the Sample text contains characters the Style lacks, the browser draws them in another font with no visible sign. Check the Sample text against the Style's character map (`library:check-coverage`, in main) and show which characters are missing instead of pretending.
+- **Release what is off-screen.** Each loaded `FontFace` costs about 1.25 times its file size in memory. Remove faces from `document.fonts` when their rows scroll far away, and when switching Styles; memory returns after cleanup (verified).
+
+## Font files and Font folders
+
+- **Supported:** `.ttf`, `.otf`, `.ttc`, `.otc`, `.woff`, `.woff2`. **Skipped, with a count shown:** `.fon`/`.fnt`, Type 1 (`.pfb`, `.pfm`, `.afm`), `.dfont` and legacy Mac suitcases.
+- **Skipped locations:** Adobe Fonts' Creative Cloud cache (`livetype`), hidden system fonts whose names start with `.`, and `/System/Library/AssetsV2`. The Scan does recurse into normal subfolders such as `/System/Library/Fonts/Supplemental`.
+- **Names:** Family = name ID 16 (typographic family), falling back to ID 1; Style = name ID 17, falling back to ID 2. Grouping by ID 1 alone splits real Families: it produced 669 Families instead of 320 on the dev machine (verified).
+- **Parse each Style in its own `try`/`catch`.** One bad file must become one failed entry, never a stopped Scan. fontkit's `namedVariations` throws on several shipping variable fonts (Bahnschrift, Segoe UI Variable, Sitka, verified); treat that as "no Named instances", not a failure.
 
 ## On-disk layout
 
@@ -78,17 +98,23 @@ The app reads Font folders and never writes into them. Everything it writes live
 
 ```text
 <userData>/
-├── library-index.json    # Cache of parsed Style metadata, keyed by Font file path + size + modified time
+├── library-index.json    # Cache of parsed Style metadata, keyed by Font file path + size + modified time, plus a parser version
 ├── collections.json      # Collections and Favorites (lists of styleIds)
+├── classifications.json  # Classifications she set by hand, keyed by Family
 ├── prefs.json            # Sample text, Specimen defaults, window size, theme
 └── imported-fonts/       # Copies of imported Font files
 ```
 
-- **Cache vs user data.** `library-index.json` can always be deleted and rebuilt by a Scan. `collections.json` and `prefs.json` are the user's work: never silently overwrite them.
+- **Cache vs user data.** `library-index.json` can always be deleted and rebuilt by a Scan. `collections.json`, `classifications.json` and `prefs.json` are the user's work: never silently overwrite them. The cache holds each Family's guessed Classification; only hand-set ones go in `classifications.json`.
 - **Parse on read.** Every file is parsed with its zod schema when read. If `collections.json` fails to parse, rename it aside (for example `collections.corrupt-<timestamp>.json`), start empty, and tell the user. If the cache fails to parse, discard it and rescan.
-- **Write safely.** Write to a temporary file in the same folder, then rename it over the original, so a crash never leaves half a file.
-- **Version stored files.** Each stored file has a `version` field. Changing its shape adds a migration with a test.
-- **Style IDs** are created in main from the Font file path and the face index inside it, and are opaque strings to the renderer. Collections and Favorites store Style IDs.
+- **Write safely.** Write to a temporary file in the same folder, then rename it over the original, so a crash never leaves half a file. On Windows that rename fails with `EPERM` while anything holds the target open, even antivirus or Book's own read handle (verified), so:
+  - send all writes through **one write queue** in `main/storage`, so two writes never race;
+  - retry the rename a few times with a short backoff on `EPERM` or `EBUSY`;
+  - keep a `.bak` copy of the previous good version.
+- **One instance.** Call `app.requestSingleInstanceLock()` at startup and focus the existing window instead of opening a second app that writes the same files.
+- **Version stored files.** Each stored file has a `version` field. Changing its shape adds a migration with a test. If a file's `version` is newer than this build understands (she opened an older build), open it read-only and say so. Never overwrite it.
+- **Style IDs** are created in main from the Font folder, the file's path relative to that folder (Unicode-normalized to NFC and case-folded), and the face index inside it. They are opaque strings to the renderer. Raw paths are not stable: the same file can be spelled differently (NFC vs NFD, letter case), and a moved or renamed file gets a new ID. Collections and Favorites store each Style ID together with a snapshot of its Family and Style names, so a Style that went missing can still be listed as Missing and later re-linked.
+- **Dev and installed builds keep separate data.** In development, point `userData` at its own folder (for example `app.setPath("userData", ...)` with a "Book Dev" folder, before the app is ready). Otherwise `bun run dev` and the installed Book read and write the same Collections.
 - Move to SQLite only if JSON becomes measurably slow or awkward. The rest of the app should not notice: only `main/storage` changes.
 
 ## IPC conventions
@@ -114,8 +140,12 @@ Follow Electron's [security checklist](https://www.electronjs.org/docs/latest/tu
 - `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false` on every window.
 - Preload exposes intended capabilities only. A sandboxed preload can use only a limited set of modules; keep its imports to `electron` and `src/shared`. See [sandbox](https://www.electronjs.org/docs/latest/tutorial/sandbox).
 - Main parses every IPC input with zod, including IDs and paths. Main checks that any path it reads belongs to a known Font file in the Library.
-- Keep the template's Content Security Policy. Load fonts from bytes, not from `file://` URLs.
+- Keep the template's Content Security Policy. Load fonts from bytes, not from `file://` URLs. A custom protocol (`book://`) would also work but needs CSP and privilege changes; keep it as a later option, not v1.
 - The app makes no network requests.
+
+## Export (v0.2)
+
+`webContents.capturePage(rect)` returns an image in device pixels (2x on her Retina display), clips a rectangle larger than the viewport, and throws when the rectangle is partly off-screen (verified). Either clamp the capture to the visible Specimen, or render the Specimen in a hidden window sized to the content and capture that. Report the PNG's real pixel size in the UI.
 
 ## Changes by example
 
