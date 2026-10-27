@@ -12,6 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AddToCollectionPopover,
+  CollectionNote,
   styleRefOf,
   useCollections,
 } from "@/features/collections";
@@ -858,6 +859,16 @@ export function BookApp({
             <section className={styles.listArea} aria-label={title}>
               <header className={styles.listHeader}>
                 <h1 className={styles.listTitle}>{title}</h1>
+                {activeCollection && (
+                  <CollectionNote
+                    collectionName={activeCollection.name}
+                    note={activeCollection.note}
+                    isReadOnly={collections.isReadOnly}
+                    onChange={(note) =>
+                      collections.setCollectionNote(activeCollection.id, note)
+                    }
+                  />
+                )}
                 {view.kind !== "couldnt-read" && (
                   <ClassificationSelect
                     value={filter}

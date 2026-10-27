@@ -1,0 +1,30 @@
+/* Reads as a gray line of text beside the title; a field only on hover and focus. */
+.note {
+  field-sizing: content;
+  min-width: 80px;
+  max-width: 320px;
+  height: var(--control-sm);
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  user-select: text;
+}
+
+.note::placeholder {
+  color: var(--gray-9);
+}
+
+.note:hover:not(:disabled) {
+  background: var(--gray-3);
+}
+
+.note:focus-visible {
+  border-color: var(--focus-ring);
+  outline: none;
+  background: var(--gray-1);
+  color: var(--gray-12);
+}

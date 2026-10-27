@@ -96,7 +96,11 @@ export function CollectionsSection({
                         collection.id === dropTargetId ? "" : undefined
                       }
                       onClick={() => onOpen(collection.id)}
-                      title={collection.name}
+                      title={
+                        collection.note
+                          ? `${collection.name}: ${collection.note}`
+                          : collection.name
+                      }
                     />
                   }
                 >

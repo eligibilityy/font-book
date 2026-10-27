@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { defaultPairing, prefsFileSchema } from "./storage";
+import {
+  collectionsFileSchema,
+  defaultPairing,
+  prefsFileSchema,
+} from "./storage";
 
 describe("prefs.json", () => {
   it("reads a file saved by Book v0.1, before the Pairing existed", () => {
@@ -20,5 +24,26 @@ describe("prefs.json", () => {
 
     expect(prefs.sampleText).toBe("Hamburgefonstiv");
     expect(prefs.pairing).toEqual(defaultPairing);
+  });
+});
+
+describe("collections.json", () => {
+  it("reads a file saved by Book v0.1, before Collection notes existed", () => {
+    const savedByV01 = {
+      version: 1,
+      favorites: [],
+      collections: [
+        {
+          id: "c1",
+          name: "Typography II",
+          styles: [{ styleId: "s1", familyName: "Inter", styleName: "Bold" }],
+        },
+      ],
+    };
+
+    const file = collectionsFileSchema.parse(savedByV01);
+
+    expect(file.collections[0]?.note).toBe("");
+    expect(file.collections[0]?.styles).toHaveLength(1);
   });
 });

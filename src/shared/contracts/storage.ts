@@ -17,6 +17,8 @@ export const collectionSchema = z.object({
   id: z.string().min(1).max(64),
   name: z.string().min(1).max(200),
   styles: z.array(styleRefSchema).max(10_000),
+  /** One line, such as "Typography II, due 12 May, trial fonts". Added in v0.2. */
+  note: z.string().max(200).default(""),
 });
 export type Collection = z.infer<typeof collectionSchema>;
 

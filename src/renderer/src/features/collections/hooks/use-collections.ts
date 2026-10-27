@@ -26,6 +26,7 @@ export interface Collections {
     isIncluded: boolean,
   ) => void;
   removeFromCollection: (collectionId: string, styleId: string) => void;
+  setCollectionNote: (id: string, note: string) => void;
   /** Adds Styles that aren't in the Collection yet, in the order given. */
   addToCollection: (collectionId: string, styles: readonly Style[]) => void;
   isNameTaken: (name: string, exceptId?: string) => boolean;
@@ -99,6 +100,7 @@ export function useCollections(
         id: crypto.randomUUID(),
         name: trimmed,
         styles: [],
+        note: "",
       };
       update((previous) => ({
         ...previous,
@@ -168,6 +170,16 @@ export function useCollections(
     [changeCollection],
   );
 
+  const setCollectionNote = useCallback(
+    (id: string, note: string) => {
+      changeCollection(id, (collection) => ({
+        ...collection,
+        note: note.trim().slice(0, 200),
+      }));
+    },
+    [changeCollection],
+  );
+
   const addToCollection = useCallback(
     (collectionId: string, styles: readonly Style[]) => {
       changeCollection(collectionId, (collection) => {
@@ -194,6 +206,7 @@ export function useCollections(
     setInCollection,
     removeFromCollection,
     addToCollection,
+    setCollectionNote,
     isNameTaken,
   };
 }

@@ -353,6 +353,8 @@ Every slider: arrow keys step 1, Shift+Arrow 10, double-click resets, readout in
 
 **New Collection** (`+` in the sidebar or `Mod+N`; shows the sidebar first if hidden): a `Popover` anchored to `+` with the name field and **Create Collection**. **Rename...** (context menu): the same popover anchored to the row, name preselected, **Rename**. **Delete...**: an `AlertDialog`, title "Delete "Typography II"?", body "Its 12 Styles stay in your Library. Only the Collection is removed.", buttons **Cancel** and **Delete Collection** (danger). Initial focus on Cancel.
 
+**Collection note (v0.2).** Beside the Collection's title in the list header, one line of gray text ("Due 12 May. Trial fonts only for the poster."), up to 200 characters, or the placeholder "Add a note". It becomes a field on click; Enter or leaving the field saves it, Escape puts the saved note back. The sidebar row's tooltip shows it after the name. Saved in `collections.json` as `note`, defaulted, so v0.1 files still load.
+
 **Collection view.** Style rows in the order added. `Mod+Backspace` removes the selected row from the Collection (optimistic, no confirmation: no file is touched). Missing Styles show as described in the list states.
 
 **Persistence errors.** Couldn't save: toast, change undone. Corrupt `collections.json` at launch: a `Dialog` explains that it was set aside, offers **Show in Finder** and **OK**. Newer version (S4): read-only note, and every organize action is disabled with a `Tooltip` saying why.
