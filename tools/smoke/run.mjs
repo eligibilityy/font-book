@@ -159,22 +159,26 @@ try {
     await page.fill('input[aria-label="Search"]', "");
     await page.click('nav[aria-label="Library"] button:has-text("All")');
     await page.waitForSelector('[role="option"]');
-    await page.keyboard.press("Enter");
-    await page.waitForSelector("textarea");
-    await page.click('button:text-is("Pair")');
-    await page.click('[role="menuitem"]:has-text("Use as Heading")');
-    // Escape belongs to the menu until its fade-out ends.
-    await page.waitForSelector('[role="menu"]', { state: "detached" });
-    await page.keyboard.press("Escape");
-    await page.waitForSelector('[role="listbox"]');
+    // H and B put the selected row's Style in the Pairing from the list.
+    await page.keyboard.press("h");
     await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("Enter");
-    await page.waitForSelector("textarea");
-    await page.click('button:text-is("Pair")');
-    await page.click('[role="menuitem"]:has-text("Use as Body")');
+    await page.keyboard.press("b");
     await page.click('nav[aria-label="Library"] button:has-text("Pairing")');
     await page.waitForSelector('section[aria-label="Pairing"]');
+    // Down steps the active role (Heading) to the next Family in the list.
+    await page.keyboard.press("ArrowDown");
+    await page.waitForTimeout(600);
     await shot("11-pairing");
+    await page.click('[aria-label="Body Family"]');
+    await page.keyboard.type("a");
+    await shot("11b-pairing-picker");
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(300);
+    const focused = await page.evaluate(() =>
+      document.activeElement?.getAttribute("aria-label"),
+    );
+    if (focused !== "Pairing")
+      problems.push(`focus after the picker closed: ${focused}`);
   });
 
   await step("waterfall", async () => {

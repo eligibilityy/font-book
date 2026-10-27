@@ -2,13 +2,15 @@ import type { Style } from "@shared/contracts/library";
 import type { Pairing } from "@shared/contracts/storage";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { styleRefOf } from "@/features/collections";
+import type { Family } from "@/features/library";
 import {
   axisLabel,
   defaultAxisValues,
   variationStyle,
 } from "@/features/specimen";
 import { sampleFontFamily } from "@/shared/font-faces/registry";
-import { useStyleFace } from "@/shared/font-faces/use-style-face";
+import { useStyleFace, useWarmFaces } from "@/shared/font-faces/use-style-face";
 import { DURATION, EASE_IN_OUT, EASE_OUT } from "@/shared/motion";
 import controls from "@/shared/ui/controls.module.css";
 import { IconButton } from "@/shared/ui/icon-button";
@@ -20,12 +22,16 @@ import {
 } from "@/shared/ui/icons";
 import { LabeledSlider } from "@/shared/ui/labeled-slider";
 import {
+  assignRole,
   type PairingRole,
   type ResolvedSlot,
   resolveSlot,
   roleLabels,
+  stepCandidate,
+  stepStyle,
   swapRoles,
 } from "../../pairing";
+import { RolePicker } from "../role-picker";
 import styles from "./styles.module.css";
 
 const SUBHEAD = "Notes on a heading and a body set together";
@@ -37,6 +43,16 @@ interface PairingViewProps {
   pairing: Pairing;
   onPairingChange: (change: (pairing: Pairing) => Pairing) => void;
   stylesById: ReadonlyMap<string, Style>;
+  /** Every Family, for the role pickers. */
+  families: readonly Family[];
+  familyOf: (style: Style) => Family | undefined;
+  /**
+   * The list she came from, with its search and filters: what Up and Down
+   * step the active role through.
+   */
+  candidates: readonly Style[];
+  /** Names that list: "41 Families in My Fonts". */
+  candidatesLabel: string;
   sampleText: string;
   paperReversed: boolean;
   onPaperReversedChange: (reversed: boolean) => void;
@@ -52,11 +68,20 @@ interface PairingViewProps {
 /**
  * A heading Style and a body Style on one page, to judge them together:
  * headline and subhead in the heading, a paragraph and caption in the body.
+ *
+ * Pairing is trying things on, so it happens here, not elsewhere: one role is
+ * active, Up and Down step it through the list she came from, Left and Right
+ * through its Family's Styles, and the pickers in the header show a Family
+ * on the page while she arrows over it.
  */
 export function PairingView({
   pairing,
   onPairingChange,
   stylesById,
+  families,
+  familyOf,
+  candidates,
+  candidatesLabel,
   sampleText,
   paperReversed,
   onPaperReversedChange,
@@ -67,8 +92,36 @@ export function PairingView({
   onBack,
   regionRef,
 }: PairingViewProps): React.JSX.Element {
-  const heading = resolveSlot(pairing.heading, stylesById);
-  const body = resolveSlot(pairing.body, stylesById);
+  const [activeRole, setActiveRole] = useState<PairingRole>(() =>
+    pairing.heading.style && !pairing.body.style ? "body" : "heading",
+  );
+  // A Family she is arrowing over in a picker, shown but not yet chosen.
+  const [preview, setPreview] = useState<{
+    role: PairingRole;
+    style: Style;
+  } | null>(null);
+
+  const slotFor = (role: PairingRole): ResolvedSlot =>
+    preview?.role === role
+      ? { status: "ready", style: preview.style, axisValues: {} }
+      : resolveSlot(pairing[role], stylesById);
+  const heading = slotFor("heading");
+  const body = slotFor("body");
+  const active = activeRole === "heading" ? heading : body;
+  const activeStyle = active.status === "ready" ? active.style : null;
+
+  const choose = (role: PairingRole, style: Style): void => {
+    // A new Style starts at its own default Axis values.
+    onPairingChange((previous) =>
+      assignRole(previous, role, styleRefOf(style), {}),
+    );
+  };
+
+  // The neighbours Up and Down would show next, loaded ahead of time.
+  useWarmFaces([
+    stepCandidate(candidates, activeStyle, -1),
+    stepCandidate(candidates, activeStyle, 1),
+  ]);
 
   // Same rule as the Specimen: the page narrows once when the controls open
   // and widens once after they have slid away, never on every frame.
@@ -77,48 +130,105 @@ export function PairingView({
 
   const ink = paperReversed ? "var(--specimen-paper)" : "var(--specimen-ink)";
   const paper = paperReversed ? "var(--specimen-ink)" : "var(--specimen-paper)";
+  const bothEmpty = heading.status === "empty" && body.status === "empty";
+
+  // Each header picker keeps its identity while she chooses Styles, so an
+  // open picker never remounts; Swap trades the identities, so each picker
+  // slides to the other role's place (Motion row "Pairing swap").
+  const [pickerKeys, setPickerKeys] = useState<[string, string]>([
+    "first",
+    "second",
+  ]);
+  const swap = (): void => {
+    onPairingChange(swapRoles);
+    setPickerKeys(([first, second]) => [second, first]);
+  };
 
   return (
     <section
       ref={regionRef}
       className={styles.pairing}
       aria-label="Pairing"
+      aria-description={`Up and Down step the ${roleLabels[activeRole]} through ${candidatesLabel}, Left and Right through its Styles. H and B choose the role, S swaps.`}
       tabIndex={-1}
       onKeyDown={(event) => {
         const target = event.target;
         if (
           !(target instanceof HTMLElement) ||
           !event.currentTarget.contains(target) ||
-          target.matches("input, textarea, [role='slider']") ||
+          // Fields, sliders and the pickers keep their own keys.
+          target.closest(
+            "input, textarea, [role='slider'], [aria-haspopup], [role='combobox']",
+          ) ||
           event.defaultPrevented ||
           event.metaKey ||
           event.ctrlKey ||
           event.altKey
         )
           return;
-        if (event.key === "Escape") {
+        const key = event.key.toLowerCase();
+        if (key === "escape") {
           event.preventDefault();
           onBack();
+        } else if (key === "arrowdown" || key === "arrowup") {
+          event.preventDefault();
+          const next = stepCandidate(
+            candidates,
+            activeStyle,
+            key === "arrowdown" ? 1 : -1,
+          );
+          if (next && next.id !== activeStyle?.id) choose(activeRole, next);
+        } else if (key === "arrowleft" || key === "arrowright") {
+          event.preventDefault();
+          const familyStyles = activeStyle
+            ? familyOf(activeStyle)?.styles
+            : undefined;
+          if (activeStyle && familyStyles)
+            choose(
+              activeRole,
+              stepStyle(
+                familyStyles,
+                activeStyle,
+                key === "arrowright" ? 1 : -1,
+              ),
+            );
+        } else if (key === "h" || key === "b") {
+          event.preventDefault();
+          setActiveRole(key === "h" ? "heading" : "body");
+        } else if (key === "s" && !bothEmpty) {
+          event.preventDefault();
+          swap();
         }
       }}
     >
       <header className={styles.header}>
         <div className={styles.roles}>
-          {/* Keyed by Style, so after Swap each name slides to its new place. */}
           {(["heading", "body"] as const).map((role, index) => {
             const slot = role === "heading" ? heading : body;
             return (
               <motion.div
-                key={slotKey(slot, role)}
+                key={pickerKeys[index]}
                 layout="position"
                 transition={{ duration: DURATION.base, ease: EASE_IN_OUT }}
                 className={styles.roleSlot}
                 style={{ order: index * 2 }}
               >
-                <RoleName
-                  pairingRole={role}
+                <RolePicker
+                  role={role}
                   slot={slot}
+                  isActive={activeRole === role}
+                  onActivate={() => setActiveRole(role)}
+                  families={families}
+                  familyOf={familyOf}
+                  onChoose={(style) => {
+                    setActiveRole(role);
+                    choose(role, style);
+                  }}
+                  onPreview={(style) =>
+                    setPreview(style ? { role, style } : null)
+                  }
                   onOpenSpecimen={onOpenSpecimen}
+                  returnFocusTo={regionRef}
                 />
               </motion.div>
             );
@@ -126,8 +236,8 @@ export function PairingView({
           <span className={styles.swap}>
             <IconButton
               label="Swap Heading and Body"
-              disabled={heading.status === "empty" && body.status === "empty"}
-              onClick={() => onPairingChange(swapRoles)}
+              disabled={bothEmpty}
+              onClick={swap}
             >
               <SwapIcon />
             </IconButton>
@@ -150,7 +260,7 @@ export function PairingView({
           </IconButton>
           <IconButton
             label="Export PNG"
-            disabled={heading.status === "empty" && body.status === "empty"}
+            disabled={bothEmpty}
             onClick={onExport}
           >
             <ExportIcon />
@@ -170,6 +280,8 @@ export function PairingView({
             <RoleText
               pairingRole="heading"
               slot={heading}
+              isActive={activeRole === "heading"}
+              onActivate={() => setActiveRole("heading")}
               lines={[
                 {
                   className: styles.headline,
@@ -188,6 +300,8 @@ export function PairingView({
             <RoleText
               pairingRole="body"
               slot={body}
+              isActive={activeRole === "body"}
+              onActivate={() => setActiveRole("body")}
               lines={[
                 {
                   className: styles.paragraph,
@@ -273,46 +387,30 @@ export function PairingView({
           )}
         </AnimatePresence>
       </div>
-    </section>
-  );
-}
 
-function slotKey(slot: ResolvedSlot, role: PairingRole): string {
-  if (slot.status === "ready") return slot.style.id;
-  if (slot.status === "missing") return slot.ref.styleId;
-  return `empty-${role}`;
-}
-
-/** "Heading" above the Style's name, which opens its Specimen. */
-function RoleName({
-  pairingRole: role,
-  slot,
-  onOpenSpecimen,
-}: {
-  pairingRole: PairingRole;
-  slot: ResolvedSlot;
-  onOpenSpecimen: (style: Style) => void;
-}): React.JSX.Element {
-  return (
-    <>
-      <span className={styles.roleLabel}>{roleLabels[role]}</span>
-      {slot.status === "ready" ? (
-        <button
-          type="button"
-          className={styles.roleName}
-          title={`Open the Specimen of ${slot.style.familyName} ${slot.style.styleName}`}
-          onClick={() => onOpenSpecimen(slot.style)}
-        >
-          {slot.style.familyName} {slot.style.styleName}
-        </button>
-      ) : (
-        <span className={styles.roleEmpty}>
-          {slot.status === "missing"
-            ? `${slot.ref.familyName} ${slot.ref.styleName}, missing`
-            : "Not chosen yet"}
+      {/* The keys, always in view: they are how Pairing is meant to be used. */}
+      <footer className={styles.footer}>
+        <span className={styles.key}>
+          <kbd>↑</kbd>
+          <kbd>↓</kbd>
+          {roleLabels[activeRole]} through {candidatesLabel}
         </span>
-      )}
-    </>
+        <span className={styles.key}>
+          <kbd>←</kbd>
+          <kbd>→</kbd>
+          Styles
+        </span>
+        <span className={styles.key}>
+          <kbd>H</kbd>
+          <kbd>B</kbd>
+          Heading or Body
+        </span>
+        <span className={styles.key}>
+          <kbd>S</kbd>
+          Swap
+        </span>
+      </footer>
+    </section>
   );
 }
 
@@ -323,24 +421,36 @@ interface TextLine {
   lineHeight: number;
 }
 
-/** One role's lines on the page, or why they can't be drawn. */
+/**
+ * One role's lines on the page, or why they can't be drawn. While the next
+ * Style loads, the last one stays, dimmed, so holding Down never blanks the
+ * page. Clicking the text makes its role the active one.
+ */
 function RoleText({
   pairingRole: role,
   slot,
+  isActive,
+  onActivate,
   lines,
 }: {
   pairingRole: PairingRole;
   slot: ResolvedSlot;
+  isActive: boolean;
+  onActivate: () => void;
   lines: TextLine[];
 }): React.JSX.Element {
-  const status = useStyleFace(slot.status === "ready" ? slot.style : null, {
-    priority: true,
-  });
+  const wanted = slot.status === "ready" ? slot : null;
+  const status = useStyleFace(wanted?.style ?? null, { priority: true });
+  const [shown, setShown] = useState<Style | null>(null);
+  if (status === "ready" && wanted && shown?.id !== wanted.style.id)
+    setShown(wanted.style);
+  const shownStatus = useStyleFace(shown, { priority: true });
 
   if (slot.status === "empty") {
     return (
       <p className={styles.message}>
-        Open a Specimen and choose Use as {roleLabels[role]}.
+        Choose a {roleLabels[role]} above, or press{" "}
+        {role === "heading" ? "H" : "B"} on any Style in the Library.
       </p>
     );
   }
@@ -360,13 +470,24 @@ function RoleText({
       </p>
     );
   }
-  if (status !== "ready") {
+  const display =
+    status === "ready" && wanted
+      ? { style: wanted.style, axisValues: wanted.axisValues, isStale: false }
+      : shown && shownStatus === "ready"
+        ? { style: shown, axisValues: {}, isStale: true }
+        : null;
+  if (!display) {
     return <div className={styles.loading} aria-busy="true" />;
   }
 
-  const { style, axisValues } = slot;
+  const { style, axisValues } = display;
   return (
-    <div className={styles.role}>
+    <div
+      className={styles.role}
+      data-active={isActive ? "" : undefined}
+      data-stale={display.isStale ? "" : undefined}
+      onPointerDown={onActivate}
+    >
       {lines.map((line) => (
         <p
           key={line.className}

@@ -159,12 +159,14 @@ export function RowMenuItems({
             onClick={() => onUseAs("heading")}
           >
             <span className={controls.itemLabel}>Use as Heading</span>
+            <span className={controls.itemHint}>H</span>
           </ContextMenu.Item>
           <ContextMenu.Item
             className={controls.item}
             onClick={() => onUseAs("body")}
           >
             <span className={controls.itemLabel}>Use as Body</span>
+            <span className={controls.itemHint}>B</span>
           </ContextMenu.Item>
           <ContextMenu.Separator className={controls.separator} />
           <ContextMenu.Item className={controls.item} onClick={onShowInFolder}>

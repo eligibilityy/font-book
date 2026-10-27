@@ -71,6 +71,8 @@ interface SpecimenViewProps {
   /** Puts this Style in the Pairing, with the Axis values it has here. */
   onUseAs: (role: "heading" | "body", axisValues: AxisValues) => void;
   onOpenPairing: () => void;
+  /** The role this Style holds in the Pairing, if any: the Pair button says so. */
+  pairingRole: "heading" | "body" | null;
   /** Export PNG of the paper as it looks now. */
   onExport: () => void;
   onBack: () => void;
@@ -138,6 +140,12 @@ export function SpecimenView(props: SpecimenViewProps): React.JSX.Element {
         } else if (event.key === "f" || event.key === "F") {
           event.preventDefault();
           props.onToggleFavorite();
+        } else if (event.key.toLowerCase() === "h") {
+          event.preventDefault();
+          props.onUseAs("heading", axisValues);
+        } else if (event.key.toLowerCase() === "b") {
+          event.preventDefault();
+          props.onUseAs("body", axisValues);
         }
       }}
     >
@@ -242,6 +250,7 @@ function SpecimenHeader({
   onAxisValuesChange,
   onUseAs,
   onOpenPairing,
+  pairingRole,
   onExport,
   sampleText,
   onSampleTextChange,
@@ -265,6 +274,7 @@ function SpecimenHeader({
         />
         <div className={styles.actions}>
           <PairMenu
+            role={pairingRole}
             onUseAs={(role) => onUseAs(role, axisValues)}
             onOpenPairing={onOpenPairing}
           />
@@ -551,16 +561,26 @@ function PresetsMenu({
 
 /** "Pair": put this Style in the Pairing as its heading or its body. */
 function PairMenu({
+  role,
   onUseAs,
   onOpenPairing,
 }: {
+  role: "heading" | "body" | null;
   onUseAs: (role: "heading" | "body") => void;
   onOpenPairing: () => void;
 }): React.JSX.Element {
   return (
     <Menu.Root>
-      <Menu.Trigger className={controls.textButton}>
-        Pair
+      {/* Says where this Style already is: "Heading" rather than "Pair". */}
+      <Menu.Trigger
+        className={controls.textButton}
+        aria-label={
+          role
+            ? `Pair: the ${role === "heading" ? "Heading" : "Body"} in the Pairing`
+            : "Pair"
+        }
+      >
+        {role === "heading" ? "Heading" : role === "body" ? "Body" : "Pair"}
         <ChevronDownIcon />
       </Menu.Trigger>
       <Menu.Portal>
@@ -575,12 +595,14 @@ function PairMenu({
               onClick={() => onUseAs("heading")}
             >
               <span className={controls.itemLabel}>Use as Heading</span>
+              <span className={controls.itemHint}>H</span>
             </Menu.Item>
             <Menu.Item
               className={controls.item}
               onClick={() => onUseAs("body")}
             >
               <span className={controls.itemLabel}>Use as Body</span>
+              <span className={controls.itemHint}>B</span>
             </Menu.Item>
             <Menu.Separator className={controls.separator} />
             <Menu.Item className={controls.item} onClick={onOpenPairing}>

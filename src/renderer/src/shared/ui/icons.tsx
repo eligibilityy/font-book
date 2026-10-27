@@ -122,6 +122,15 @@ export function SearchIcon({ className }: IconProps): React.JSX.Element {
   );
 }
 
+/** An arrow leaving a corner: open this somewhere fuller (a Specimen). */
+export function OpenIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <path d="M6.5 3.5h-2a1.5 1.5 0 0 0-1.5 1.5v6.5A1.5 1.5 0 0 0 4.5 13H11a1.5 1.5 0 0 0 1.5-1.5v-2M9 3h4v4M13 3L7.5 8.5" />
+    </Icon>
+  );
+}
+
 /** An arrow out of a tray: Export PNG. */
 export function ExportIcon({ className }: IconProps): React.JSX.Element {
   return (

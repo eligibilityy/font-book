@@ -361,18 +361,25 @@ Every slider: arrow keys step 1, Shift+Arrow 10, double-click resets, readout in
 
 ### 8.6 Pairing (v0.2)
 
-Built in v0.2 (2026-10-28). The third view: the sidebar's Pairing item under Favorites, or Go > Pairing (Mod+5).
+Built in v0.2 (2026-10-28), then reworked the same day: the first version made her leave the Pairing to change either Style, which is the thing Pairing is for. The third view: the sidebar's Pairing item under Favorites, or Go > Pairing (Mod+5).
 
-**Purpose.** Job 3: a heading Style and a body Style on one page.
+**Purpose.** Job 3: a heading Style and a body Style on one page, and trying alternatives quickly.
 
-- Choosing Styles: the Specimen header gets a `Menu` button "Pair" with Use as Heading, Use as Body, Open Pairing. The Style arrives with the Axis values it has in the Specimen. A row's context menu and the Style menu also have Use as Heading and Use as Body (on a Family row, the Style Quick preview shows, else the Representative Style). No new picker UI to build. Feedback: the sidebar's Pairing row tints and fades (Motion row "Collection add feedback") and the live region says "Inter Bold is the Heading in the Pairing".
-- Layout on paper and ink, measure about 60 characters: headline (heading Style, 48px, the shared Sample text), subhead (heading Style, half the headline size), paragraph (body Style, 16px, line height 1.5, a fixed passage the developer writes), caption (body Style, three quarters of the body size).
-- Adjust each role in the inspector (the same toggle as the Specimen's): Size and Line height per role, plus a slider for each Axis except `opsz`, which follows each line's size. Sizes and line heights belong to the role; Axis values travel with the Style.
-- Saved in `prefs.json` as `pairing` (Style references with saved names, so a Missing Style keeps its name).
-- Opening a role's Specimen from the header makes Back return to the Pairing.
-- Header: "Heading: Inter Bold" and "Body: Source Serif Regular", each a link-styled button that opens that Specimen, and a **Swap** button. Motion row "Pairing swap" for the labels; the type swaps instantly.
-- Empty slot: "Open a Specimen and choose Use as Heading." Missing or unpreviewable Style: that role shows the Specimen's message in its place; the other role still renders.
-- `font-synthesis: none` matters most here: a Regular-only heading must never be faked bold.
+**Getting Styles in.**
+- **H** and **B** on any Style she can see: the selected row (on a Family row, the Style Quick preview shows, else the Representative Style), Quick preview, or the Specimen (with its Axis values). Also in the row's context menu, the Style menu, and the Specimen's Pair menu, which reads "Heading" or "Body" when its Style already holds that role. Feedback: the sidebar's Pairing row tints and fades, and the live region says "Inter Bold is the Heading in the Pairing".
+- In the Pairing header, each role has a **Family picker** (a Base UI `Combobox` with its search field inside the popup, 80 rows at a time, typing narrows) and, for Families with more than one Style, a **Style** `Select`. Arrowing over a Family shows it on the page at once; Enter or a click chooses it; Escape puts the page back. A small button opens that Style's Specimen; Back returns to the Pairing.
+- An empty role says "Choose a Heading above, or press H on any Style in the Library."
+
+**Trying alternatives.** One role is active: a soft tile around its picker and a thin mark in the paper's margin beside its text (never in an Export). Click a role's picker or its text, or press H or B, to make it active.
+- **Up / Down**: the active role steps to the previous or next Family in the list she came from, with its search and filters ("Body through 41 Families in My Fonts"); on Favorites and Collections, the next Style. Stops at the ends.
+- **Left / Right**: the previous or next Style in that Family, wrapping.
+- **S**: Swap.
+- The neighbours Up and Down would show are loaded ahead, and while the next Style loads the last one stays, dimmed, so holding Down never blanks the page.
+- A footer under the paper lists the keys, like Quick preview's. When a picker closes, focus returns to the page so the keys work at once.
+
+**Layout** on paper and ink, measure about 60 characters: headline (heading Style, 48px, the shared Sample text), subhead (heading Style, half the headline size), paragraph (body Style, 16px, line height 1.5, a fixed passage), caption (body Style, three quarters of the body size). The inspector (the same toggle as the Specimen's) sets Size and Line height per role, plus a slider for each Axis except `opsz`, which follows each line's size. Sizes and line heights belong to the role; Axis values travel with the Style.
+
+**Swap** trades the Styles; each header picker slides to the other's place (Motion row "Pairing swap"); the type swaps instantly. Saved in `prefs.json` as `pairing` (Style references with saved names, so a Missing Style keeps its name and its role shows the Specimen's message). `font-synthesis: none` matters most here: a Regular-only heading must never be faked bold.
 
 ### 8.7 Menus
 

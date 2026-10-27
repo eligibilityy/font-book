@@ -1,0 +1,123 @@
+/* One role: its label above its pickers. The active one carries a soft tile. */
+.role {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 var(--border-width) transparent;
+}
+
+.role[data-active] {
+  background: var(--gray-2);
+  box-shadow: inset 0 0 0 var(--border-width) var(--gray-5);
+}
+
+.label {
+  padding-left: var(--space-1);
+  color: var(--gray-10);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.role[data-active] .label {
+  color: var(--accent-11);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.familyTrigger,
+.styleTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  height: 24px;
+  padding: 0 var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  white-space: nowrap;
+  -webkit-app-region: no-drag;
+}
+
+.familyTrigger {
+  max-width: 220px;
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+}
+
+.familyTrigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.styleTrigger {
+  max-width: 160px;
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+}
+
+.familyTrigger svg,
+.styleTrigger svg {
+  flex-shrink: 0;
+  color: var(--gray-10);
+}
+
+.familyTrigger:hover,
+.styleTrigger:hover,
+.familyTrigger[data-popup-open],
+.styleTrigger[data-popup-open] {
+  background: var(--gray-4);
+}
+
+.placeholder {
+  color: var(--accent-11);
+}
+
+.openButton {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-10);
+}
+
+.openButton:hover {
+  background: var(--gray-4);
+  color: var(--gray-12);
+}
+
+/* ---------- The Family picker's popup ---------- */
+
+.pickerPopup {
+  display: grid;
+  width: 280px;
+  padding: var(--space-1);
+}
+
+.pickerInput {
+  width: 100%;
+  margin-bottom: var(--space-1);
+}
+
+.pickerList {
+  max-height: min(360px, calc(var(--available-height) - 48px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.pickerEmpty:not(:empty) {
+  padding: var(--space-2);
+  color: var(--gray-10);
+  font-size: var(--text-sm);
+}

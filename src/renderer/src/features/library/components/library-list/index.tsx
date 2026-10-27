@@ -28,6 +28,8 @@ interface LibraryListProps {
   /** Left and Right while Quick preview shows a Family: step through its Styles. */
   onStepQuickPreview: (delta: number) => void;
   onToggleFavorite: () => void;
+  /** H and B: the selected row's Style (or Quick preview's) into the Pairing. */
+  onUseAs: (role: "heading" | "body") => void;
   /** Menu items for the selected row, shown on right-click. */
   contextMenuItems: React.ReactNode;
   /** Where the list was scrolled the last time this view was open. */
@@ -54,6 +56,7 @@ export function LibraryList({
   onFocusLeave,
   onStepQuickPreview,
   onToggleFavorite,
+  onUseAs,
   contextMenuItems,
   initialScrollOffset,
   onScrollOffsetChange,
@@ -139,6 +142,13 @@ export function LibraryList({
       case "F":
         event.preventDefault();
         onToggleFavorite();
+        return;
+      case "h":
+      case "H":
+      case "b":
+      case "B":
+        event.preventDefault();
+        onUseAs(event.key.toLowerCase() === "h" ? "heading" : "body");
         return;
     }
   };

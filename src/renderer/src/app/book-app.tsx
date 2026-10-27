@@ -241,6 +241,17 @@ export function BookApp({
   );
   const { rows } = built;
 
+  // Every Family, by name, for the Pairing's pickers; and the list she is
+  // in, with its search and filters, for stepping a Pairing role through.
+  const allFamilies = useMemo(
+    () => [...familiesByKey.values()],
+    [familiesByKey],
+  );
+  const pairingCandidates = useMemo(
+    () => rows.flatMap((row) => rowStyle(row) ?? []),
+    [rows],
+  );
+
   const savedKey = selectedKeys[key];
   const foundIndex =
     savedKey === undefined ? -1 : rows.findIndex((row) => row.key === savedKey);
@@ -803,6 +814,13 @@ export function BookApp({
                 putInPairing(role, specimenStyle, axisValues)
               }
               onOpenPairing={openPairing}
+              pairingRole={
+                prefs.data.pairing.heading.style?.styleId === specimenStyle.id
+                  ? "heading"
+                  : prefs.data.pairing.body.style?.styleId === specimenStyle.id
+                    ? "body"
+                    : null
+              }
               onExport={() => void exportCurrent()}
               onBack={goBack}
               regionRef={specimenRef}
@@ -817,6 +835,16 @@ export function BookApp({
                 }))
               }
               stylesById={stylesById}
+              families={allFamilies}
+              familyOf={(style) =>
+                familiesByKey.get(familyKey(style.familyName))
+              }
+              candidates={pairingCandidates}
+              candidatesLabel={`${countOf(
+                pairingCandidates.length,
+                showsFamilies(view) ? "Family" : "Style",
+                showsFamilies(view) ? "Families" : "Styles",
+              )} in ${title}`}
               sampleText={prefs.data.sampleText}
               paperReversed={settings.paperReversed}
               onPaperReversedChange={(paperReversed) =>
@@ -979,6 +1007,10 @@ export function BookApp({
                     onFocusLeave={closeQuickPreview}
                     onStepQuickPreview={stepQuickPreview}
                     onToggleFavorite={toggleFavorite}
+                    onUseAs={(role) => {
+                      if (quickPreviewStyle)
+                        putInPairing(role, quickPreviewStyle, {});
+                    }}
                     initialScrollOffset={scrollOffsets.current[key] ?? 0}
                     onScrollOffsetChange={(offset) => {
                       scrollOffsets.current[key] = offset;

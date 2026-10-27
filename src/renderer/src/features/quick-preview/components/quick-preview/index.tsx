@@ -248,6 +248,13 @@ function QuickPreviewContent({
               <span className={styles.keyLabel}>Favorite</span>
             </>
           )}
+          {style && (
+            <>
+              <kbd>H</kbd>
+              <kbd>B</kbd>
+              <span className={styles.keyLabel}>Pair</span>
+            </>
+          )}
           <kbd>Space</kbd>
           <span className={styles.keyLabel}>Close</span>
         </span>

@@ -1,6 +1,6 @@
 .pairing {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   height: 100%;
   outline: none;
 }
@@ -10,58 +10,26 @@
   align-items: center;
   gap: var(--space-3);
   min-height: 64px;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   border-bottom: var(--border-width) solid var(--border-subtle);
 }
 
 .roles {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-1);
   min-width: 0;
 }
 
 .roleSlot {
   display: grid;
   min-width: 0;
-  max-width: 280px;
+  max-width: 380px;
 }
 
 /* Between the two roles, whichever order they are in. */
 .swap {
   order: 1;
-}
-
-.roleLabel {
-  color: var(--gray-10);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-}
-
-.roleName,
-.roleEmpty {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--text-md);
-}
-
-.roleName {
-  padding: 0;
-  border: none;
-  background: none;
-  font-weight: var(--weight-medium);
-  text-align: left;
-}
-
-.roleName:hover {
-  color: var(--accent-11);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.roleEmpty {
-  color: var(--gray-10);
 }
 
 .actions {
@@ -93,9 +61,40 @@
   max-width: 760px;
 }
 
+/*
+ * A role's lines. The active one, which the arrow keys change, gets a thin
+ * mark in the margin: on the paper, so it is near the type, but never in an
+ * Export.
+ */
 .role {
+  position: relative;
   display: grid;
   gap: var(--space-3);
+}
+
+.role::before {
+  position: absolute;
+  top: 0.15em;
+  bottom: 0.15em;
+  left: calc(-1 * var(--space-5));
+  width: 2px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  opacity: 0;
+  content: "";
+}
+
+.role[data-active]::before {
+  opacity: 0.25;
+}
+
+[data-exporting] .role::before {
+  display: none;
+}
+
+/* The last Style stays up while the next loads; it never blinks to empty. */
+.role[data-stale] {
+  opacity: 0.55;
 }
 
 /* Only the type renders in the Styles, and never with faked bold or italic. */
@@ -128,6 +127,37 @@
 /* Reserves space while a Style loads, so the page doesn't jump. */
 .loading {
   min-height: 96px;
+}
+
+/* The Pairing's keys, in the chrome below the paper, like Quick preview's footer. */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border-top: var(--border-width) solid var(--border-subtle);
+  color: var(--gray-10);
+  font-size: var(--text-sm);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.key kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: var(--border-width) solid var(--gray-6);
+  border-radius: 5px;
+  background: var(--gray-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
 }
 
 /* ---------- Inspector: the same panel as the Specimen's ---------- */
