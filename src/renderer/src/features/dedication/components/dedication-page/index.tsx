@@ -1,4 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
+import { useRef } from "react";
 import { dedication } from "../../words";
 import styles from "./styles.module.css";
 
@@ -20,6 +21,7 @@ export function DedicationPage({
   version,
   onClose,
 }: DedicationPageProps): React.JSX.Element {
+  const pageRef = useRef<HTMLDivElement | null>(null);
   return (
     <Dialog.Root
       open={open}
@@ -33,7 +35,11 @@ export function DedicationPage({
           data-first-time={isFirstTime ? "" : undefined}
         />
         <Dialog.Popup
+          ref={pageRef}
           className={styles.page}
+          // Focus the page itself, so Close doesn't open wearing a focus ring;
+          // Tab still reaches it, and Escape closes.
+          initialFocus={pageRef}
           data-first-time={isFirstTime ? "" : undefined}
         >
           <p className={`${styles.line} ${styles.book}`}>Book</p>
