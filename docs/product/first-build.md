@@ -50,6 +50,8 @@ Settled on 2026-10-27:
 
 ## Build order
 
+Status, 2026-10-27: milestones 4 to 9 are built (v0.1). Every item below is in the code; what is left is checking it on her Mac (next section).
+
 The roadmap's milestones, with what v0.1 adds to each. "Done when" is the UI part; the roadmap has the learning part.
 
 | Milestone | Build | Edge cases to handle | Done when |

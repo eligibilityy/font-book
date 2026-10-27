@@ -25,13 +25,15 @@ src/
 │   ├── menu.ts             # The application menu; its accelerators are Book's shortcuts
 │   ├── ipc/                # One file per domain; each handler parses input, calls an operation
 │   ├── library/            # Font folders per platform, Scan, parse Font files, Import
-│   ├── storage/            # Read/parse/write JSON files in userData
+│   ├── storage/            # json-file.ts (write queue, .bak, set-aside) and stores.ts (every file)
 │   └── export/             # Capture a Specimen region and write a PNG
 ├── preload/
 │   ├── index.ts            # contextBridge.exposeInMainWorld("fontBook", ...)
 │   └── index.d.ts          # Declares window.fontBook for the renderer's type checker
 ├── shared/
-│   └── contracts/          # One file per domain: channel names, zod schemas, z.infer types
+│   ├── classification.ts   # The Classification guess (pure, tested)
+│   └── contracts/          # channels.ts (every IPC channel name, no imports), then one file
+│                           # per domain: zod schemas, z.infer types, the FontBookApi
 └── renderer/src/
     ├── app/                # App shell, layout, feature composition
     ├── features/           # library, specimen, collections, favorites, pairing, glyphs, ...
@@ -39,7 +41,7 @@ src/
     │       ├── index.ts    # Public entry: the only file other features import
     │       ├── components/ hooks/ state/ operations/
     │       └── *.test.ts(x)
-    └── shared/             # Reusable UI primitives, the fontBook client, theme tokens
+    └── shared/             # Tokens, controls, the FontFace registry (font-faces/), use-saved-file
 ```
 
 The renderer imports `src/shared` as `@shared/...` (an alias in `tsconfig.web.json` and `electron.vite.config.ts`); main and preload use relative paths.
@@ -105,7 +107,8 @@ The app reads Font folders and never writes into them. Everything it writes live
 ├── library-index.json    # Cache of parsed Style metadata, keyed by Font file path + size + modified time, plus a parser version
 ├── collections.json      # Collections and Favorites (lists of styleIds)
 ├── classifications.json  # Classifications she set by hand, keyed by Family
-├── prefs.json            # Sample text, Specimen defaults, window size, theme
+├── prefs.json            # Sample text, Specimen size, line height, tracking, paper and ink, panels
+├── app-state.json        # Main's own: window size and position, theme
 └── imported-fonts/       # Copies of imported Font files
 ```
 
@@ -127,6 +130,7 @@ Read Electron's [IPC tutorial](https://www.electronjs.org/docs/latest/tutorial/i
 
 Start with **one handler per operation**:
 
+- Channel names live in `src/shared/contracts/channels.ts`, a file with no imports. The sandboxed preload can only `require("electron")` at runtime, and every other contract file imports zod, so preload imports channel names from `channels.ts` and everything else with `import type`. Two dependency-cruiser rules enforce this; breaking it makes the window open without `window.fontBook`.
 - Each operation has a channel named `domain:operation-name` in kebab-case: `library:list-styles`, `library:read-style-bytes`, `collections:add-style`, `export:save-specimen-png`.
 - Its contract lives in `src/shared/contracts/<domain>.ts`: the channel name, an input schema, an output schema, and types derived with `z.infer`.
 - Main registers it with `ipcMain.handle(channel, handler)`. The handler parses the input with the schema (`schema.parse` or `safeParse`), calls a plain operation function, and returns a serializable result.
@@ -181,4 +185,4 @@ Pass the operation what it needs: a folder path, a storage object, a clock. Prod
 
 ## Verification
 
-`bun run check` runs the required local checks and offline tests. `bun run build` verifies the production bundle. `bun run build:mac` and `bun run build:win` package installers; the macOS arm64 build runs in GitHub Actions. Document changes to ownership, IPC conventions, or stored files in this file in the same pull request.
+`bun run check` runs the required local checks and offline tests. `bun run smoke` builds the app, opens it with Playwright against a throwaway data folder, walks the main flows with the keyboard (list, Quick preview, Specimen, Inspector, Favorites, a Collection, Axes, the Classification filter), and saves a screenshot of each step to `out/smoke`. Set `BOOK_EXECUTABLE` to run it against a packaged build (`dist/win-unpacked/book.exe` after `bun run build:unpack`). `bun run build` verifies the production bundle. `bun run build:mac` and `bun run build:win` package installers; the macOS arm64 build runs in GitHub Actions. Document changes to ownership, IPC conventions, or stored files in this file in the same pull request.

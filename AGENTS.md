@@ -25,7 +25,7 @@ This is a learning project. Since milestone 4 (2026-10-27) AI tools write the ap
 The user runs the app. The dev server is user-owned.
 
 - Do not run `bun run dev`, `vitest` in watch mode, or any other long-running or watch command.
-- Use finite checks: `bun run check` (lint, typecheck, dependency boundaries, knip, tests), or one of `bun run lint`, `bun run typecheck`, `bun run test`, `bun run deps:check`, `bun run knip`, `bun run build`.
+- Use finite checks: `bun run check` (lint, typecheck, dependency boundaries, knip, tests), or one of `bun run lint`, `bun run typecheck`, `bun run test`, `bun run deps:check`, `bun run knip`, `bun run build`. `bun run smoke` is finite too: it opens a Book window for about half a minute, with its own throwaway data, and closes it. Look at its screenshots in `out/smoke` after UI changes.
 - If behavior must be seen in the running app, tell the user what to click and what to look for.
 
 Preserve unrelated working changes. Do not revert, reformat, or "tidy" files outside the task. Do not run `bun run format` across the repository unless asked.
