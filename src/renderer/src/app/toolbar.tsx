@@ -5,6 +5,7 @@ import {
   CloseIcon,
   SearchIcon,
   SidebarIcon,
+  TextIcon,
 } from "@/shared/ui/icons";
 import styles from "./styles.module.css";
 
@@ -95,24 +96,28 @@ export function Toolbar({
           </button>
         )}
       </div>
-      <input
-        className={`${controls.field} ${styles.sampleField}`}
-        value={sampleText}
-        maxLength={300}
-        placeholder="Type your own Sample text"
-        aria-label="Sample text"
-        dir="auto"
-        spellCheck={false}
-        onChange={(event) =>
-          onSampleTextChange(event.target.value.replace(/\s*\n\s*/g, " "))
-        }
-        onKeyDown={(event) => {
-          if (event.key === "Escape" || event.key === "Enter") {
-            event.preventDefault();
-            onSearchExit();
+      <div className={styles.sampleField}>
+        <TextIcon className={styles.searchIcon} />
+        <input
+          className={controls.field}
+          value={sampleText}
+          maxLength={300}
+          placeholder="Type your own Sample text"
+          aria-label="Sample text"
+          title="Sample text, shown in Quick preview and the Specimen"
+          dir="auto"
+          spellCheck={false}
+          onChange={(event) =>
+            onSampleTextChange(event.target.value.replace(/\s*\n\s*/g, " "))
           }
-        }}
-      />
+          onKeyDown={(event) => {
+            if (event.key === "Escape" || event.key === "Enter") {
+              event.preventDefault();
+              onSearchExit();
+            }
+          }}
+        />
+      </div>
     </header>
   );
 }

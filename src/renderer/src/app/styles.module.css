@@ -125,16 +125,24 @@
 
 /* The Sample text field reads as what it is: a line of type, not a form field. */
 .sampleField {
+  position: relative;
+  display: flex;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.sampleField input {
   width: min(380px, 32vw);
+  padding-left: 30px;
   border-color: transparent;
   background: var(--gray-3);
 }
 
-.sampleField:hover {
+.sampleField input:hover {
   background: var(--gray-4);
 }
 
-.sampleField:focus-visible {
+.sampleField input:focus-visible {
   background: var(--gray-1);
 }
 

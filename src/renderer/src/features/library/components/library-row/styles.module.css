@@ -23,20 +23,35 @@
   content: "";
 }
 
-.row[aria-selected="true"] {
+/*
+ * Hover and selection are a rounded tile inset from the row's edges
+ * rather than a band across the whole list: quieter, and
+ * the type stays the loudest thing on screen.
+ */
+.row::before {
+  position: absolute;
+  inset: 2px var(--space-2);
+  z-index: -1;
+  border-radius: var(--radius-md);
+  content: "";
+}
+
+.row[aria-selected="true"]::before {
   background: var(--selection-unfocused);
 }
 
-[role="listbox"]:focus .row[aria-selected="true"] {
+[role="listbox"]:focus .row[aria-selected="true"]::before {
   background: var(--selection);
 }
 
-.row[aria-selected="true"]::after {
+/* The selected tile replaces the hairlines on either side of it. */
+.row[aria-selected="true"]::after,
+.row:has(+ .row[aria-selected="true"])::after {
   opacity: 0;
 }
 
 @media (hover: hover) {
-  .row:hover:not([aria-selected="true"]) {
+  .row:hover:not([aria-selected="true"])::before {
     background: var(--gray-2);
   }
 }

@@ -171,7 +171,7 @@ The two-view layout fits at the minimum size: Specimen view needs 200 + 400 + 27
 - Line 1: Sample text in the row's Style at `--row-sample-size`, numeric `line-height: 40px`, one line, `overflow: hidden`, a right-edge fade (`mask-image` gradient) instead of an ellipsis. Font stack: the generated family name (`book-style-<id>`, R2), then the bundled notdef font. Always `font-synthesis: none`, `font-weight: normal`, `font-style: normal` (R3).
 - Line 2, UI font: Family name (`--gray-12`, medium), then on Family rows "18 Styles" or "1 Style", plus ", Variable" when any Style has Axes; on Style rows the Style name ("Bold Italic"). Right: star indicator if a Favorite is in it.
 - Padding 12px 16px; hairline bottom border; fixed height, nothing in a row can change its height (R6).
-- Selected: `--accent-a4` background. List focused by keyboard: a `--focus-ring` outline on the selected row. Hover: `--gray-3`, pointer only.
+- Selected: a rounded tile inset 8px from the row edges (`--selection` while the list has focus, gray otherwise), hiding the hairlines beside it. Hover: the same tile in `--gray-2`, pointer only. (Changed 2026-10-28: the full-width band read as heavy in dark mode.)
 
 ### Lazy loading
 

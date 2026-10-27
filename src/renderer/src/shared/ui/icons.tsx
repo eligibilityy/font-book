@@ -122,6 +122,15 @@ export function SearchIcon({ className }: IconProps): React.JSX.Element {
   );
 }
 
+/** A capital T: the Sample text field. */
+export function TextIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <path d="M3.5 4.5V3h9v1.5M8 3v10M6 13h4" />
+    </Icon>
+  );
+}
+
 export function CloseIcon({ className }: IconProps): React.JSX.Element {
   return (
     <Icon className={className}>

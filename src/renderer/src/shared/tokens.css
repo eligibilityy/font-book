@@ -136,7 +136,7 @@
     --accent-9: #5472e4;
     --accent-11: #9eb1ff;
     --accent-a4: rgb(84 114 228 / 0.22);
-    --selection: rgb(84 114 228 / 0.28);
+    --selection: rgb(84 114 228 / 0.2);
     --selection-unfocused: var(--gray-4);
     --focus-ring: #5472e4;
     --danger: #ff6369;
