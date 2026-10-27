@@ -70,7 +70,7 @@ New tokens (add beside the [existing ones](../design-principles.md#tokens-to-def
 | `--sidebar-width` | 200px | Fixed in v0.1 |
 | `--list-header-height` | 32px | Title and counts above the rows |
 | `--row-height` | 80px | Fixed Library row (replaces the 56px example) |
-| `--row-sample-size` | 32px | Sample text size in rows (row size slider is v0.2) |
+| `--row-sample-size` | 32px | Sample text size in rows (row size slider is v0.3) |
 | `--inspector-width` | 272px | Specimen inspector |
 | `--specimen-min-width` | 400px | Text column never narrower |
 | `--quick-preview-size` | 80px | Sample text size in Quick preview |
@@ -268,7 +268,7 @@ Specs: [OS/2 table](https://learn.microsoft.com/en-us/typography/opentype/spec/o
 | Loading | Nothing for 150ms (avoids a flash), then "Loading Inter Bold..." in the UI font where the text will be. Never Sample text in a fallback font (R1). |
 | Loaded | Sample text in the Style. Switching Styles is instant; a late load for an older Style is ignored (R7). |
 | Can't be previewed (F3, E-2) | In place of the text: the Family and Style name in the UI font, "This Style can't be previewed. The Font file may be damaged, or use a format Book can't draw." and **Show in Finder**. About this Style still works. |
-| Missing Glyphs (R1) | Empty boxes for characters the Style lacks. The text line that lists them ("2 characters aren't in this Style: e n") is the v0.2 Missing Glyph hint. |
+| Missing Glyphs (R1) | Empty boxes for characters the Style lacks. The text line that lists them ("2 characters aren't in this Style: e n") is the v0.3 Missing Glyph hint. |
 | Missing Style | "This Style's Font file is no longer in your Font folders. It may have been moved or removed." **Remove from Collection** when opened from a Collection. |
 | `.ttc` Style (F1) | Renders like any other: main sends the one face's bytes. If extraction fails, the "can't be previewed" state. |
 | Variable Style (F8) | One Style; Axes in the inspector; Named instances in the picker. Default view uses the Style's default Axis values. |
@@ -380,7 +380,7 @@ Items that don't apply are disabled, not hidden (Favorite on a Family row, Inspe
 
 ### 8.8 Settings in v0.1
 
-No Settings window (v0.2, `Mod+,`). Theme lives in View > Theme (System by default; main sets `nativeTheme.themeSource`, the renderer sets `data-theme`). Remembered in `prefs.json`: window bounds, Library filter, Sample text, Specimen size, line height, tracking, paper and ink, inspector and sidebar visibility, Pairing Styles, the first-Collection flag, the first-launch hint flag.
+No Settings window (v0.3, `Mod+,`). Theme lives in View > Theme (System by default; main sets `nativeTheme.themeSource`, the renderer sets `data-theme`). Remembered in `prefs.json`: window bounds, Library filter, Sample text, Specimen size, line height, tracking, paper and ink, inspector and sidebar visibility, Pairing Styles, the first-Collection flag, the first-launch hint flag.
 
 ### 8.9 First launch and About
 
@@ -489,6 +489,8 @@ Title Case for buttons and menu items; sentence case for messages. Book never sa
 
 ### Room left for v0.2
 
+Pairing, PNG Export and Import are v0.2; the rest of this list moved to v0.3 on 2026-10-28 (see [features: v0.2 scope](features.md#v02-scope)).
+
 - **Pairing**: a third view, a sidebar item under Favorites, and Go > Pairing (Mod+5). The full spec is in [8.6](#86-pairing-v02).
 - **OpenType features**: a fourth inspector section between Axes and About this Style, with a count in the header ("4 OpenType features").
 - **Glyph grid**: a Base UI `Tabs` control (Specimen, Glyphs) in Specimen header row 2.
@@ -525,7 +527,7 @@ Title Case for buttons and menu items; sentence case for messages. Book never sa
 ## 14. Contradictions and risks found
 
 1. **The template blocks Book's shortcuts in packaged builds.** `src/main/index.ts` calls `optimizer.watchWindowShortcuts`, which in production calls `preventDefault` on Mod+R, Cmd+Alt+I, Ctrl+Shift+I and Mod+Minus. In Electron, that also stops menu accelerators, so Scan Again, Show Inspector and Smaller would silently do nothing on her Mac while working in dev. Replace it in milestone 4 with a small dev-only F12 handler.
-2. **Silent fallback is a v0.1 blocker (R1) but the Missing Glyph hint is v0.2 (features).** The notdef font resolves it for v0.1. It needs one experiment in milestone 6: bundle Adobe NotDef (SIL OFL 1.1, a cmap format 13 font that maps every code point to `.notdef`) as a local file, confirm Chromium's sanitizer accepts it, and confirm emoji in a Comic Sans Specimen now draw as boxes (E19). Inferred, not yet tested.
+2. **Silent fallback is a v0.1 blocker (R1) but the Missing Glyph hint is v0.3 (features).** The notdef font resolves it for v0.1. It needs one experiment in milestone 6: bundle Adobe NotDef (SIL OFL 1.1, a cmap format 13 font that maps every code point to `.notdef`) as a local file, confirm Chromium's sanitizer accepts it, and confirm emoji in a Comic Sans Specimen now draw as boxes (E19). Inferred, not yet tested.
 3. **Design principles section 8 copy** offers Import and "Remove from Library", neither of which v0.1 can do (amendment 2).
 4. **"Library sources"** (the brief) collides with CONTEXT.md, which avoids "source"; this spec uses Library filter.
 5. **"My Fonts"** comes from features.md and Apple Font Book but uses "Fonts" for a set of Styles, which CONTEXT.md avoids. Kept because she knows the label; listed for a decision.

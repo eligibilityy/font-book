@@ -24,7 +24,7 @@ A calm, fast way to answer "which of my fonts is right for this?":
 - She keeps what she likes in Favorites and Collections, one per project.
 - Nothing ever lies: no faked bold, no other font silently standing in for missing characters, no wrong face from a `.ttc`.
 
-Not in v0.1: Pairing (the first thing in v0.2), Import, PNG Export, OpenType feature toggles, Glyph grid, the other facet filters, Settings window, Activate. Their place in the layout is already reserved ([ui-spec, room left for v0.2](ui-spec.md#room-left-for-v02)).
+Not in v0.1: Pairing (the first thing in v0.2), Import, PNG Export, OpenType feature toggles, Glyph grid, the other facet filters, Settings window, Activate. Their place in the layout is already reserved ([ui-spec, room left for v0.2](ui-spec.md#room-left-for-v02)). What v0.2 and v0.3 hold is in [features: v0.2 scope](features.md#v02-scope).
 
 ## Decisions made
 

@@ -2,7 +2,7 @@
 
 What Book should do, in what order. This sets the product scope. The [roadmap](../roadmap.md) sets the learning order, and the [design principles](../design-principles.md) set how each feature should feel. Terms in **bold** or capitals (Style, Family, Specimen, and so on) are defined in [CONTEXT.md](../../CONTEXT.md).
 
-Priorities: **v0.1** is the first build she uses every day. **v0.2** is the next release. **Later** is worth doing someday. **Won't do** has a reason. Effort is for a learner working evenings: **S** about one evening, **M** a few evenings, **L** a week or more.
+Priorities: **v0.1** is the first build she uses every day. **v0.2** is the next release: Pairing, Import, PNG Export and small Specimen and list improvements. **v0.3** is the work that needs the Style's character set or OpenType feature list parsed first, plus the Glyph grid and Settings window. **Later** is worth doing someday. **Won't do** has a reason. Effort is for a learner working evenings: **S** about one evening, **M** a few evenings, **L** a week or more.
 
 ## Who it's for
 
@@ -52,13 +52,14 @@ A multimedia-arts and graphic-design student on an M5 MacBook Air. Her fonts com
 | Shared Sample text | Type once in the toolbar; every row renders it. This is job 1. | S | List | v0.1 |
 | Search by Family name | `Mod+F` or `/`, filters as she types. | S | List | v0.1 |
 | Keyboard navigation | Up/Down, Home/End, Enter opens the Specimen. | M | List | v0.1 |
+| Names in their own script | A Style that can't draw its Latin Family name (Al Bayan, Geeza Pro) shows its name in its own script instead of empty boxes, with the script named on the row. Found on her Mac in v0.1.1. | S | Parse Styles | v0.2 |
 | My fonts / System filter | Sidebar items that split her Font folder from `/System/Library/Fonts`. Hides about a hundred script Families she never uses. | S | Scan | v0.1 |
-| Row size slider | Small rows to skim, large rows to judge. | S | List | v0.2 |
+| Row size slider | Small rows to skim, large rows to judge. | S | List | v0.3 |
 | Classification filter | Serif, Sans Serif, Slab Serif, Monospace, Script, Display, Unclassified. Guessed from the Font file, set by hand to correct it. Rules in [ui-spec](ui-spec.md#classification-filter). | M | Parse Styles, Collections storage | v0.1 |
 | Variable, Has italics, Style count filters | Cheap, reliable facets. | S | Parse Styles | v0.2 |
-| Language filter | "Has the characters for Tagalog / Polish / Vietnamese." | M | Character set | v0.2 |
+| Language filter | "Has the characters for Tagalog / Polish / Vietnamese." | M | Character set | v0.3 |
 | Recently imported | Newest Imports first. | S | Import | v0.2 |
-| Filter by Sample text coverage | Hide Styles that lack a character in what she typed (Typeface does this). | M | Character set | v0.2 |
+| Filter by Sample text coverage | Hide Styles that lack a character in what she typed (Typeface does this). | M | Character set | v0.3 |
 | Measured weight, width, x-height, contrast | FontBase and Adobe-style "properties". Needs outline measurement. | L | Parse Styles | later |
 | Saved filters (Smart Collections) | A Collection defined by criteria. | M | Filters, Collections | later |
 
@@ -71,7 +72,7 @@ A multimedia-arts and graphic-design student on an M5 MacBook Air. Her fonts com
 | Paper and ink swap | One click between dark-on-light and light-on-dark, independent of app theme. Posters are often reversed. | S | Specimen | v0.1 |
 | Style picker | Move between a Family's Styles (and Named instances) without going back to the list. | S | Specimen | v0.1 |
 | About this Style | Designer, foundry, version, copyright, license text and URL from the Font file, the file's location with Show in Finder. Answers "can I use this for my portfolio?" as far as the file can. | S | Parse Styles | v0.1 |
-| Missing Glyph hint | Mark characters in the Sample text that fell back to another font. | M | Character set | v0.2 |
+| Missing Glyph hint | Mark characters in the Sample text that fell back to another font. | M | Character set | v0.3 |
 | Waterfall | The same line at several sizes, to judge text versus display use. | S | Specimen | v0.2 |
 | Text presets | Headline, paragraph, A-Z and figures, a language sample. | S | Specimen | v0.2 |
 | Compare Styles stacked | Two to four Styles under one Sample text (FontGoggles, Specimen for Mac). | M | Specimen | later |
@@ -98,8 +99,8 @@ A multimedia-arts and graphic-design student on an M5 MacBook Air. Her fonts com
 
 | Feature | Description and why she needs it | Effort | Depends on | Priority |
 | --- | --- | --- | --- | --- |
-| Glyph grid | Every Glyph, virtualized; click for a large view with code point. Checking for an ampersand or a nice `g` is a real design question. | M | Virtualization | v0.2 |
-| Copy a character | Copy the selected character to paste into Illustrator or Figma. | S | Glyph grid | v0.2 |
+| Glyph grid | Every Glyph, virtualized; click for a large view with code point. Checking for an ampersand or a nice `g` is a real design question. | M | Virtualization | v0.3 |
+| Copy a character | Copy the selected character to paste into Illustrator or Figma. | S | Glyph grid | v0.3 |
 | Group by Unicode block | Letters, figures, punctuation, symbols, as in Wakamai Fondue's character map. | M | Glyph grid | later |
 | Unencoded Glyphs and alternates | Show Glyphs reachable only through OpenType features. | L | OpenType features | later |
 
@@ -109,8 +110,8 @@ A multimedia-arts and graphic-design student on an M5 MacBook Air. Her fonts com
 | --- | --- | --- | --- | --- |
 | Axis sliders | One per Axis with the real range and default. Many Google Fonts downloads are a single variable Font file; without this they look like one Style. | M | Specimen | v0.1 |
 | Named instances | Presets that move the sliders, also listed in the Style picker. | S | Axis sliders | v0.1 |
-| OpenType feature toggles | Tag plus human name, only features that exist, grouped (figures, ligatures, stylistic sets, case). | M | Parse Styles | v0.2 |
-| Feature sample hints | If a toggle changes nothing in her text, offer text that shows it (for example `1/2` for fractions). | M | Toggles | v0.2 |
+| OpenType feature toggles | Tag plus human name, only features that exist, grouped (figures, ligatures, stylistic sets, case). | M | Parse Styles | v0.3 |
+| Feature sample hints | If a toggle changes nothing in her text, offer text that shows it (for example `1/2` for fractions). | M | Toggles | v0.3 |
 | Copy CSS | Copy `font-variation-settings` and `font-feature-settings` for web class projects. | S | Toggles | later |
 
 ### Collections and Favorites
@@ -119,7 +120,7 @@ A multimedia-arts and graphic-design student on an M5 MacBook Air. Her fonts com
 | --- | --- | --- | --- | --- |
 | Favorites | Star a Style; a Favorites item in the sidebar. | M | Milestone 8 | v0.1 |
 | Collections | Create, rename, delete; Add to Collection popover. This is job 2. | M | Milestone 8 | v0.1 |
-| Drag a Style onto a Collection | The natural Mac gesture. | M | Collections | v0.2 |
+| Drag a Style onto a Collection | The natural Mac gesture. | M | Collections | v0.3 |
 | Collection note | One line of text, such as "Typography II, due 12 May, trial fonts". | S | Collections | v0.2 |
 | Tags | Collections already cover projects and moods. A second organizing system doubles the learning for her and the code for him. | L | | won't do |
 
@@ -139,7 +140,7 @@ A multimedia-arts and graphic-design student on an M5 MacBook Air. Her fonts com
 | --- | --- | --- | --- | --- |
 | Remember state | Window size, last Sample text, last Specimen settings (in `prefs.json`). | S | Storage | v0.1 |
 | Theme | System, light, or dark. | S | Tokens | v0.1 |
-| Settings window | `Mod+,`; theme, default Sample text, reset to defaults. | S | Remember state | v0.2 |
+| Settings window | `Mod+,`; theme, default Sample text, reset to defaults. | S | Remember state | v0.3 |
 | Extra Font folders | Watch a folder such as `~/Documents/Class Fonts` without copying. | M | Scan | later |
 
 ### Personal touches
@@ -169,6 +170,20 @@ The smallest Book she would choose over Apple Font Book: browse everything with 
 **Not in v0.1:** Pairing (first in v0.2), Import, PNG Export, OpenType feature toggles, Glyph grid, every facet filter except Classification (variable, italics, language), missing Glyph hint, waterfall, drag onto Collections, Settings window, Copy CSS, comparison, Activate, watched folders, Smart Collections.
 
 Why this cut: everything in v0.1 serves jobs 1 and 2 directly, and each piece is a roadmap milestone already. Import matters less at first because Styles she installs with Apple Font Book land in `~/Library/Fonts`, which Book scans. Axes jump the queue because variable Google Fonts files are common and look wrong without them.
+
+## v0.2 scope
+
+Decided on 2026-10-28, after v0.1.1 reached her Mac. v0.2 is the features she reaches for in a class project; v0.3 is the work that first needs the character set or OpenType features parsed.
+
+| Area | What ships in v0.2 |
+| --- | --- |
+| Fixes from her Mac | Names in their own script for Styles without Latin letters; fewer Unclassified Families; quieter list selection. |
+| Pairing | Heading plus body, swap, size and weight per role, Pair from the list. |
+| Import | Drag and drop, File > Import..., Import into a Collection, the Imported Library filter, newest first. |
+| PNG Export | A Specimen or Pairing as a PNG. |
+| Small items | Waterfall, Text presets, Favorite from Quick preview, Collection note, Variable and Has italics filters. |
+
+**v0.3:** Missing Glyph hint, Sample text coverage and Language filters (all need the character set), OpenType feature toggles and sample hints, Glyph grid and Copy a character, drag onto Collections, Settings window, row size slider.
 
 ## Filters and facets
 
