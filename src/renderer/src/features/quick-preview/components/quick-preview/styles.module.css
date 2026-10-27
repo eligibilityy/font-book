@@ -1,0 +1,64 @@
+/* Centered over the list. No backdrop: the list stays visible and in charge. */
+.panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: var(--z-popover);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: min(880px, calc(100% - 64px));
+  height: max(320px, 60%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.header,
+.footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  opacity: 0.7;
+}
+
+.title {
+  flex: 1;
+  overflow: hidden;
+  font-weight: var(--weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stepper {
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 var(--space-5);
+  /* Long text fades out at the bottom instead of being cut mid-line. */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
+}
+
+.sample {
+  font-size: var(--quick-preview-size);
+  font-weight: normal;
+  font-style: normal;
+  font-synthesis: none;
+  overflow-wrap: anywhere;
+}
+
+.message {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  opacity: 0.7;
+}

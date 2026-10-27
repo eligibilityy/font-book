@@ -1,6 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "project": ["src/**/*.{ts,tsx}", "*.config.{ts,mjs,cjs}"],
+  "entry": ["tools/smoke/*.mjs"],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "*.config.{ts,mts,mjs,cjs}",
+    "tools/**/*.mjs"
+  ],
   "ignoreExportsUsedInFile": {
     "interface": true,
     "type": true

@@ -1,14 +1,23 @@
-import { ipcMain } from "electron";
+import { ipcMain, shell } from "electron";
+import { libraryChannels } from "../../shared/contracts/channels";
 import {
-  type FontFolder,
-  libraryChannels,
+  showInFolderInputSchema,
+  styleIdSchema,
 } from "../../shared/contracts/library";
-import { listFontFiles } from "../library/list-font-files";
+import type { LibraryService } from "../library/library-service";
 
-export function registerLibraryHandlers(fontFolders: FontFolder[]): void {
-  // No input to parse yet. Once a handler takes arguments, parse them with
-  // zod here before calling the operation (milestone 5).
-  ipcMain.handle(libraryChannels.listFontFiles, () =>
-    listFontFiles(fontFolders),
+export function registerLibraryHandlers(library: LibraryService): void {
+  ipcMain.handle(libraryChannels.load, () => library.load());
+  ipcMain.handle(libraryChannels.scan, () => library.scan());
+
+  ipcMain.handle(libraryChannels.readStyleBytes, (_event, input: unknown) =>
+    library.readStyleBytes(styleIdSchema.parse(input)),
   );
+
+  ipcMain.handle(libraryChannels.showInFolder, (_event, input: unknown) => {
+    // Only paths of Font files in the Library: the page never names a path
+    // main hasn't already found itself.
+    const path = library.findFontFilePath(showInFolderInputSchema.parse(input));
+    if (path) shell.showItemInFolder(path);
+  });
 }

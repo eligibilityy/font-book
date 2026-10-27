@@ -1,0 +1,35 @@
+.list {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--gray-3);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-weight: var(--weight-medium);
+  user-select: text;
+}
+
+.message {
+  color: var(--gray-11);
+}
+
+.path {
+  overflow: hidden;
+  color: var(--gray-10);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: text;
+}

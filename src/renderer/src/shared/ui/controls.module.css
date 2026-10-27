@@ -1,0 +1,430 @@
+/*
+ * Styles for the controls every feature uses: buttons, fields, menus,
+ * popovers, sliders and selects. Base UI renders the behaviour and states
+ * (data-highlighted, data-popup-open...); these classes give them Book's look.
+ */
+
+/* ---------- Buttons ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--gray-6);
+  border-radius: var(--radius-sm);
+  background: var(--gray-1);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-out);
+  -webkit-app-region: no-drag;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--gray-3);
+}
+
+.button:active:not(:disabled) {
+  background: var(--gray-4);
+}
+
+.button:disabled {
+  color: var(--gray-9);
+}
+
+.primaryButton {
+  composes: button;
+  border-color: transparent;
+  background: var(--accent-9);
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--accent-11);
+}
+
+.dangerButton {
+  composes: button;
+  border-color: transparent;
+  background: var(--danger);
+  color: #fff;
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: var(--danger);
+  filter: brightness(0.95);
+}
+
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-11);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+  -webkit-app-region: no-drag;
+}
+
+.iconButton:hover:not(:disabled) {
+  background: var(--gray-3);
+  color: var(--gray-12);
+}
+
+.iconButton:active:not(:disabled) {
+  background: var(--gray-4);
+}
+
+.iconButton[aria-pressed="true"] {
+  color: var(--accent-9);
+}
+
+.iconButton:disabled {
+  color: var(--gray-8);
+}
+
+/** A button that reads as text: the Classification label, the Axes count. */
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+  -webkit-app-region: no-drag;
+}
+
+.textButton:hover {
+  background: var(--gray-3);
+  color: var(--gray-12);
+}
+
+/* ---------- Text fields ---------- */
+
+.field {
+  height: var(--control-sm);
+  min-width: 0;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--gray-6);
+  border-radius: var(--radius-sm);
+  background: var(--gray-1);
+  font-size: var(--text-md);
+  user-select: text;
+  -webkit-app-region: no-drag;
+}
+
+.field::placeholder {
+  color: var(--gray-9);
+}
+
+.field:focus-visible {
+  outline-offset: -1px;
+  border-color: var(--focus-ring);
+}
+
+/* ---------- Popups: menus, selects, popovers ---------- */
+
+.positioner {
+  z-index: var(--z-popover);
+  outline: none;
+}
+
+.popup {
+  min-width: 180px;
+  max-height: var(--available-height);
+  overflow-y: auto;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--gray-1);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-md);
+  outline: none;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+
+/* Enter grows from the trigger; exit is quicker and never ease-in. */
+.popup[data-starting-style] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.97);
+  transition-duration: var(--duration-fast);
+}
+
+/* Context menus appear at once: they open often and at the pointer. */
+.popup[data-instant],
+.contextPopup[data-starting-style] {
+  transition: none;
+}
+
+.contextPopup {
+  composes: popup;
+}
+
+.contextPopup[data-starting-style] {
+  opacity: 1;
+  transform: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: default;
+  user-select: none;
+}
+
+.item[data-highlighted] {
+  background: var(--accent-9);
+  color: #fff;
+}
+
+.item[data-disabled] {
+  color: var(--gray-9);
+}
+
+.itemIndicator {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  margin-left: calc(-1 * var(--space-1));
+}
+
+.itemLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemHint {
+  color: var(--gray-10);
+  font-size: var(--text-sm);
+}
+
+.item[data-highlighted] .itemHint {
+  color: rgb(255 255 255 / 0.8);
+}
+
+.separator {
+  height: var(--border-width);
+  margin: var(--space-1) var(--space-2);
+  background: var(--gray-5);
+}
+
+.groupLabel {
+  padding: var(--space-1) var(--space-2);
+  color: var(--gray-10);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+/* ---------- Select ---------- */
+
+.selectTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  height: var(--control-sm);
+  min-width: 120px;
+  max-width: 280px;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: var(--border-width) solid var(--gray-6);
+  border-radius: var(--radius-sm);
+  background: var(--gray-1);
+  font-size: var(--text-md);
+  -webkit-app-region: no-drag;
+}
+
+.selectTrigger:hover {
+  background: var(--gray-2);
+}
+
+.selectValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectIcon {
+  flex-shrink: 0;
+  color: var(--gray-10);
+}
+
+/* ---------- Slider ---------- */
+
+.slider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  touch-action: none;
+}
+
+.sliderControl {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+}
+
+.sliderTrack {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--gray-5);
+}
+
+.sliderIndicator {
+  border-radius: var(--radius-full);
+  background: var(--accent-9);
+}
+
+.sliderThumb {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.15),
+    0 1px 3px rgb(0 0 0 / 0.2);
+}
+
+.sliderThumb:has(:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------- Switch ---------- */
+
+.switch {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--gray-6);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.switch[data-checked] {
+  background: var(--accent-9);
+}
+
+.switchThumb {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin: 2px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.switchThumb[data-checked] {
+  transform: translateX(12px);
+}
+
+/* ---------- Dialog ---------- */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  background: rgb(0 0 0 / 0.3);
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.backdrop[data-starting-style],
+.backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+.dialog {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  z-index: var(--z-dialog);
+  display: grid;
+  gap: var(--space-3);
+  width: 380px;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--gray-1);
+  box-shadow: var(--shadow-lg);
+  transform: translate(-50%, -50%);
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+
+.dialog[data-starting-style],
+.dialog[data-ending-style] {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.97);
+}
+
+.dialogTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.dialogDescription {
+  color: var(--gray-11);
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ---------- Tooltip ---------- */
+
+.tooltip {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--gray-12);
+  color: var(--gray-1);
+  font-size: var(--text-sm);
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.tooltip[data-starting-style],
+.tooltip[data-ending-style] {
+  opacity: 0;
+}
+
+.tooltip[data-instant] {
+  transition: none;
+}
+
+.tooltipShortcut {
+  margin-left: var(--space-2);
+  opacity: 0.6;
+}

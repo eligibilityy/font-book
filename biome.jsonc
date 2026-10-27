@@ -123,6 +123,15 @@
   },
   "overrides": [
     {
+      // Command-line tools report to the terminal; printing is their job.
+      "includes": ["tools/**"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noConsole": "off" }
+        }
+      }
+    },
+    {
       // Image files shown with <img alt="...">; the alt text describes them.
       "includes": ["src/renderer/src/assets/**/*.svg"],
       "linter": {

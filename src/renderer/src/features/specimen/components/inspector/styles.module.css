@@ -1,0 +1,69 @@
+.inspector {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--inspector-width);
+  overflow-y: auto;
+  border-left: var(--border-width) solid var(--border-subtle);
+  background: var(--gray-1);
+}
+
+.section {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-bottom: var(--border-width) solid var(--gray-4);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+  margin-bottom: var(--space-2);
+}
+
+.sectionTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.sectionBody {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.axis {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+}
+
+.about {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  user-select: text;
+}
+
+.field dt {
+  color: var(--gray-10);
+}
+
+.field dd {
+  overflow-wrap: anywhere;
+}
+
+.clamped {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}

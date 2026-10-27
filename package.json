@@ -22,15 +22,19 @@
     "check": "bun run lint && bun run typecheck && bun run deps:check && bun run knip && bun run test",
     "postinstall": "install-electron && electron-builder install-app-deps",
     "prepare": "husky",
+    "smoke": "bun run build && node tools/smoke/run.mjs",
     "build:unpack": "bun run build && electron-builder --dir",
     "build:mac": "bun run build && electron-builder --mac --arm64",
     "build:win": "bun run build && electron-builder --win --x64"
   },
   "devDependencies": {
+    "@base-ui/react": "1.9.0",
     "@biomejs/biome": "2.6.3",
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
     "@electron-toolkit/tsconfig": "^2.0.0",
+    "@tanstack/react-virtual": "3.14.23",
+    "@types/fontkit": "^2.0.9",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -41,10 +45,16 @@
     "electron-vite": "^6.0.0",
     "husky": "9.1.7",
     "knip": "6.43.0",
+    "motion": "14.6.0",
+    "playwright-core": "^1.64.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "typescript": "^5.9.3",
     "vite": "^8.3.4",
     "vitest": "5.0.5"
+  },
+  "dependencies": {
+    "fontkit": "^2.0.4",
+    "zod": "^4.6.7"
   }
 }

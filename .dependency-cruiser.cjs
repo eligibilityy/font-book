@@ -53,6 +53,30 @@ module.exports = {
       to: { path: [MAIN, RENDERER] },
     },
     {
+      name: "preload-only-electron-at-runtime",
+      comment:
+        "The preload runs sandboxed: at runtime it can require only electron. Any other package (zod included) makes the window load without window.fontBook. Import channel names from src/shared/contracts/channels.ts and everything else as types.",
+      severity: "error",
+      from: { path: PRELOAD },
+      to: {
+        path: "^node_modules/",
+        pathNot: "^node_modules/electron/",
+        dependencyTypesNot: ["type-only"],
+      },
+    },
+    {
+      name: "preload-only-channels-from-shared",
+      comment:
+        "Contract files import zod, which the sandboxed preload can't load. Preload imports only channels.ts as code; every other shared import must be `import type`.",
+      severity: "error",
+      from: { path: PRELOAD },
+      to: {
+        path: SHARED,
+        pathNot: "^src/shared/contracts/channels.ts$",
+        dependencyTypesNot: ["type-only"],
+      },
+    },
+    {
       name: "shared-not-to-process-code",
       comment:
         "src/shared holds contracts (types, zod schemas, IPC channel names) that every process loads, so it imports no process code or Electron.",

@@ -1,4 +1,17 @@
-import type { FontFileList } from "./library";
+import type { AppCommand, AppInfo } from "./app";
+import type {
+  Library,
+  ScanProgress,
+  ShowInFolderInput,
+  StyleBytesResult,
+} from "./library";
+import type {
+  ClassificationsFile,
+  CollectionsFile,
+  PrefsFile,
+  SaveResult,
+  StoredData,
+} from "./storage";
 
 /**
  * Everything the renderer can ask of main. Preload implements it and exposes
@@ -6,8 +19,25 @@ import type { FontFileList } from "./library";
  */
 export interface FontBookApi {
   library: {
-    listFontFiles(): Promise<FontFileList>;
-    /** Called when she chooses File > Scan Again. Returns an unsubscribe function. */
-    onScanRequested(callback: () => void): () => void;
+    /** The current Library, scanning first if needed. */
+    load(): Promise<Library>;
+    /** Scan Again. */
+    scan(): Promise<Library>;
+    /** One Style's font bytes, ready for `new FontFace(...)`. */
+    readStyleBytes(styleId: string): Promise<StyleBytesResult>;
+    showInFolder(target: ShowInFolderInput): Promise<void>;
+    /** Returns an unsubscribe function. */
+    onScanProgress(callback: (progress: ScanProgress) => void): () => void;
+  };
+  storage: {
+    loadAll(): Promise<StoredData>;
+    saveCollections(file: CollectionsFile): Promise<SaveResult>;
+    saveClassifications(file: ClassificationsFile): Promise<SaveResult>;
+    savePrefs(file: PrefsFile): Promise<SaveResult>;
+  };
+  app: {
+    getInfo(): Promise<AppInfo>;
+    /** Menu items and their shortcuts. Returns an unsubscribe function. */
+    onCommand(callback: (command: AppCommand) => void): () => void;
   };
 }

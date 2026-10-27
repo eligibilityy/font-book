@@ -8,6 +8,8 @@
 *.icns binary
 *.otf binary
 *.ttf binary
+*.ttc binary
+*.otc binary
 *.woff binary
 *.woff2 binary
 *.dmg binary

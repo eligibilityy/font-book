@@ -49,6 +49,23 @@ const FONT_FILE_EXTENSIONS = new Set([
   ".woff2",
 ]);
 
+/**
+ * Font formats Book can't preview: Windows bitmap fonts, PostScript Type 1,
+ * and classic Mac resource-fork fonts. They are counted so the UI can say so.
+ */
+const SKIPPED_EXTENSIONS = new Set([
+  ".fon",
+  ".fnt",
+  ".pfb",
+  ".pfa",
+  ".pfm",
+  ".afm",
+  ".dfont",
+  ".suit",
+  ".bdf",
+  ".pcf",
+]);
+
 /** Deep enough for any real Font folder; stops runaway trees. */
 const MAX_DEPTH = 16;
 
@@ -62,6 +79,7 @@ export async function listFontFiles(
   reader: DirectoryReader = fileSystemReader,
 ): Promise<FontFileList> {
   const unreadableSubfolders: string[] = [];
+  const skipped = { count: 0 };
 
   const scans = await Promise.all(
     folders.map(async (folder) => {
@@ -79,6 +97,7 @@ export async function listFontFiles(
         depth: 0,
         fontFiles,
         unreadableSubfolders,
+        skipped,
       });
       fontFiles.sort(compareFontFiles);
       const report: FontFolderReport = {
@@ -94,6 +113,7 @@ export async function listFontFiles(
     folders: scans.map((scan) => scan.report),
     fontFiles: scans.flatMap((scan) => scan.fontFiles),
     unreadableSubfolders: unreadableSubfolders.sort(),
+    skippedFileCount: skipped.count,
   };
 }
 
@@ -105,6 +125,7 @@ interface CollectContext {
   depth: number;
   fontFiles: FontFile[];
   unreadableSubfolders: string[];
+  skipped: { count: number };
 }
 
 async function collectFontFiles(context: CollectContext): Promise<void> {
@@ -116,11 +137,9 @@ async function collectFontFiles(context: CollectContext): Promise<void> {
     const entryPath = join(directoryPath, entry.name);
 
     if (entry.kind === "file" && isFontFileName(entry.name)) {
-      context.fontFiles.push({
-        path: entryPath,
-        name: entry.name,
-        folderPath: folder.path,
-      });
+      context.fontFiles.push({ path: entryPath, name: entry.name, folder });
+    } else if (entry.kind === "file" && isSkippedFileName(entry.name)) {
+      context.skipped.count += 1;
     } else if (entry.kind === "directory" && depth < MAX_DEPTH) {
       const child = await readDirectory(reader, entryPath);
       if (child.status === "read") {
@@ -139,6 +158,10 @@ async function collectFontFiles(context: CollectContext): Promise<void> {
 
 function isFontFileName(name: string): boolean {
   return FONT_FILE_EXTENSIONS.has(extname(name).toLowerCase());
+}
+
+function isSkippedFileName(name: string): boolean {
+  return SKIPPED_EXTENSIONS.has(extname(name).toLowerCase());
 }
 
 type ReadResult =

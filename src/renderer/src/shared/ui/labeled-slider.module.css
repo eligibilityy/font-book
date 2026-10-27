@@ -1,0 +1,26 @@
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr 44px;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 28px;
+}
+
+/* The hidden label leaves the grid, so the slider takes the first column. */
+.rowWithoutLabel {
+  composes: row;
+  grid-template-columns: 1fr 44px;
+}
+
+.label {
+  min-width: 72px;
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+}
+
+.value {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

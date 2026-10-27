@@ -53,9 +53,7 @@ describe("listFontFiles", () => {
       "Playfair.woff2",
       "Zapfino.TTF",
     ]);
-    expect(
-      result.fontFiles.every((file) => file.folderPath === folder.path),
-    ).toBe(true);
+    expect(result.fontFiles.every((file) => file.folder === folder)).toBe(true);
     expect(result.folders).toEqual([
       { status: "scanned", folder, fontFileCount: 6 },
     ]);
@@ -76,6 +74,7 @@ describe("listFontFiles", () => {
     const result = await listFontFiles([userFolder("fonts")]);
 
     expect(result.fontFiles.map((file) => file.name)).toEqual(["Inter.ttf"]);
+    expect(result.skippedFileCount).toBe(2);
   });
 
   it("reports a Font folder that doesn't exist as missing, not as an error", async () => {

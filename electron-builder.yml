@@ -8,6 +8,7 @@ files:
   - "!**/.vscode/*"
   - "!src/*"
   - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!vitest.config.{js,ts,mts,mjs,cjs}"
   - "!{dev-app-update.yml,CHANGELOG.md,README.md}"
   - "!{.env,.env.*,.npmrc,bun.lock}"
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
