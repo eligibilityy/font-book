@@ -1,3 +1,4 @@
+export { axisLabel, defaultAxisValues, variationStyle } from "./axes";
 export {
   type SpecimenSettings,
   SpecimenView,

@@ -128,6 +128,7 @@ export function buildApplicationMenu({
         command("My Fonts", "go-my-fonts", "CommandOrControl+2"),
         command("System", "go-system", "CommandOrControl+3"),
         command("Favorites", "go-favorites", "CommandOrControl+4"),
+        command("Pairing", "go-pairing", "CommandOrControl+5"),
       ],
     },
     {
@@ -146,6 +147,9 @@ export function buildApplicationMenu({
           "add-to-collection",
           "CommandOrControl+Shift+A",
         ),
+        { type: "separator" },
+        command("Use as Heading", "use-as-heading"),
+        command("Use as Body", "use-as-body"),
         { type: "separator" },
         command(`Show in ${fileManagerName}`, "show-in-folder"),
       ],

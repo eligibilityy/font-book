@@ -61,6 +61,9 @@ interface SpecimenViewProps {
   otherCopyFolders: ReadonlyMap<string, string>;
   fileManagerName: string;
   onShowInFolder: (style: Style) => void;
+  /** Puts this Style in the Pairing, with the Axis values it has here. */
+  onUseAs: (role: "heading" | "body", axisValues: AxisValues) => void;
+  onOpenPairing: () => void;
   onBack: () => void;
   regionRef: React.RefObject<HTMLElement | null>;
 }
@@ -219,6 +222,8 @@ function SpecimenHeader({
   duplicateFolders,
   axisValues,
   onAxisValuesChange,
+  onUseAs,
+  onOpenPairing,
 }: SpecimenViewProps & {
   axisValues: AxisValues;
   onAxisValuesChange: (values: AxisValues) => void;
@@ -238,6 +243,10 @@ function SpecimenHeader({
           onChange={onClassificationChange}
         />
         <div className={styles.actions}>
+          <PairMenu
+            onUseAs={(role) => onUseAs(role, axisValues)}
+            onOpenPairing={onOpenPairing}
+          />
           <IconButton
             label={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             aria-pressed={isFavorite}
@@ -436,6 +445,50 @@ function StylePicker({
         </Select.Positioner>
       </Select.Portal>
     </Select.Root>
+  );
+}
+
+/** "Pair": put this Style in the Pairing as its heading or its body. */
+function PairMenu({
+  onUseAs,
+  onOpenPairing,
+}: {
+  onUseAs: (role: "heading" | "body") => void;
+  onOpenPairing: () => void;
+}): React.JSX.Element {
+  return (
+    <Menu.Root>
+      <Menu.Trigger className={controls.textButton}>
+        Pair
+        <ChevronDownIcon />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner
+          className={controls.positioner}
+          sideOffset={4}
+          align="end"
+        >
+          <Menu.Popup className={controls.popup}>
+            <Menu.Item
+              className={controls.item}
+              onClick={() => onUseAs("heading")}
+            >
+              <span className={controls.itemLabel}>Use as Heading</span>
+            </Menu.Item>
+            <Menu.Item
+              className={controls.item}
+              onClick={() => onUseAs("body")}
+            >
+              <span className={controls.itemLabel}>Use as Body</span>
+            </Menu.Item>
+            <Menu.Separator className={controls.separator} />
+            <Menu.Item className={controls.item} onClick={onOpenPairing}>
+              <span className={controls.itemLabel}>Open Pairing</span>
+            </Menu.Item>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   );
 }
 

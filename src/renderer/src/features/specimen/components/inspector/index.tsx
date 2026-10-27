@@ -2,6 +2,7 @@ import { Switch } from "@base-ui/react/switch";
 import type { Axis, Embedding, Style } from "@shared/contracts/library";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { EASE_OUT } from "@/shared/motion";
 import controls from "@/shared/ui/controls.module.css";
 import { LabeledSlider } from "@/shared/ui/labeled-slider";
 import { type AxisValues, axisLabel, defaultAxisValues } from "../../axes";
@@ -23,8 +24,6 @@ interface InspectorProps {
   /** After the slide-out finishes, so the text can widen in one step. */
   onExitComplete: () => void;
 }
-
-const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 /**
  * Depth on demand: Text, Axes, and About this Style, in a panel on the

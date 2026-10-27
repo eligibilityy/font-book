@@ -38,6 +38,36 @@ export type ClassificationsFile = z.infer<typeof classificationsFileSchema>;
 
 export const DEFAULT_SAMPLE_TEXT = "Sphinx of black quartz, judge my vow.";
 
+/** One role in a Pairing: the Style, and the Axis values it was chosen with. */
+const pairingSlotSchema = z.object({
+  style: styleRefSchema.nullable(),
+  /** Axis tag to value; Axes left out use the Style's default. */
+  axisValues: z.record(z.string().max(4), z.number()),
+});
+
+/**
+ * The Pairing: a heading Style and a body Style. Sizes and line heights
+ * belong to the role, so Swap trades the Styles and keeps the page's scale.
+ */
+export const pairingSchema = z.object({
+  heading: pairingSlotSchema,
+  body: pairingSlotSchema,
+  headingSize: z.number().min(16).max(160),
+  headingLineHeight: z.number().min(0.8).max(2),
+  bodySize: z.number().min(8).max(32),
+  bodyLineHeight: z.number().min(1).max(2.4),
+});
+export type Pairing = z.infer<typeof pairingSchema>;
+
+export const defaultPairing: Pairing = {
+  heading: { style: null, axisValues: {} },
+  body: { style: null, axisValues: {} },
+  headingSize: 48,
+  headingLineHeight: 1.1,
+  bodySize: 16,
+  bodyLineHeight: 1.5,
+};
+
 export const PREFS_VERSION = 1;
 export const prefsFileSchema = z.object({
   version: z.literal(PREFS_VERSION),
@@ -52,6 +82,8 @@ export const prefsFileSchema = z.object({
   firstLaunchHintSeen: z.boolean(),
   /** The dedication shows once, at first launch. Defaulted, so older prefs files still load. */
   dedicationSeen: z.boolean().default(false),
+  /** Added in v0.2. Defaulted, so v0.1 prefs files still load. */
+  pairing: pairingSchema.default(defaultPairing),
 });
 export type PrefsFile = z.infer<typeof prefsFileSchema>;
 
@@ -66,6 +98,7 @@ export const defaultPrefs: PrefsFile = {
   sidebarVisible: true,
   firstLaunchHintSeen: false,
   dedicationSeen: false,
+  pairing: defaultPairing,
 };
 
 /**

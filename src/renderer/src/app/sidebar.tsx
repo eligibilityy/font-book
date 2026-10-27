@@ -2,6 +2,7 @@ import { type Collections, CollectionsSection } from "@/features/collections";
 import {
   ComputerIcon,
   GridIcon,
+  PairingIcon,
   PersonIcon,
   StarIcon,
   WarningIcon,
@@ -17,6 +18,11 @@ interface SidebarProps {
   isCreatingCollection: boolean;
   onCreatingCollectionChange: (isCreating: boolean) => void;
   recentlyAddedId: string | null;
+  /** The Pairing is showing: it, not a view, is the current item. */
+  isPairingOpen: boolean;
+  onOpenPairing: () => void;
+  /** Briefly true after a Style was put in the Pairing. */
+  isPairingFlashing: boolean;
 }
 
 /** Chooses what the Library list shows. It never changes between views. */
@@ -28,6 +34,9 @@ export function Sidebar({
   isCreatingCollection,
   onCreatingCollectionChange,
   recentlyAddedId,
+  isPairingOpen,
+  onOpenPairing,
+  isPairingFlashing,
 }: SidebarProps): React.JSX.Element {
   const item = (
     target: View,
@@ -39,7 +48,9 @@ export function Sidebar({
       <button
         type="button"
         className={styles.sidebarItem}
-        aria-current={view.kind === target.kind ? "page" : undefined}
+        aria-current={
+          !isPairingOpen && view.kind === target.kind ? "page" : undefined
+        }
         onClick={() => onViewChange(target)}
       >
         {icon}
@@ -77,11 +88,23 @@ export function Sidebar({
             <StarIcon />,
             collections.favorites.length,
           )}
+          <li>
+            <button
+              type="button"
+              className={styles.sidebarItem}
+              aria-current={isPairingOpen ? "page" : undefined}
+              data-recently-added={isPairingFlashing ? "" : undefined}
+              onClick={onOpenPairing}
+            >
+              <PairingIcon />
+              <span className={styles.sidebarLabel}>Pairing</span>
+            </button>
+          </li>
         </ul>
       </section>
       <CollectionsSection
         collections={collections}
-        activeId={view.kind === "collection" ? view.id : null}
+        activeId={!isPairingOpen && view.kind === "collection" ? view.id : null}
         onOpen={(id) => onViewChange({ kind: "collection", id })}
         isCreating={isCreatingCollection}
         onCreatingChange={onCreatingCollectionChange}

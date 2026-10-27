@@ -21,6 +21,8 @@ interface RowMenuItemsProps {
   onAddToCollection: () => void;
   onRemoveFromCollection: () => void;
   onSetClassification: (classification: Classification | null) => void;
+  /** On a Family row, the Style Quick preview shows, else its Representative Style. */
+  onUseAs: (role: "heading" | "body") => void;
   onShowInFolder: () => void;
 }
 
@@ -40,6 +42,7 @@ export function RowMenuItems({
   onAddToCollection,
   onRemoveFromCollection,
   onSetClassification,
+  onUseAs,
   onShowInFolder,
 }: RowMenuItemsProps): React.JSX.Element | null {
   if (!row) return null;
@@ -150,6 +153,19 @@ export function RowMenuItems({
       )}
       {!isMissing && (
         <>
+          <ContextMenu.Separator className={controls.separator} />
+          <ContextMenu.Item
+            className={controls.item}
+            onClick={() => onUseAs("heading")}
+          >
+            <span className={controls.itemLabel}>Use as Heading</span>
+          </ContextMenu.Item>
+          <ContextMenu.Item
+            className={controls.item}
+            onClick={() => onUseAs("body")}
+          >
+            <span className={controls.itemLabel}>Use as Body</span>
+          </ContextMenu.Item>
           <ContextMenu.Separator className={controls.separator} />
           <ContextMenu.Item className={controls.item} onClick={onShowInFolder}>
             <span className={controls.itemLabel}>

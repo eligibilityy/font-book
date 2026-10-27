@@ -122,6 +122,25 @@ export function SearchIcon({ className }: IconProps): React.JSX.Element {
   );
 }
 
+/** Two arrows passing each other: Swap Heading and Body. */
+export function SwapIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <path d="M2.5 5.5h10M10 3l2.5 2.5L10 8M13.5 10.5h-10M6 8l-2.5 2.5L6 13" />
+    </Icon>
+  );
+}
+
+/** A heavy line over three light ones: a heading and its body text. */
+export function PairingIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <Icon className={className}>
+      <path d="M2.5 3.5h11" strokeWidth="2.5" />
+      <path d="M2.5 8h11M2.5 10.75h11M2.5 13.5h7" />
+    </Icon>
+  );
+}
+
 /** A capital T: the Sample text field. */
 export function TextIcon({ className }: IconProps): React.JSX.Element {
   return (

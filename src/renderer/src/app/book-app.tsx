@@ -18,6 +18,7 @@ import {
   ClassificationSelect,
   CouldntReadView,
   type Family,
+  familyKey,
   findDuplicates,
   groupIntoFamilies,
   LibraryList,
@@ -27,6 +28,12 @@ import {
   rowStyle,
   useClassifications,
 } from "@/features/library";
+import {
+  assignRole,
+  type PairingRole,
+  PairingView,
+  roleLabels,
+} from "@/features/pairing";
 import { QuickPreview } from "@/features/quick-preview";
 import { type SpecimenSettings, SpecimenView } from "@/features/specimen";
 import { useWarmFaces } from "@/shared/font-faces/use-style-face";
@@ -48,8 +55,15 @@ import {
 
 type Mode =
   | { kind: "list" }
-  | { kind: "specimen"; familyKey: string; styleId: string }
-  | { kind: "missing"; ref: StyleRef };
+  | {
+      kind: "specimen";
+      familyKey: string;
+      styleId: string;
+      /** Opened from the Pairing's header: Back returns there. */
+      fromPairing?: boolean;
+    }
+  | { kind: "missing"; ref: StyleRef }
+  | { kind: "pairing" };
 
 const SAVE_FAILED =
   "Couldn't save your change, so it was undone. Try again in a moment.";
@@ -109,6 +123,7 @@ export function BookApp({
     anchor: null,
   });
   const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
+  const [isPairingFlashing, setIsPairingFlashing] = useState(false);
   // Un-starred while looking at Favorites: stays listed until she leaves, so
   // pressing F again undoes a mistake.
   const [unstarred, setUnstarred] = useState<StyleRef[]>([]);
@@ -141,6 +156,10 @@ export function BookApp({
       new Map(
         groupIntoFamilies(library.styles).map((family) => [family.key, family]),
       ),
+    [library.styles],
+  );
+  const stylesById = useMemo(
+    () => new Map(library.styles.map((style) => [style.id, style])),
     [library.styles],
   );
   const { duplicateFolders, otherCopyFolders } = useMemo(() => {
@@ -294,7 +313,19 @@ export function BookApp({
     [rows, quickPreview.styleId],
   );
 
-  const goBack = useCallback(() => setMode({ kind: "list" }), []);
+  const goBack = useCallback(
+    () =>
+      setMode((current) =>
+        current.kind === "specimen" && current.fromPairing
+          ? { kind: "pairing" }
+          : { kind: "list" },
+      ),
+    [],
+  );
+  const openPairing = useCallback(() => {
+    setQuickPreview({ open: false, styleId: null });
+    setMode({ kind: "pairing" });
+  }, []);
   const closeQuickPreview = useCallback(
     () => setQuickPreview({ open: false, styleId: null }),
     [],
@@ -394,6 +425,27 @@ export function BookApp({
     );
   }, []);
 
+  const putInPairing = useCallback(
+    (role: PairingRole, style: Style, axisValues: Record<string, number>) => {
+      prefs.update((previous) => ({
+        ...previous,
+        pairing: assignRole(
+          previous.pairing,
+          role,
+          styleRefOf(style),
+          axisValues,
+        ),
+      }));
+      setAnnouncement(
+        `${style.familyName} ${style.styleName} is the ${roleLabels[role]} in the Pairing`,
+      );
+      // The sidebar's Pairing row tints, then fades: where the Style went.
+      setIsPairingFlashing(true);
+      setTimeout(() => setIsPairingFlashing(false), 50);
+    },
+    [prefs],
+  );
+
   const showInFolder = useCallback((style: Style) => {
     void window.fontBook.library.showInFolder({
       kind: "style",
@@ -484,6 +536,24 @@ export function BookApp({
         return changeView({ kind: "system" });
       case "go-favorites":
         return changeView({ kind: "favorites" });
+      case "go-pairing":
+        return openPairing();
+      case "use-as-heading":
+      case "use-as-body": {
+        const style =
+          mode.kind === "specimen"
+            ? specimenStyle
+            : inList
+              ? quickPreviewStyle
+              : null;
+        if (style)
+          putInPairing(
+            command === "use-as-heading" ? "heading" : "body",
+            style,
+            {},
+          );
+        return;
+      }
       case "open-specimen":
         if (inList && selectedIndex >= 0) openRow(selectedIndex);
         return;
@@ -536,6 +606,9 @@ export function BookApp({
           isCreatingCollection={isCreatingCollection}
           onCreatingCollectionChange={setIsCreatingCollection}
           recentlyAddedId={recentlyAddedId}
+          isPairingOpen={mode.kind === "pairing"}
+          onOpenPairing={openPairing}
+          isPairingFlashing={isPairingFlashing}
         />
       )}
       <div className={styles.content}>
@@ -547,7 +620,13 @@ export function BookApp({
               sidebarVisible: !previous.sidebarVisible,
             }))
           }
-          backLabel={mode.kind === "list" ? null : title}
+          backLabel={
+            mode.kind === "list"
+              ? null
+              : mode.kind === "specimen" && mode.fromPairing
+                ? "Pairing"
+                : title
+          }
           onBack={goBack}
           search={search}
           searchPlaceholder={`Search ${title}`}
@@ -564,11 +643,13 @@ export function BookApp({
               style={specimenStyle}
               familyName={specimenFamily.name}
               onStyleChange={(style) =>
-                setMode({
+                setMode((current) => ({
                   kind: "specimen",
                   familyKey: specimenFamily.key,
                   styleId: style.id,
-                })
+                  fromPairing:
+                    current.kind === "specimen" && current.fromPairing === true,
+                }))
               }
               sampleText={prefs.data.sampleText}
               onSampleTextChange={setSampleText}
@@ -601,6 +682,40 @@ export function BookApp({
               otherCopyFolders={otherCopyFolders}
               fileManagerName={appInfo.fileManagerName}
               onShowInFolder={showInFolder}
+              onUseAs={(role, axisValues) =>
+                putInPairing(role, specimenStyle, axisValues)
+              }
+              onOpenPairing={openPairing}
+              onBack={goBack}
+              regionRef={specimenRef}
+            />
+          ) : mode.kind === "pairing" ? (
+            <PairingView
+              pairing={prefs.data.pairing}
+              onPairingChange={(change) =>
+                prefs.update((previous) => ({
+                  ...previous,
+                  pairing: change(previous.pairing),
+                }))
+              }
+              stylesById={stylesById}
+              sampleText={prefs.data.sampleText}
+              paperReversed={settings.paperReversed}
+              onPaperReversedChange={(paperReversed) =>
+                updateSettings({ paperReversed })
+              }
+              inspectorOpen={settings.inspectorOpen}
+              onInspectorOpenChange={(inspectorOpen) =>
+                updateSettings({ inspectorOpen })
+              }
+              onOpenSpecimen={(style) =>
+                setMode({
+                  kind: "specimen",
+                  familyKey: familyKey(style.familyName),
+                  styleId: style.id,
+                  fromPairing: true,
+                })
+              }
               onBack={goBack}
               regionRef={specimenRef}
             />
@@ -742,6 +857,10 @@ export function BookApp({
                               selectedFamily.key,
                               value,
                             );
+                        }}
+                        onUseAs={(role) => {
+                          if (quickPreviewStyle)
+                            putInPairing(role, quickPreviewStyle, {});
                         }}
                         onShowInFolder={() => {
                           const style = selectedRow

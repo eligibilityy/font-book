@@ -202,8 +202,19 @@
   color: var(--gray-10);
 }
 
+/* The background fades out after a flash (Motion row "Collection add feedback"). */
+.sidebarItem {
+  transition: background-color var(--duration-slow) var(--ease-out);
+}
+
 .sidebarItem:hover {
   background: var(--gray-4);
+  transition: none;
+}
+
+.sidebarItem[data-recently-added] {
+  background: var(--accent-a4);
+  transition: none;
 }
 
 .sidebarItem[aria-current="page"] {

@@ -19,10 +19,13 @@ export type AppCommand =
   | "go-my-fonts"
   | "go-system"
   | "go-favorites"
+  | "go-pairing"
   | "open-specimen"
   | "quick-preview"
   | "toggle-favorite"
   | "add-to-collection"
+  | "use-as-heading"
+  | "use-as-body"
   | "show-in-folder"
   | "show-about";
 

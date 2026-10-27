@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { sampleFontFamily } from "@/shared/font-faces/registry";
 import { useStyleFace } from "@/shared/font-faces/use-style-face";
+import { EASE_OUT } from "@/shared/motion";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -26,8 +27,6 @@ interface QuickPreviewProps {
   onOpenSpecimen: () => void;
   onClose: () => void;
 }
-
-const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 const CHARACTERS = [
   "ABCDEFGHIJKLM",
