@@ -8,6 +8,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CloseIcon,
+  StarIcon,
 } from "@/shared/ui/icons";
 import styles from "./styles.module.css";
 
@@ -24,6 +25,9 @@ interface QuickPreviewProps {
   tracking: number;
   paperReversed: boolean;
   onStep: (delta: number) => void;
+  isFavorite: boolean;
+  /** Stars the Style it shows; null when Collections are read-only. */
+  onToggleFavorite: (() => void) | null;
   onOpenSpecimen: () => void;
   onClose: () => void;
 }
@@ -86,6 +90,8 @@ function QuickPreviewContent({
   tracking,
   paperReversed,
   onStep,
+  isFavorite,
+  onToggleFavorite,
   onOpenSpecimen,
   onClose,
 }: QuickPreviewProps): React.JSX.Element {
@@ -154,6 +160,21 @@ function QuickPreviewContent({
             </button>
           </div>
         )}
+        {style && onToggleFavorite && (
+          <button
+            type="button"
+            tabIndex={-1}
+            className={styles.iconButton}
+            aria-label={
+              isFavorite ? "Remove from Favorites" : "Add to Favorites"
+            }
+            aria-pressed={isFavorite}
+            title="F"
+            onClick={onToggleFavorite}
+          >
+            <StarIcon filled={isFavorite} />
+          </button>
+        )}
         <button
           type="button"
           tabIndex={-1}
@@ -219,6 +240,12 @@ function QuickPreviewContent({
               <kbd>←</kbd>
               <kbd>→</kbd>
               <span className={styles.keyLabel}>Styles</span>
+            </>
+          )}
+          {style && onToggleFavorite && (
+            <>
+              <kbd>F</kbd>
+              <span className={styles.keyLabel}>Favorite</span>
             </>
           )}
           <kbd>Space</kbd>

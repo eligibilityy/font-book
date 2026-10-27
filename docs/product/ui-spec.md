@@ -316,6 +316,8 @@ Every slider: arrow keys step 1, Shift+Arrow 10, double-click resets, readout in
 
 **Behavior.** Up/Down move the list selection and swap the content in the same frame; the frame does not move. Left/Right step through the Family's Styles (Family rows only). Enter closes it and opens the Specimen at the shown Style. Space, Escape, or the list losing focus (clicking search, the sidebar, the toolbar) close it. Clicking another row selects it and the preview follows. It reuses the row's already loaded `FontFace` when there is one.
 
+**Favorite (v0.2).** F, Mod+D, or the star in its header favorite the Style it shows, without closing it; on a Family row that is the Style Left and Right stepped to. Add to Collection works the same way. With Quick preview closed, F on a Family row says "Press Space or open the Specimen to choose a Style."
+
 **States.** Loading: Style name in the UI font, centered. Can't be previewed: the Specimen message (U2), Space and Escape still close. Missing Style: the Specimen message. Missing Glyphs: boxes. Large file: loads now, with the loading state.
 
 **Motion.** None: it opens and closes instantly ([Q2](#q2-quick-preview-timing)).

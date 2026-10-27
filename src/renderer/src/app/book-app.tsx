@@ -380,13 +380,18 @@ export function BookApp({
     [selectedRow, quickPreviewStyle],
   );
 
-  /** The Style the organize actions apply to: the Specimen's, or a Style row's. */
+  /**
+   * The Style the organize actions apply to: one she can see. The Specimen's,
+   * the one Quick preview shows, or a Style row's.
+   */
   const targetStyle: Style | null =
     mode.kind === "specimen"
       ? specimenStyle
-      : selectedRow?.kind === "style"
-        ? selectedRow.style
-        : null;
+      : quickPreview.open && selectedRow?.kind !== "missing"
+        ? quickPreviewStyle
+        : selectedRow?.kind === "style"
+          ? selectedRow.style
+          : null;
 
   const toggleFavorite = useCallback(() => {
     if (collections.isReadOnly) return;
@@ -398,7 +403,7 @@ export function BookApp({
       ) {
         collections.removeFavorite(selectedRow.key);
       } else if (mode.kind === "list" && selectedRow?.kind === "family") {
-        showToast("Open the Specimen to choose a Style.");
+        showToast("Press Space or open the Specimen to choose a Style.");
       }
       return;
     }
@@ -992,6 +997,13 @@ export function BookApp({
                   tracking={settings.tracking}
                   paperReversed={settings.paperReversed}
                   onStep={stepQuickPreview}
+                  isFavorite={
+                    quickPreviewStyle !== null &&
+                    collections.favoriteIds.has(quickPreviewStyle.id)
+                  }
+                  onToggleFavorite={
+                    collections.isReadOnly ? null : toggleFavorite
+                  }
                   onOpenSpecimen={() => openRow(selectedIndex)}
                   onClose={closeQuickPreview}
                 />

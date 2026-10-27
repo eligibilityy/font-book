@@ -75,6 +75,10 @@
   color: var(--gray-12);
 }
 
+.iconButton[aria-pressed="true"] {
+  color: var(--accent-9);
+}
+
 .paper {
   position: relative;
   min-height: 0;
