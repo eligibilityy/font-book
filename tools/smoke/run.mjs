@@ -154,6 +154,46 @@ try {
     await shot("9-serif");
   });
 
+  await step("pairing", async () => {
+    await page.keyboard.press("Escape");
+    await page.fill('input[aria-label="Search"]', "");
+    await page.click('nav[aria-label="Library"] button:has-text("All")');
+    await page.waitForSelector('[role="option"]');
+    await page.keyboard.press("Enter");
+    await page.waitForSelector("textarea");
+    await page.click('button:text-is("Pair")');
+    await page.click('[role="menuitem"]:has-text("Use as Heading")');
+    // Escape belongs to the menu until its fade-out ends.
+    await page.waitForSelector('[role="menu"]', { state: "detached" });
+    await page.keyboard.press("Escape");
+    await page.waitForSelector('[role="listbox"]');
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector("textarea");
+    await page.click('button:text-is("Pair")');
+    await page.click('[role="menuitem"]:has-text("Use as Body")');
+    await page.click('nav[aria-label="Library"] button:has-text("Pairing")');
+    await page.waitForSelector('section[aria-label="Pairing"]');
+    await shot("11-pairing");
+  });
+
+  await step("waterfall", async () => {
+    await page.click('nav[aria-label="Library"] button:has-text("All")');
+    await page.waitForSelector('[role="option"]');
+    await page.keyboard.press("Enter");
+    await page.waitForSelector("textarea");
+    await page.click('button:text-is("Waterfall")');
+    await page.waitForSelector('ol[aria-label="Waterfall"]');
+    await shot("12-waterfall");
+    await page.click('button:text-is("Text")');
+  });
+
+  await step("imported, empty", async () => {
+    await page.click('nav[aria-label="Library"] button:has-text("Imported")');
+    await page.waitForSelector("text=Nothing Imported yet.");
+    await shot("13-imported-empty");
+  });
+
   await step("dark theme", async () => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.keyboard.press("Escape");

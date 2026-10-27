@@ -136,3 +136,20 @@ Pairing (a heading Style and a body Style together) is the first feature after v
 - [MDN: variable fonts guide](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_fonts/Variable_fonts_guide)
 - [Electron: dialog](https://www.electronjs.org/docs/latest/api/dialog)
 - [Electron: webContents](https://www.electronjs.org/docs/latest/api/web-contents)
+
+## 10. v0.2: Pairing, Import, Export
+
+**Goal.** The features she reaches for in a class project, plus the fixes from the first build on her Mac. Scope is in [features: v0.2 scope](product/features.md#v02-scope); each part has a section in the [UI spec](product/ui-spec.md) (8.6 Pairing, 8.10 Import, 8.11 PNG Export).
+
+**Concepts.** Reading a Font file's character map to choose what a row can draw (`hasGlyphForCodePoint`, Unicode script properties in regular expressions). Adding fields to stored files without a migration (zod `.default`) and testing that old files still load. Native dialogs in main (`dialog.showOpenDialog`, `showSaveDialog`). Why a dropped file's path can only be read in the preload (`webUtils.getPathForFile`). Capturing part of a window (`webContents.capturePage`) and device pixels. Motion `layout` animations for the Pairing swap. Window-level drag and drop events and why `dragenter`/`dragleave` need counting.
+
+**Done when.** Each feature works on her Mac, `bun run check` and `bun run smoke` pass, and the release notes list the stored-file changes (`prefs.json`: `pairing`, `specimenLayout`; `collections.json`: `note`; new `imported-fonts/` folder; the Scan cache is rebuilt once).
+
+**Resources.**
+- [Electron: dialog](https://www.electronjs.org/docs/latest/api/dialog)
+- [Electron: webUtils](https://www.electronjs.org/docs/latest/api/web-utils)
+- [Electron: webContents.capturePage](https://www.electronjs.org/docs/latest/api/web-contents#contentscapturepagerect-opts)
+- [MDN: HTML Drag and Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
+- [MDN: Unicode property escapes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape)
+- [Motion: layout animations](https://motion.dev/docs/react-layout-animations)
+- [zod: defaults](https://zod.dev/api#defaults)
