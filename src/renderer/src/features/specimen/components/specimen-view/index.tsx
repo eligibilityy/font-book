@@ -1,5 +1,7 @@
 import { Menu } from "@base-ui/react/menu";
 import { Select } from "@base-ui/react/select";
+import { Toggle } from "@base-ui/react/toggle";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
 import {
   type Classification,
   classificationLabels,
@@ -28,7 +30,9 @@ import {
   matchingInstance,
   variationStyle,
 } from "../../axes";
+import { SAMPLE_PRESETS } from "../../sample-presets";
 import { Inspector } from "../inspector";
+import { Waterfall } from "../waterfall";
 import styles from "./styles.module.css";
 
 export interface SpecimenSettings {
@@ -37,6 +41,8 @@ export interface SpecimenSettings {
   tracking: number;
   paperReversed: boolean;
   inspectorOpen: boolean;
+  /** The Sample text once, editable; or a waterfall of sizes. */
+  layout: "text" | "waterfall";
 }
 
 interface SpecimenViewProps {
@@ -149,7 +155,14 @@ export function SpecimenView(props: SpecimenViewProps): React.JSX.Element {
           data-inspector-space={hasInspectorSpace ? "" : undefined}
           data-export-region=""
         >
-          {status === "ready" ? (
+          {status === "ready" && settings.layout === "waterfall" ? (
+            <Waterfall
+              style={style}
+              text={props.sampleText}
+              tracking={settings.tracking}
+              variation={variationStyle(style, axisValues, matchOpticalSize)}
+            />
+          ) : status === "ready" ? (
             <textarea
               ref={textRef}
               className={styles.text}
@@ -230,6 +243,8 @@ function SpecimenHeader({
   onUseAs,
   onOpenPairing,
   onExport,
+  sampleText,
+  onSampleTextChange,
 }: SpecimenViewProps & {
   axisValues: AxisValues;
   onAxisValuesChange: (values: AxisValues) => void;
@@ -320,10 +335,33 @@ function SpecimenHeader({
             {style.axes.length === 1 ? "1 Axis" : `${style.axes.length} Axes`}
           </button>
         )}
+        <ToggleGroup
+          className={controls.segmented}
+          aria-label="Layout"
+          value={[settings.layout]}
+          onValueChange={(value) => {
+            const next = value[0];
+            // Pressing the chosen segment again would leave none chosen.
+            if (next === "text" || next === "waterfall")
+              onSettingsChange({ layout: next });
+          }}
+        >
+          <Toggle value="text" className={controls.segment}>
+            Text
+          </Toggle>
+          <Toggle value="waterfall" className={controls.segment}>
+            Waterfall
+          </Toggle>
+        </ToggleGroup>
+        <PresetsMenu
+          sampleText={sampleText}
+          onSampleTextChange={onSampleTextChange}
+        />
         <div className={styles.size}>
           <LabeledSlider
             label="Size"
             hideLabel
+            disabled={settings.layout === "waterfall"}
             value={settings.size}
             min={8}
             max={300}
@@ -454,6 +492,60 @@ function StylePicker({
         </Select.Positioner>
       </Select.Portal>
     </Select.Root>
+  );
+}
+
+/** "Presets": ready-made Sample texts. Choosing one edits the shared Sample text. */
+function PresetsMenu({
+  sampleText,
+  onSampleTextChange,
+}: {
+  sampleText: string;
+  onSampleTextChange: (text: string) => void;
+}): React.JSX.Element {
+  const current = SAMPLE_PRESETS.find((preset) => preset.text === sampleText);
+  return (
+    <Menu.Root>
+      <Menu.Trigger className={controls.textButton}>
+        Presets
+        <ChevronDownIcon />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner
+          className={controls.positioner}
+          sideOffset={4}
+          align="start"
+        >
+          <Menu.Popup className={controls.popup}>
+            <Menu.RadioGroup
+              value={current?.name ?? ""}
+              onValueChange={(name) => {
+                const preset = SAMPLE_PRESETS.find(
+                  (candidate) => candidate.name === name,
+                );
+                if (preset) onSampleTextChange(preset.text);
+              }}
+            >
+              {SAMPLE_PRESETS.map((preset) => (
+                <Menu.RadioItem
+                  key={preset.name}
+                  value={preset.name}
+                  className={controls.item}
+                  closeOnClick
+                >
+                  <span className={controls.itemIndicator}>
+                    <Menu.RadioItemIndicator>
+                      <CheckIcon />
+                    </Menu.RadioItemIndicator>
+                  </span>
+                  {preset.name}
+                </Menu.RadioItem>
+              ))}
+            </Menu.RadioGroup>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   );
 }
 

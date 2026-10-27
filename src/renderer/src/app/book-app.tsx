@@ -157,6 +157,7 @@ export function BookApp({
     tracking: prefs.data.tracking,
     paperReversed: prefs.data.paperReversed,
     inspectorOpen: prefs.data.inspectorOpen,
+    layout: prefs.data.specimenLayout,
   };
 
   // ---------- Derived data ----------
@@ -558,6 +559,7 @@ export function BookApp({
         tracking: changes.tracking ?? previous.tracking,
         paperReversed: changes.paperReversed ?? previous.paperReversed,
         inspectorOpen: changes.inspectorOpen ?? previous.inspectorOpen,
+        specimenLayout: changes.layout ?? previous.specimenLayout,
       }));
     },
     [prefs],

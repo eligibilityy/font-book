@@ -111,6 +111,38 @@
   color: var(--gray-12);
 }
 
+/* ---------- Segmented control (a ToggleGroup of text Toggles) ---------- */
+
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--gray-3);
+}
+
+.segment {
+  height: 22px;
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+}
+
+.segment:hover {
+  color: var(--gray-12);
+}
+
+.segment[data-pressed] {
+  background: var(--gray-1);
+  color: var(--gray-12);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.12),
+    0 1px 2px rgb(0 0 0 / 0.08);
+}
+
 /* ---------- Text fields ---------- */
 
 .field {

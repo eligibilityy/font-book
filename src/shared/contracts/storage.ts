@@ -84,6 +84,8 @@ export const prefsFileSchema = z.object({
   dedicationSeen: z.boolean().default(false),
   /** Added in v0.2. Defaulted, so v0.1 prefs files still load. */
   pairing: pairingSchema.default(defaultPairing),
+  /** The Specimen's layout: the Sample text once, or a waterfall of sizes. Added in v0.2. */
+  specimenLayout: z.enum(["text", "waterfall"]).default("text"),
 });
 export type PrefsFile = z.infer<typeof prefsFileSchema>;
 
@@ -99,6 +101,7 @@ export const defaultPrefs: PrefsFile = {
   firstLaunchHintSeen: false,
   dedicationSeen: false,
   pairing: defaultPairing,
+  specimenLayout: "text",
 };
 
 /**
