@@ -89,6 +89,33 @@ describe("guessClassification", () => {
     expect(named("Schibsted Grotesk")).toBe("sans-serif");
     expect(named("Source Serif 4")).toBe("serif");
     expect(named("Playfair Display")).toBe("display");
+    expect(named("Fira Code")).toBe("monospace");
+    expect(named("Franklin Gothic Book")).toBe("sans-serif");
+    expect(named("Hiragino Mincho ProN")).toBe("serif");
+    expect(named("Kozuka Gothic Pr6N")).toBe("sans-serif");
+    expect(named("Bradley Hand")).toBe("script");
+    expect(named("Stencil Std")).toBe("display");
+  });
+
+  it("knows well-known Families whose Font files say nothing", () => {
+    const named = (familyName: string) =>
+      guessClassification({ ...blank, familyName });
+    expect(named("Academy Engraved LET")).toBe("display");
+    expect(named("Anton")).toBe("sans-serif");
+    expect(named("American Typewriter")).toBe("slab-serif");
+    expect(named("Zapfino")).toBe("script");
+    // The table beats name words: Copperplate isn't a Gothic sans.
+    expect(named("Copperplate")).toBe("display");
+  });
+
+  it("lets the Font file's own fields beat the table", () => {
+    expect(
+      guessClassification({
+        ...blank,
+        familyName: "Anton",
+        familyClass: 0x0900,
+      }),
+    ).toBe("display");
   });
 
   it("says unclassified when nothing in the file says otherwise", () => {

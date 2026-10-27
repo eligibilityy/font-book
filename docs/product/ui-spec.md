@@ -219,8 +219,9 @@ The list is one tab stop: `role="listbox"` on the scroll container with `aria-ac
    1. `post.isFixedPitch` set: Monospace (reliable).
    2. `OS/2.sFamilyClass` class (its high byte): 1, 2, 3 or 7 (the serif classes) is Serif; 4 (Clarendon) or 5 (Slab) is Slab Serif; 8 is Sans Serif; 9 (Ornamental) is Display; 10 is Script. Class 0 (no classification) and 12 (Symbolic) fall through.
    3. PANOSE: family type 3 (Latin Hand Written) is Script; 4 (Latin Decorative) is Display; 2 (Latin Text) uses the serif style digit: 11 to 13 are Sans Serif, 6 (Square) is Slab Serif, 2 to 10 are Serif. Anything else falls through.
-   4. Words in the Family name: "Mono" is Monospace, "Slab" is Slab Serif, "Sans" or "Grotesk" is Sans Serif, "Serif" is Serif, "Script" is Script, "Display" is Display.
-   5. Nothing matched: Unclassified.
+   4. A table of well-known Families whose Font files leave both fields empty, mostly ones that ship with macOS (Academy Engraved LET, American Typewriter, Zapfino) and Windows. Added on 2026-10-28, after v0.1.1 showed many Unclassified Families on her Mac. In `src/shared/known-classifications.ts`.
+   5. Words in the Family name: "Mono" or "Code" is Monospace, "Slab" or "Typewriter" is Slab Serif, "Sans", "Grotesk" or "Gothic" is Sans Serif, "Serif", "Roman" or "Mincho" is Serif, "Script", "Hand" or "Brush" is Script, "Display", "Stencil" or "Engraved" is Display. The full list is in `src/shared/classification.ts`.
+   6. Nothing matched: Unclassified.
 3. **Honest about which is which.** A guess is always labelled "guessed" where a single Family is shown (the Specimen header). In the filter, guessed and hand-set Families count the same; the filter is for finding, not for proof.
 
 Specs: [OS/2 table](https://learn.microsoft.com/en-us/typography/opentype/spec/os2) (`sFamilyClass`, `panose`), [post table](https://learn.microsoft.com/en-us/typography/opentype/spec/post) (`isFixedPitch`), and the [IBM font class parameters](https://learn.microsoft.com/en-us/typography/opentype/spec/ibmfc). Unit-test the guess as a pure function in `src/shared` or `main/fonts`: it takes the parsed fields and returns a Classification.
