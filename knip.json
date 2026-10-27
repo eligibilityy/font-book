@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["tools/smoke/*.mjs"],
+  "entry": ["tools/smoke/*.mjs", "tools/icon/*.mjs"],
   "project": [
     "src/**/*.{ts,tsx}",
     "*.config.{ts,mts,mjs,cjs}",

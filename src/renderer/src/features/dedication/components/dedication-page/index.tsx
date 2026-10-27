@@ -1,5 +1,6 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { useRef } from "react";
+import bookIcon from "@/shared/ui/book-icon.svg";
 import { dedication } from "../../words";
 import styles from "./styles.module.css";
 
@@ -42,7 +43,10 @@ export function DedicationPage({
           initialFocus={pageRef}
           data-first-time={isFirstTime ? "" : undefined}
         >
-          <p className={`${styles.line} ${styles.book}`}>Book</p>
+          <p className={`${styles.line} ${styles.book}`}>
+            <img className={styles.icon} src={bookIcon} alt="" />
+            Book
+          </p>
           <Dialog.Title className={`${styles.line} ${styles.to}`}>
             For {dedication.to}
           </Dialog.Title>

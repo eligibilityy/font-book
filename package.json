@@ -23,6 +23,7 @@
     "postinstall": "install-electron && electron-builder install-app-deps",
     "prepare": "husky",
     "smoke": "bun run build && node tools/smoke/run.mjs",
+    "icons": "node tools/icon/build.mjs",
     "build:unpack": "bun run build && electron-builder --dir",
     "build:mac": "bun run build && electron-builder --mac --arm64",
     "build:win": "bun run build && electron-builder --win --x64"
@@ -33,6 +34,7 @@
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
     "@electron-toolkit/tsconfig": "^2.0.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@tanstack/react-virtual": "3.14.23",
     "@types/fontkit": "^2.0.9",
     "@types/node": "^24.19.2",
