@@ -146,15 +146,20 @@
   gap: var(--space-5);
   min-height: 0;
   overflow-y: auto;
-  padding: 0 var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-2) var(--space-4);
   border-right: var(--border-width) solid var(--border-subtle);
   background: var(--gray-2);
 }
 
-/* The strip beside the traffic lights: it drags the window. */
+/*
+ * Room for the macOS traffic lights, and a strip to drag the window by.
+ * Zero height on Windows, where the window has its own title bar, so the
+ * sidebar's items start at the top. The flex gap is cancelled when it's empty.
+ */
 .sidebarTop {
   flex-shrink: 0;
-  height: calc(var(--toolbar-height) - var(--space-3));
+  height: var(--titlebar-height);
+  margin-bottom: calc(-1 * var(--space-5));
   -webkit-app-region: drag;
 }
 

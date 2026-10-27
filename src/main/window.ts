@@ -13,6 +13,8 @@ const WINDOW_BACKGROUND = { light: "#ffffff", dark: "#0a0a0a" };
 
 /** Room for the macOS traffic lights at the left of the toolbar. */
 const MAC_TITLEBAR_INSET = "80px";
+/** Height of the traffic-light row, kept clear at the top of the sidebar. */
+const MAC_TITLEBAR_HEIGHT = "36px";
 
 export interface WindowPlacement {
   bounds: Rectangle | null;
@@ -139,7 +141,7 @@ function visibleBounds(bounds: Rectangle | null): Rectangle | null {
 }
 
 /**
- * Sets --titlebar-inset on the page. Main sets it rather than the renderer, so
+ * Sets --titlebar-inset and --titlebar-height on the page. Main sets it rather than the renderer, so
  * the renderer never needs to know which OS it runs on. In full screen the
  * traffic lights are hidden, so the inset goes back to 0.
  */
@@ -153,7 +155,7 @@ function keepTitlebarInset(window: BrowserWindow): void {
     }
     if (!window.isFullScreen()) {
       insertedKey = await window.webContents.insertCSS(
-        `:root { --titlebar-inset: ${MAC_TITLEBAR_INSET}; }`,
+        `:root { --titlebar-inset: ${MAC_TITLEBAR_INSET}; --titlebar-height: ${MAC_TITLEBAR_HEIGHT}; }`,
       );
     }
   };

@@ -80,6 +80,10 @@ try {
     await shot("3-specimen");
     await page.click('button[aria-label="Show Inspector"]');
     await shot("4-inspector");
+    // Tightest line height: ascenders and descenders must not be cut off.
+    await page.getByRole("slider", { name: "Line height" }).focus();
+    await page.keyboard.press("Home");
+    await shot("4b-tight-line-height");
   });
 
   await step("favorite and back", async () => {

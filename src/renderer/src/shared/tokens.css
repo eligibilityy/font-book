@@ -91,6 +91,8 @@
   --specimen-ink: #111111;
   /* main sets this to 80px on macOS, beside the traffic lights. */
   --titlebar-inset: 0px;
+  /* main sets this to 36px on macOS: the sidebar's items start below the traffic lights. */
+  --titlebar-height: 0px;
 
   --border-width: 1px;
   --border-subtle: var(--gray-5);

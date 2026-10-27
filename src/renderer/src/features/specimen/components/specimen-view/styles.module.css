@@ -70,11 +70,19 @@
 }
 
 /* Only the Sample text renders in the Style, and never with faked styles. */
+/*
+ * A textarea clips its text to its own box. With a tight line height that
+ * box is shorter than the letters, cutting off ascenders and descenders, so
+ * it gets half an em of room above and below, taken back with negative
+ * margins: nothing is clipped, and the text doesn't move.
+ */
 .text {
   display: block;
   width: 100%;
   min-width: 0;
-  padding: 0;
+  margin-block: -0.5em;
+  padding-block: 0.5em;
+  padding-inline: 0;
   border: none;
   background: transparent;
   color: inherit;
