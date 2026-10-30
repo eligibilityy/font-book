@@ -1,4 +1,4 @@
-import type { AppCommand, AppInfo } from "./app";
+import type { AppCommand, AppInfo, AppMenuEntry } from "./app";
 import type { ExportPngInput, ExportPngResult } from "./export";
 import type {
   ImportResult,
@@ -49,5 +49,10 @@ export interface FontBookApi {
     getInfo(): Promise<AppInfo>;
     /** Menu items and their shortcuts. Returns an unsubscribe function. */
     onCommand(callback: (command: AppCommand) => void): () => void;
+    /**
+     * Runs a menu item, as clicking it in a native menu would. Resolves with
+     * the menu afterwards, where a Theme item may now be checked.
+     */
+    clickMenuItem(path: number[]): Promise<AppMenuEntry[]>;
   };
 }

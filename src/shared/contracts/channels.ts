@@ -26,4 +26,5 @@ export const exportChannels = {
 export const appChannels = {
   getInfo: "app:get-info",
   command: "app:command",
+  clickMenuItem: "app:click-menu-item",
 } as const;

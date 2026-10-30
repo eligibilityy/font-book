@@ -21,7 +21,7 @@ Electron runs your code in separate processes. Each one can do different things,
 src/
 ├── main/
 │   ├── index.ts            # Startup: single-instance lock, dev data folder, IPC handlers, menu, window
-│   ├── window.ts           # The main window: size, title bar, security options, --titlebar-inset
+│   ├── window.ts           # The main window: size, title bar, security options, --titlebar-inset, Windows controls overlay
 │   ├── menu.ts             # The application menu; its accelerators are Book's shortcuts
 │   ├── ipc/                # One file per domain; each handler parses input, calls an operation
 │   ├── library/            # Font folders per platform, Scan, parse Font files, Import

@@ -93,6 +93,18 @@
   --titlebar-inset: 0px;
   /* main sets this to 36px on macOS: the sidebar's items start below the traffic lights. */
   --titlebar-height: 0px;
+  /* Windows only: the bar with the menu titles. Main's titleBarOverlay height is this less 1px. */
+  --title-bar-height: 36px;
+  /*
+   * Windows draws its minimize, maximize and close buttons over the title
+   * bar's right end, and Chromium reports the free area as titlebar-area-*.
+   * With no such buttons the fallbacks make this 0.
+   */
+  --window-controls-width: calc(
+    100vw -
+    env(titlebar-area-x, 0px) -
+    env(titlebar-area-width, 100vw)
+  );
 
   --border-width: 1px;
   --border-subtle: var(--gray-5);

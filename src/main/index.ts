@@ -1,15 +1,20 @@
 import { join } from "node:path";
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme } from "electron";
-import type { AppInfo } from "../shared/contracts/app";
+import {
+  type AppInfo,
+  type AppMenuEntry,
+  menuItemPathSchema,
+} from "../shared/contracts/app";
 import { appChannels, libraryChannels } from "../shared/contracts/channels";
 import { registerExportHandlers } from "./ipc/export";
 import { registerLibraryHandlers } from "./ipc/library";
 import { registerStorageHandlers } from "./ipc/storage";
 import { listFontFolders } from "./library/font-folders";
 import { createLibraryService } from "./library/library-service";
-import { buildApplicationMenu } from "./menu";
+import { buildApplicationMenu, clickMenuItem } from "./menu";
+import { describeMenu } from "./menu-description";
 import { type AppState, openStores, type Theme } from "./storage/stores";
-import { createMainWindow } from "./window";
+import { createMainWindow, drawsWindowControlsOverToolbar } from "./window";
 
 const isDevelopment = !app.isPackaged;
 
@@ -101,7 +106,19 @@ function startBook(): void {
         fileManagerName:
           process.platform === "darwin" ? "Finder" : "File Explorer",
         version: app.getVersion(),
+        menu: drawsWindowControlsOverToolbar(process.platform)
+          ? describeMenu(Menu.getApplicationMenu()?.items ?? [])
+          : [],
       }),
+    );
+    ipcMain.handle(
+      appChannels.clickMenuItem,
+      (event, input: unknown): AppMenuEntry[] => {
+        const path = menuItemPathSchema.parse(input);
+        const window = BrowserWindow.fromWebContents(event.sender);
+        if (window) clickMenuItem(path, window);
+        return describeMenu(Menu.getApplicationMenu()?.items ?? []);
+      },
     );
 
     Menu.setApplicationMenu(

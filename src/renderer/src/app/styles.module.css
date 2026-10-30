@@ -1,8 +1,16 @@
+/* The title bar (Windows only) on top, the shell filling the rest. */
+.window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 /* The sidebar runs the full height, like Finder; the toolbar tops the content only. */
 .shell {
   display: grid;
+  flex: 1;
   grid-template-columns: 1fr;
-  height: 100%;
+  min-height: 0;
 }
 
 .shell[data-sidebar] {
@@ -21,6 +29,59 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+}
+
+/* ---------- Title bar (Windows) ---------- */
+
+/* Empty space drags the window; Windows draws its window buttons over the right end. */
+.titleBar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--title-bar-height);
+  padding: 0 calc(var(--window-controls-width) + var(--space-2)) 0
+    var(--space-3);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+  background: var(--gray-2);
+  -webkit-app-region: drag;
+}
+
+.titleBarIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: var(--space-1);
+}
+
+.menuTitles {
+  display: flex;
+}
+
+.menuTitle {
+  height: 26px;
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-11);
+  white-space: nowrap;
+  -webkit-app-region: no-drag;
+}
+
+.menuTitle:hover,
+.menuTitle[data-popup-open] {
+  background: var(--gray-4);
+  color: var(--gray-12);
+}
+
+/* Wider than a context menu, to fit the shortcuts. It opens over the toolbar, which drags the window, so it opts out. */
+.titleBarMenu {
+  min-width: 240px;
+  -webkit-app-region: no-drag;
+}
+
+.menuShortcut {
+  margin-left: var(--space-5);
 }
 
 /* ---------- Toolbar ---------- */
@@ -161,8 +222,8 @@
 
 /*
  * Room for the macOS traffic lights, and a strip to drag the window by.
- * Zero height on Windows, where the window has its own title bar, so the
- * sidebar's items start at the top. The flex gap is cancelled when it's empty.
+ * Zero height on Windows, where the title bar sits above the sidebar, so
+ * the sidebar's items start at the top. The flex gap is cancelled when it's empty.
  */
 .sidebarTop {
   flex-shrink: 0;

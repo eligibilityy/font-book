@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Commands main sends when she picks a menu item or presses its shortcut.
  * The menu is the one list of shortcuts; the renderer decides what each
@@ -37,4 +39,30 @@ export interface AppInfo {
   fileManagerName: string;
   /** Book's version, from package.json. */
   version: string;
+  /**
+   * The application menu on Windows, where Book draws its own title bar and
+   * menus. Empty on macOS, where the system menu bar shows it.
+   */
+  menu: AppMenuEntry[];
 }
+
+/** One entry of the application menu. `path` is its index at every level. */
+export type AppMenuEntry =
+  | { type: "separator"; path: number[] }
+  | { type: "submenu"; path: number[]; label: string; entries: AppMenuEntry[] }
+  | {
+      type: "item";
+      path: number[];
+      label: string;
+      /** "Ctrl+F", as Windows writes it. */
+      shortcut: string | null;
+      enabled: boolean;
+      /** True or false for a checkbox or radio item, such as a Theme; null otherwise. */
+      checked: boolean | null;
+    };
+
+/** The path of the menu item to click. */
+export const menuItemPathSchema = z
+  .array(z.number().int().min(0).max(100))
+  .min(1)
+  .max(6);

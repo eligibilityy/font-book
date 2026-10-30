@@ -207,6 +207,32 @@ try {
     await page.keyboard.press("Space");
     await shot("10-dark");
   });
+
+  await step("menu bar", async () => {
+    // Only Windows draws its own title bar and menus; macOS has none to test.
+    await page.keyboard.press("Escape");
+    if ((await page.getByRole("menubar").count()) === 0) return;
+    await page
+      .getByRole("menubar")
+      .getByRole("menuitem", { name: "View" })
+      .click();
+    await page.getByRole("menuitem", { name: "Theme" }).hover();
+    await page.waitForSelector('[role="menuitemcheckbox"]');
+    await shot("14-menu");
+    // A click runs the item in main, which sends back the menu with the new check.
+    await page.getByRole("menuitemcheckbox", { name: "Dark" }).click();
+    await page
+      .getByRole("menubar")
+      .getByRole("menuitem", { name: "View" })
+      .click();
+    await page.getByRole("menuitem", { name: "Theme" }).hover();
+    const dark = page.getByRole("menuitemcheckbox", { name: "Dark" });
+    if ((await dark.getAttribute("aria-checked")) !== "true") {
+      throw new Error("View > Theme > Dark isn't checked after choosing it");
+    }
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+  });
 } finally {
   await app.close();
   await rm(userData, { recursive: true, force: true });

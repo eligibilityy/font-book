@@ -68,6 +68,8 @@ const fontBook: FontBookApi = {
     getInfo: () => ipcRenderer.invoke(appChannels.getInfo),
     onCommand: (callback) =>
       subscribe<AppCommand>(appChannels.command, callback),
+    clickMenuItem: (path) =>
+      ipcRenderer.invoke(appChannels.clickMenuItem, path),
   },
 };
 

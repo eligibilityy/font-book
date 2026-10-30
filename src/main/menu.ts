@@ -3,6 +3,7 @@ import {
   type BaseWindow,
   BrowserWindow,
   Menu,
+  type MenuItem,
   type MenuItemConstructorOptions,
 } from "electron";
 import type { AppCommand } from "../shared/contracts/app";
@@ -194,6 +195,21 @@ export function buildApplicationMenu({
   }
 
   return Menu.buildFromTemplate(template);
+}
+
+/**
+ * Runs the application menu's item at `path`, as a click on it in a native
+ * menu would: a role such as Copy acts on the page, a radio item gets checked.
+ */
+export function clickMenuItem(path: number[], window: BrowserWindow): void {
+  let items = Menu.getApplicationMenu()?.items ?? [];
+  let item: MenuItem | undefined;
+  for (const index of path) {
+    item = items[index];
+    items = item?.submenu?.items ?? [];
+  }
+  if (!item?.enabled || item.submenu || item.type === "separator") return;
+  item.click(undefined, window, window.webContents);
 }
 
 function send(window: BaseWindow | undefined, command: AppCommand): void {

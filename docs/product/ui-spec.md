@@ -67,6 +67,8 @@ New tokens (add beside the [existing ones](../design-principles.md#tokens-to-def
 | --- | --- | --- |
 | `--toolbar-height` | 48px | Full-width toolbar; also the traffic-light row on macOS |
 | `--titlebar-inset` | 80px on macOS, 0 elsewhere | Left padding of the toolbar; set by main as a CSS variable, never computed in the renderer |
+| `--title-bar-height` | 36px | The Windows title bar; main's `titleBarOverlay` height is 1px less |
+| `--window-controls-width` | About 138px on Windows, 0 elsewhere | Right padding of the Windows title bar, clear of the window buttons; read from Chromium's `titlebar-area-*` environment variables |
 | `--sidebar-width` | 200px | Fixed in v0.1 |
 | `--list-header-height` | 32px | Title and counts above the rows |
 | `--row-height` | 80px | Fixed Library row (replaces the 56px example) |
@@ -75,7 +77,7 @@ New tokens (add beside the [existing ones](../design-principles.md#tokens-to-def
 | `--specimen-min-width` | 400px | Text column never narrower |
 | `--quick-preview-size` | 80px | Sample text size in Quick preview |
 
-Window: minimum 960 x 600, default 1280 x 800, bounds remembered (debounced 400ms) and clamped back onto a visible display at launch. macOS uses `titleBarStyle: "hiddenInset"` with traffic lights at about x 16, y 16; Windows keeps the standard frame and menu bar. The window is created hidden and shown on `ready-to-show` with a `backgroundColor` matching the theme, so there is no flash.
+Window: minimum 960 x 600, default 1280 x 800, bounds remembered (debounced 400ms) and clamped back onto a visible display at launch. macOS uses `titleBarStyle: "hiddenInset"` with traffic lights at about x 16, y 16; Windows uses `titleBarStyle: "hidden"` with a `titleBarOverlay`, like VS Code: Book draws a 36px title bar across the whole window, above the sidebar, with its icon and the application menu (File, Edit, View...). Main sends the menu as data (`describeMenu`) and the page draws it with Base UI's Menubar in Book's context-menu style; a click runs the real menu item in main, so roles like Copy and the Theme radio items behave as in a native menu. Windows draws the minimize, maximize and close buttons over its right end in the theme's colors. The window is created hidden and shown on `ready-to-show` with a `backgroundColor` matching the theme, so there is no flash.
 
 ### List view
 

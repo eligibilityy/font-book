@@ -10,11 +10,29 @@ import icon from "../../resources/icon.png?asset";
 
 /** Matches --gray-1 in the renderer's tokens, so the window never flashes. */
 const WINDOW_BACKGROUND = { light: "#ffffff", dark: "#0a0a0a" };
+/** Windows' minimize, maximize and close buttons: --gray-2 behind --gray-12. */
+const WINDOW_CONTROLS = {
+  light: { color: "#f9f9f9", symbolColor: "#1b1b1b" },
+  dark: { color: "#191919", symbolColor: "#eeeeee" },
+};
+/** --title-bar-height less its 1px bottom border, which stays visible below the buttons. */
+const WINDOWS_CONTROLS_HEIGHT = 35;
 
 /** Room for the macOS traffic lights at the left of the toolbar. */
 const MAC_TITLEBAR_INSET = "80px";
 /** Height of the traffic-light row, kept clear at the top of the sidebar. */
 const MAC_TITLEBAR_HEIGHT = "36px";
+
+/**
+ * Windows: Book draws its own title bar, with the menu titles, and Windows
+ * draws its minimize, maximize and close buttons over its right end.
+ * Elsewhere the window has no such overlay.
+ */
+export function drawsWindowControlsOverToolbar(
+  platform: NodeJS.Platform,
+): boolean {
+  return platform === "win32";
+}
 
 export interface WindowPlacement {
   bounds: Rectangle | null;
@@ -37,6 +55,7 @@ export function createMainWindow({
   onPlacementChange,
 }: MainWindowOptions): BrowserWindow {
   const isMac = platform === "darwin";
+  const hasControlsOverlay = drawsWindowControlsOverToolbar(platform);
   const bounds = visibleBounds(placement.bounds);
   const options: BrowserWindowConstructorOptions = {
     width: bounds?.width ?? 1280,
@@ -50,7 +69,6 @@ export function createMainWindow({
       ? WINDOW_BACKGROUND.dark
       : WINDOW_BACKGROUND.light,
     // macOS: no title bar; the toolbar sits beside the traffic lights.
-    // Windows keeps its standard frame and menu bar.
     titleBarStyle: isMac ? "hiddenInset" : "default",
     trafficLightPosition: { x: 16, y: 16 },
     webPreferences: {
@@ -62,6 +80,14 @@ export function createMainWindow({
   };
   // Windows and macOS take the icon from the packaged app instead.
   if (platform === "linux") options.icon = icon;
+  if (hasControlsOverlay) {
+    // No system title bar; the page draws one, under the window buttons.
+    options.titleBarStyle = "hidden";
+    options.titleBarOverlay = {
+      ...windowControlColors(),
+      height: WINDOWS_CONTROLS_HEIGHT,
+    };
+  }
   if (bounds) {
     options.x = bounds.x;
     options.y = bounds.y;
@@ -80,6 +106,7 @@ export function createMainWindow({
   window.webContents.on("will-navigate", (event) => event.preventDefault());
 
   if (isMac) keepTitlebarInset(window);
+  if (hasControlsOverlay) keepControlsMatchingTheme(window);
 
   if (rendererUrl) {
     void window.loadURL(rendererUrl);
@@ -88,6 +115,23 @@ export function createMainWindow({
   }
 
   return window;
+}
+
+/** The title bar's background and text colors in the current theme. */
+function windowControlColors(): { color: string; symbolColor: string } {
+  return WINDOW_CONTROLS[nativeTheme.shouldUseDarkColors ? "dark" : "light"];
+}
+
+/**
+ * Windows paints its window buttons in fixed colors, so they're repainted
+ * whenever the theme changes, from the View menu or the system's own setting.
+ */
+function keepControlsMatchingTheme(window: BrowserWindow): void {
+  const repaint = (): void => {
+    window.setTitleBarOverlay(windowControlColors());
+  };
+  nativeTheme.on("updated", repaint);
+  window.on("closed", () => nativeTheme.off("updated", repaint));
 }
 
 /** Saves the window's place a moment after she stops moving or resizing it. */
