@@ -1,6 +1,6 @@
 {
   "name": "book",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A local-first font manager and specimen app.",
   "main": "./out/main/index.js",
   "author": "yiliya.studio",
