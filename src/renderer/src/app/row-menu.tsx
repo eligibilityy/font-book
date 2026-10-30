@@ -4,7 +4,11 @@ import {
   classificationLabels,
   classifications,
 } from "@shared/classification";
-import type { FamilyClassification, ListRow } from "@/features/library";
+import type {
+  FamilyClassification,
+  InstallStatus,
+  ListRow,
+} from "@/features/library";
 import controls from "@/shared/ui/controls.module.css";
 import { CheckIcon, ChevronRightIcon } from "@/shared/ui/icons";
 
@@ -24,6 +28,10 @@ interface RowMenuItemsProps {
   /** On a Family row, the Style Quick preview shows, else its Representative Style. */
   onUseAs: (role: "heading" | "body") => void;
   onShowInFolder: () => void;
+  /** Null where Book can't Install (Windows). */
+  installStatus: InstallStatus | null;
+  onInstall: () => void;
+  onUninstall: () => void;
 }
 
 const GUESS = "guess";
@@ -44,6 +52,9 @@ export function RowMenuItems({
   onSetClassification,
   onUseAs,
   onShowInFolder,
+  installStatus,
+  onInstall,
+  onUninstall,
 }: RowMenuItemsProps): React.JSX.Element | null {
   if (!row) return null;
   const isStyleRow = row.kind === "style";
@@ -174,6 +185,16 @@ export function RowMenuItems({
               Show in {fileManagerName}
             </span>
           </ContextMenu.Item>
+          {installStatus === "not-installed" && (
+            <ContextMenu.Item className={controls.item} onClick={onInstall}>
+              <span className={controls.itemLabel}>Install</span>
+            </ContextMenu.Item>
+          )}
+          {installStatus === "installed" && (
+            <ContextMenu.Item className={controls.item} onClick={onUninstall}>
+              <span className={controls.itemLabel}>Uninstall</span>
+            </ContextMenu.Item>
+          )}
         </>
       )}
     </>

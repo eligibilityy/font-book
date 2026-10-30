@@ -91,9 +91,9 @@ export async function importFontFiles(
 /**
  * Writes the bytes under the file's own name, or "Name 2.otf" and so on when
  * a different file has that name. Returns the existing copy instead when an
- * identical file is already there.
+ * identical file is already there. Install uses it too.
  */
-async function placeCopy(
+export async function placeCopy(
   folder: string,
   name: string,
   bytes: Buffer,

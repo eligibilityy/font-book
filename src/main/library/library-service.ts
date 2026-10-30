@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import type {
   FontFolder,
   ImportSummary,
+  InstallResult,
+  InstallSummary,
   Library,
   ScanProgress,
   Style,
@@ -10,6 +12,13 @@ import type {
 import { errorCode, type JsonFile } from "../storage/json-file";
 import { extractFace, isCollection } from "./extract-face";
 import { importFontFiles } from "./import-font-files";
+import {
+  INSTALLED_VERSION,
+  type InstalledCopy,
+  type InstalledFile,
+  installFontFile,
+  uninstallFontFile,
+} from "./install-font-files";
 import {
   emptyLibraryIndex,
   type LibraryIndex,
@@ -26,6 +35,10 @@ export interface LibraryService {
   importFontFiles(
     paths: readonly string[],
   ): Promise<{ summary: ImportSummary; library: Library }>;
+  /** Copies the Styles' Imported Font files into her Fonts folder, then Scans. */
+  install(styleIds: readonly string[]): Promise<InstallResult>;
+  /** Removes the copies Install made of the Styles' Font files, then Scans. */
+  uninstall(styleIds: readonly string[]): Promise<InstallResult>;
   /** The Font file path of a Style or Failed entry in the Library, or null. */
   findFontFilePath(
     target:
@@ -39,6 +52,9 @@ interface LibraryServiceOptions {
   /** Book's own folder of Imported Font files; also one of `folders`. */
   importedFolder: string;
   indexFile: JsonFile<LibraryIndex>;
+  /** Her Fonts folder, where Install copies to; also one of `folders`. Null where Book can't Install. */
+  installFolder: string | null;
+  installedFile: JsonFile<InstalledFile>;
   onProgress: (progress: ScanProgress) => void;
 }
 
@@ -50,6 +66,8 @@ export function createLibraryService({
   folders,
   importedFolder,
   indexFile,
+  installFolder,
+  installedFile,
   onProgress,
 }: LibraryServiceOptions): LibraryService {
   let current: Library | null = null;
@@ -57,6 +75,71 @@ export function createLibraryService({
   let stylesById = new Map<string, Style>();
   let failedPaths = new Set<string>();
   let index: LibraryIndex | null = null;
+  let copies: InstalledCopy[] | null = null;
+
+  async function loadCopies(): Promise<InstalledCopy[]> {
+    // An unreadable file loses only the Installed marks, never a Font file.
+    copies ??= await installedFile
+      .load()
+      .then((stored) => stored.data.copies)
+      .catch(() => []);
+    return copies;
+  }
+
+  async function saveCopies(next: InstalledCopy[]): Promise<void> {
+    copies = next;
+    await installedFile
+      .save({ version: INSTALLED_VERSION, copies: next })
+      .catch((error: unknown) => {
+        console.warn("Couldn't save the Installed list", error);
+      });
+  }
+
+  /**
+   * Book's copies in her Fonts folder would list every Installed Style twice,
+   * so they are hidden and the Imported original is marked Installed instead.
+   * A copy she deleted, or whose original is gone, is no longer tracked.
+   */
+  async function applyInstalled(library: Library): Promise<Library> {
+    const known = await loadCopies();
+    const scanned = new Set(library.styles.map((style) => style.fontFile.path));
+    const kept = known.filter(
+      (copy) =>
+        scanned.has(copy.importedPath) && scanned.has(copy.installedPath),
+    );
+    if (kept.length !== known.length) void saveCopies(kept);
+
+    const installedPaths = new Set(kept.map((copy) => copy.installedPath));
+    const importedPaths = new Set(kept.map((copy) => copy.importedPath));
+    return {
+      ...library,
+      styles: library.styles
+        .filter((style) => !installedPaths.has(style.fontFile.path))
+        .map((style) =>
+          importedPaths.has(style.fontFile.path)
+            ? { ...style, fontFile: { ...style.fontFile, isInstalled: true } }
+            : style,
+        ),
+    };
+  }
+
+  /** The Imported Font files holding these Styles, each once. */
+  function importedFontFilePaths(styleIds: readonly string[]): string[] {
+    const paths = new Set<string>();
+    for (const id of styleIds) {
+      const style = stylesById.get(id);
+      if (style?.fontFile.folderKind === "imported") {
+        paths.add(style.fontFile.path);
+      }
+    }
+    return [...paths];
+  }
+
+  /** Scans once more after a change, waiting for any Scan already running. */
+  async function scanAfterChange(): Promise<Library> {
+    await running?.catch(() => null);
+    return scan();
+  }
 
   async function runScan(): Promise<Library> {
     if (!index) {
@@ -71,15 +154,14 @@ export function createLibraryService({
       onProgress,
     });
     index = result.index;
-    current = result.library;
-    stylesById = new Map(
-      result.library.styles.map((style) => [style.id, style]),
-    );
-    failedPaths = new Set(result.library.failed.map((entry) => entry.path));
+    const library = await applyInstalled(result.library);
+    current = library;
+    stylesById = new Map(library.styles.map((style) => [style.id, style]));
+    failedPaths = new Set(library.failed.map((entry) => entry.path));
     indexFile.save(result.index).catch((error: unknown) => {
       console.warn("Couldn't save the Scan cache", error);
     });
-    return result.library;
+    return library;
   }
 
   function scan(): Promise<Library> {
@@ -135,6 +217,58 @@ export function createLibraryService({
         },
         library,
       };
+    },
+    async install(styleIds) {
+      if (!installFolder) throw new Error("Book can't Install here.");
+      const summary: InstallSummary = {
+        doneCount: 0,
+        skippedCount: 0,
+        failedCount: 0,
+      };
+      const next = [...(await loadCopies())];
+      const alreadyInstalled = new Set(next.map((copy) => copy.importedPath));
+      for (const path of importedFontFilePaths(styleIds)) {
+        if (alreadyInstalled.has(path)) continue;
+        try {
+          const outcome = await installFontFile(path, installFolder);
+          if (outcome.status === "installed") {
+            next.push(outcome.copy);
+            summary.doneCount += 1;
+          } else {
+            summary.skippedCount += 1;
+          }
+        } catch {
+          summary.failedCount += 1;
+        }
+      }
+      await saveCopies(next);
+      return { summary, library: await scanAfterChange() };
+    },
+    async uninstall(styleIds) {
+      const summary: InstallSummary = {
+        doneCount: 0,
+        skippedCount: 0,
+        failedCount: 0,
+      };
+      const paths = new Set(importedFontFilePaths(styleIds));
+      const next: InstalledCopy[] = [];
+      for (const copy of await loadCopies()) {
+        if (!paths.has(copy.importedPath)) {
+          next.push(copy);
+          continue;
+        }
+        try {
+          // A copy that changed is hers now: it stays, and so leaves the list.
+          const outcome = await uninstallFontFile(copy);
+          if (outcome === "changed") summary.skippedCount += 1;
+          else summary.doneCount += 1;
+        } catch {
+          next.push(copy);
+          summary.failedCount += 1;
+        }
+      }
+      await saveCopies(next);
+      return { summary, library: await scanAfterChange() };
     },
     findFontFilePath(target) {
       if (target.kind === "style") {

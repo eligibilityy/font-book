@@ -132,7 +132,9 @@ A multimedia-arts and graphic-design student on an M5 MacBook Air. Her fonts com
 | Import into a Collection | Dropping onto a Collection imports and adds in one step. | S | Import, Collections | v0.2 |
 | PNG Export of a Specimen or Pairing | For mood boards, critiques, and messaging a tutor. | M | Specimen | v0.2 |
 | PDF specimen sheet | A printable sheet for a Collection. | L | Export | later |
-| Activate | Making Styles available in other apps. CONTEXT.md lists it as future; Book never writes into system Font folders. | L | | later |
+| Install | Copy Imported Styles into her Fonts folder so Illustrator and every other app can use them; Uninstall removes only Book's copies. Right-click a row; an "Installed" mark on the row. macOS only. | S | Import | v0.2.1 |
+| Install on Import | An "Install too" choice when she Imports, so "drop the zip in, use it in Illustrator" is one step. | S | Install | later |
+| Activate | Making Styles available in other apps without copying them, through Core Text. Install does what she needs with far less code. | L | | won't do |
 
 ### Settings
 

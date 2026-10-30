@@ -3,7 +3,7 @@
 // It uses a throwaway data folder, so your own Collections are never touched.
 //
 //   node tools/smoke/run.mjs [screenshot folder]
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import electronPath from "electron";
@@ -12,6 +12,8 @@ import { _electron as electron } from "playwright-core";
 const screenshots = resolve(process.argv[2] ?? "out/smoke");
 await mkdir(screenshots, { recursive: true });
 const userData = await mkdtemp(join(tmpdir(), "book-smoke-"));
+// Install copies here instead of into a real Fonts folder.
+const installFolder = join(userData, "stand-in Fonts");
 const problems = [];
 
 // BOOK_EXECUTABLE runs a packaged build instead, such as dist/win-unpacked/Book.exe.
@@ -19,7 +21,11 @@ const packaged = process.env.BOOK_EXECUTABLE;
 const app = await electron.launch({
   executablePath: packaged ?? String(electronPath),
   args: packaged ? [] : ["."],
-  env: { ...process.env, BOOK_USER_DATA_DIR: userData },
+  env: {
+    ...process.env,
+    BOOK_USER_DATA_DIR: userData,
+    BOOK_INSTALL_FOLDER: installFolder,
+  },
 });
 
 try {
@@ -232,6 +238,42 @@ try {
     }
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
+  });
+
+  await step("install", async () => {
+    // An Imported Font file, as if dropped on the window, then Scan Again.
+    const importedFolder = join(userData, "imported-fonts");
+    await mkdir(importedFolder, { recursive: true });
+    await copyFile(
+      resolve("src/main/library/fixtures/Pacifico-Regular.ttf"),
+      join(importedFolder, "Pacifico-Regular.ttf"),
+    );
+    await app.evaluate(({ BrowserWindow }) =>
+      BrowserWindow.getAllWindows()[0]?.webContents.send(
+        "app:command",
+        "scan-again",
+      ),
+    );
+    await page.click('nav[aria-label="Library"] button:has-text("Imported")');
+    const row = page.getByRole("option", { name: /Pacifico/ });
+    await row.waitFor({ timeout: 30_000 });
+
+    await row.click({ button: "right" });
+    await page.getByRole("menuitem", { name: "Install", exact: true }).click();
+    await row.getByText("Installed", { exact: true }).waitFor();
+    if ((await readdir(installFolder)).length !== 1) {
+      throw new Error("Install didn't copy the Font file");
+    }
+    await shot("15-installed");
+
+    await row.click({ button: "right" });
+    await page.getByRole("menuitem", { name: "Uninstall" }).click();
+    await row
+      .getByText("Installed", { exact: true })
+      .waitFor({ state: "detached" });
+    if ((await readdir(installFolder)).length !== 0) {
+      throw new Error("Uninstall didn't remove Book's copy");
+    }
   });
 } finally {
   await app.close();

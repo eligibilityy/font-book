@@ -18,4 +18,5 @@ export {
   useClassifications,
 } from "./hooks/use-classifications";
 export { useLibrary } from "./hooks/use-library";
+export { type InstallStatus, installStatus } from "./install-status";
 export { type ListRow, rowFamily, rowStyle } from "./rows";

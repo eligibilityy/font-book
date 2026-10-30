@@ -13,6 +13,12 @@ import {
   prefsFileSchema,
 } from "../../shared/contracts/storage";
 import {
+  emptyInstalledFile,
+  INSTALLED_VERSION,
+  type InstalledFile,
+  installedFileSchema,
+} from "../library/install-font-files";
+import {
   emptyLibraryIndex,
   LIBRARY_INDEX_VERSION,
   type LibraryIndex,
@@ -46,6 +52,8 @@ export interface Stores {
   prefs: JsonFile<PrefsFile>;
   /** Main's own state: window size and position, and the theme. */
   appState: JsonFile<AppState>;
+  /** The copies Install put in her Fonts folder, so Uninstall removes only those. */
+  installed: JsonFile<InstalledFile>;
 }
 
 /** Every file Book writes, all under userData. See architecture: on-disk layout. */
@@ -89,6 +97,12 @@ export function openStores(userDataPath: string): Stores {
         windowBounds: null,
         isMaximized: false,
       }),
+    }),
+    installed: createJsonFile({
+      path: join(userDataPath, "installed.json"),
+      schema: installedFileSchema,
+      version: INSTALLED_VERSION,
+      defaults: emptyInstalledFile,
     }),
   };
 }

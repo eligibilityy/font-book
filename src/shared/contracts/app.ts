@@ -39,6 +39,8 @@ export interface AppInfo {
   fileManagerName: string;
   /** Book's version, from package.json. */
   version: string;
+  /** False where Book has no Fonts folder to Install into (Windows). */
+  canInstall: boolean;
   /**
    * The application menu on Windows, where Book draws its own title bar and
    * menus. Empty on macOS, where the system menu bar shows it.

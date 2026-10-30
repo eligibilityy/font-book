@@ -43,6 +43,7 @@ function style(
       size: 1000,
       modifiedMs: 0,
       faceCount: 1,
+      isInstalled: false,
     },
     ...changes,
   };

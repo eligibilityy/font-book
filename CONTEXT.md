@@ -32,8 +32,12 @@ _Avoid_: source, location, tab
 A Font file in a Font folder that could not be parsed. Failed entries are listed under "Couldn't Read"; they never stop a Scan.
 _Avoid_: error, broken font, invalid font
 
-**Activate** (future):
-Making a Style available to other apps on the computer. Not built; the app never writes into system Font folders today.
+**Install**:
+Copying an Imported Style's Font file into the user's own Fonts folder (macOS: `~/Library/Fonts`) so other apps, such as Illustrator, can use it. The Imported Font file stays in Book. Book records each copy it makes; **Uninstall** removes only those copies, and only while they are unchanged. macOS only: on Windows a Font file must also be registered with the system.
+_Avoid_: activate, enable, add
+
+**Activate** (not planned):
+Making a Style available to other apps without copying it, as pro font managers do. Install covers what Book needs.
 _Avoid_: install, enable, import
 
 ### Fonts

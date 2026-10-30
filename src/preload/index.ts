@@ -50,6 +50,10 @@ const fontBook: FontBookApi = {
       ),
     importWithDialog: () =>
       ipcRenderer.invoke(libraryChannels.importWithDialog),
+    install: (styleIds) =>
+      ipcRenderer.invoke(libraryChannels.install, styleIds),
+    uninstall: (styleIds) =>
+      ipcRenderer.invoke(libraryChannels.uninstall, styleIds),
     onScanProgress: (callback) =>
       subscribe<ScanProgress>(libraryChannels.scanProgress, callback),
   },

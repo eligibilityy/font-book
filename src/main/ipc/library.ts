@@ -5,6 +5,7 @@ import {
   importPathsSchema,
   showInFolderInputSchema,
   styleIdSchema,
+  styleIdsSchema,
 } from "../../shared/contracts/library";
 import type { LibraryService } from "../library/library-service";
 
@@ -55,6 +56,13 @@ export function registerLibraryHandlers(library: LibraryService): void {
         ...(await library.importFontFiles(picked.filePaths)),
       };
     },
+  );
+
+  ipcMain.handle(libraryChannels.install, (_event, input: unknown) =>
+    library.install(styleIdsSchema.parse(input)),
+  );
+  ipcMain.handle(libraryChannels.uninstall, (_event, input: unknown) =>
+    library.uninstall(styleIdsSchema.parse(input)),
   );
 
   ipcMain.handle(libraryChannels.showInFolder, (_event, input: unknown) => {

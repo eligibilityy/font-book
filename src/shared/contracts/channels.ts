@@ -9,6 +9,8 @@ export const libraryChannels = {
   showInFolder: "library:show-in-folder",
   importPaths: "library:import-paths",
   importWithDialog: "library:import-with-dialog",
+  install: "library:install",
+  uninstall: "library:uninstall",
   scanProgress: "library:scan-progress",
 } as const;
 

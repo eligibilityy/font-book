@@ -100,7 +100,7 @@ Installed fonts and loaded `FontFace` objects share one namespace in the rendere
 
 ## On-disk layout
 
-The app reads Font folders and never writes into them. Everything it writes lives under `app.getPath('userData')` (macOS: `~/Library/Application Support/<productName>`; Windows: `%APPDATA%\<productName>`).
+The app reads Font folders and never writes into them, except Install, which copies Imported Font files she chose into her own Fonts folder and records each copy in `installed.json`. Everything it writes lives under `app.getPath('userData')` (macOS: `~/Library/Application Support/<productName>`; Windows: `%APPDATA%\<productName>`).
 
 ```text
 <userData>/
@@ -109,6 +109,7 @@ The app reads Font folders and never writes into them. Everything it writes live
 ├── classifications.json  # Classifications she set by hand, keyed by Family
 ├── prefs.json            # Sample text, Specimen size, line height, tracking, paper and ink, panels
 ├── app-state.json        # Main's own: window size and position, theme
+├── installed.json        # The copies Install put in her Fonts folder, so Uninstall removes only those
 └── imported-fonts/       # Copies of Imported Font files: a Font folder of kind "imported"
 ```
 

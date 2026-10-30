@@ -18,7 +18,11 @@ import {
 } from "@/features/collections";
 import { DedicationPage } from "@/features/dedication";
 import { exportPaper } from "@/features/export";
-import { ImportDropZone, importMessage } from "@/features/import";
+import {
+  ImportDropZone,
+  importMessage,
+  installMessage,
+} from "@/features/import";
 import {
   type ClassificationFilter,
   ClassificationSelect,
@@ -27,6 +31,7 @@ import {
   familyKey,
   findDuplicates,
   groupIntoFamilies,
+  installStatus,
   LibraryList,
   type LibraryListHandle,
   type ListRow,
@@ -536,6 +541,28 @@ export function BookApp({
     }
   };
 
+  /** Install or Uninstall a row's Imported Styles, then says what changed. */
+  const runInstall = async (
+    action: "install" | "uninstall",
+    styles: readonly Style[],
+  ): Promise<void> => {
+    const ids = styles.map((style) => style.id);
+    if (ids.length === 0) return;
+    try {
+      const result =
+        action === "install"
+          ? await window.fontBook.library.install(ids)
+          : await window.fontBook.library.uninstall(ids);
+      onLibraryChange(result.library);
+      showToast(installMessage(action, result.summary));
+    } catch (error) {
+      console.error(`${action} failed`, error);
+      showToast(
+        `Book couldn't ${action === "install" ? "Install" : "Uninstall"} those Font files. Try again in a moment.`,
+      );
+    }
+  };
+
   /** Export PNG of the Specimen or the Pairing, as it looks now. */
   const exportCurrent = async (): Promise<void> => {
     const { heading, body } = prefs.data.pairing;
@@ -718,6 +745,13 @@ export function BookApp({
 
   const title = viewTitle(view, collections.collections);
   const selectedFamily = selectedRow ? rowFamily(selectedRow) : null;
+  // What Install acts on: the whole Family on a Family row.
+  const selectedRowStyles =
+    selectedRow?.kind === "family"
+      ? selectedRow.family.styles
+      : selectedRow?.kind === "style"
+        ? [selectedRow.style]
+        : [];
 
   return (
     <div
@@ -1065,6 +1099,17 @@ export function BookApp({
                             : null;
                           if (style) showInFolder(style);
                         }}
+                        installStatus={
+                          appInfo.canInstall
+                            ? installStatus(selectedRowStyles)
+                            : null
+                        }
+                        onInstall={() =>
+                          void runInstall("install", selectedRowStyles)
+                        }
+                        onUninstall={() =>
+                          void runInstall("uninstall", selectedRowStyles)
+                        }
                       />
                     }
                   />

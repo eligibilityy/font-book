@@ -5,6 +5,7 @@ import { sampleFontFamily } from "@/shared/font-faces/registry";
 import { useStyleFace } from "@/shared/font-faces/use-style-face";
 import { countOf } from "@/shared/text";
 import { StarIcon } from "@/shared/ui/icons";
+import { installStatus } from "../../install-status";
 import type { ListRow } from "../../rows";
 import styles from "./styles.module.css";
 
@@ -98,6 +99,9 @@ function RowContent({
           ? row.family.hasAxes
           : row.style.axes.length > 0) && <span>Variable</span>}
         {ownScript && <span>{ownScript.script}</span>}
+        {installStatus(
+          row.kind === "family" ? row.family.styles : [row.style],
+        ) === "installed" && <span>Installed</span>}
         {/* Most Families are Unclassified; saying so on every row is noise. */}
         {row.classification !== "unclassified" && (
           <span>{classificationLabels[row.classification]}</span>

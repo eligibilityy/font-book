@@ -9,7 +9,7 @@ import { appChannels, libraryChannels } from "../shared/contracts/channels";
 import { registerExportHandlers } from "./ipc/export";
 import { registerLibraryHandlers } from "./ipc/library";
 import { registerStorageHandlers } from "./ipc/storage";
-import { listFontFolders } from "./library/font-folders";
+import { installFolderFor, listFontFolders } from "./library/font-folders";
 import { createLibraryService } from "./library/library-service";
 import { buildApplicationMenu, clickMenuItem } from "./menu";
 import { describeMenu } from "./menu-description";
@@ -43,18 +43,29 @@ function startBook(): void {
 
   // Imported Font files are copies Book owns, so they live under userData.
   const importedFolder = join(app.getPath("userData"), "imported-fonts");
+  const fontFolderEnvironment = {
+    platform: process.platform,
+    homePath: app.getPath("home"),
+    windowsPath: process.env.WINDIR,
+    localAppDataPath: process.env.LOCALAPPDATA,
+  };
+  const folders = listFontFolders(fontFolderEnvironment);
+  // BOOK_INSTALL_FOLDER Installs into a stand-in Fonts folder instead, so
+  // Install can be tried on Windows and in the smoke test.
+  const installFolder =
+    process.env.BOOK_INSTALL_FOLDER ?? installFolderFor(fontFolderEnvironment);
+  if (
+    installFolder &&
+    !folders.some((folder) => folder.path === installFolder)
+  ) {
+    folders.push({ path: installFolder, kind: "user" });
+  }
   const library = createLibraryService({
-    folders: [
-      ...listFontFolders({
-        platform: process.platform,
-        homePath: app.getPath("home"),
-        windowsPath: process.env.WINDIR,
-        localAppDataPath: process.env.LOCALAPPDATA,
-      }),
-      { path: importedFolder, kind: "imported" },
-    ],
+    folders: [...folders, { path: importedFolder, kind: "imported" }],
     importedFolder,
     indexFile: stores.libraryIndex,
+    installFolder,
+    installedFile: stores.installed,
     onProgress: (progress) => {
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send(libraryChannels.scanProgress, progress);
@@ -106,6 +117,7 @@ function startBook(): void {
         fileManagerName:
           process.platform === "darwin" ? "Finder" : "File Explorer",
         version: app.getVersion(),
+        canInstall: installFolder !== null,
         menu: drawsWindowControlsOverToolbar(process.platform)
           ? describeMenu(Menu.getApplicationMenu()?.items ?? [])
           : [],

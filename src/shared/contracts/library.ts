@@ -116,6 +116,11 @@ export interface StyleFontFile {
   /** Last modified, in ms. For an Imported Font file, when it was Imported. */
   modifiedMs: number;
   faceCount: number;
+  /**
+   * An Imported Font file Book has also Installed into her Fonts folder, so
+   * other apps can use it. Always false outside the imported-fonts folder.
+   */
+  isInstalled: boolean;
 }
 
 /** One Style in the Library. `id` is opaque: never parse it. */
@@ -173,6 +178,26 @@ export interface ImportSummary {
 export type ImportResult =
   | { status: "imported"; summary: ImportSummary; library: Library }
   | { status: "cancelled" };
+
+/** The Styles to Install or Uninstall: a Family's, or one Style. */
+export const styleIdsSchema = z.array(styleIdSchema).min(1).max(5000);
+
+/** What Install or Uninstall did, counted in Font files. */
+export interface InstallSummary {
+  /** Install: copied into her Fonts folder. Uninstall: removed from it. */
+  doneCount: number;
+  /**
+   * Install: an identical file was already in her Fonts folder.
+   * Uninstall: the copy changed since Book made it, so it stays.
+   */
+  skippedCount: number;
+  failedCount: number;
+}
+
+export interface InstallResult {
+  summary: InstallSummary;
+  library: Library;
+}
 
 export const showInFolderInputSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("style"), styleId: styleIdSchema }),

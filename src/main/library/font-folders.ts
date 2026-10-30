@@ -18,6 +18,17 @@ export interface FontFolderEnvironment {
  * use through Creative Cloud only. Neither is a Font folder, so a Scan never
  * reaches them.
  */
+/**
+ * Her own Fonts folder, where Install copies Imported Font files so every app
+ * finds them; null where copying isn't enough. On Windows a Font file must also
+ * be registered with the system, which Book doesn't do.
+ */
+export function installFolderFor(env: FontFolderEnvironment): string | null {
+  return env.platform === "darwin"
+    ? posix.join(env.homePath, "Library", "Fonts")
+    : null;
+}
+
 export function listFontFolders(env: FontFolderEnvironment): FontFolder[] {
   switch (env.platform) {
     case "darwin":

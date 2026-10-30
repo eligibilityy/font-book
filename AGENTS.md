@@ -36,5 +36,5 @@ Developed on Windows 11. The primary user runs macOS on Apple Silicon (arm64), f
 
 - Keep paths cross-platform: build them with `path.join` and `app.getPath(...)`. Never hard-code `/` or `\` separators or a user's home folder.
 - Branch on `process.platform` only in `src/main`. The renderer and `src/shared` must not know which OS they run on.
-- Never write into system font folders. The app reads them; it stores its own data in `app.getPath('userData')`.
+- Never write into system font folders (`/System/Library/Fonts`, `/Library/Fonts`, `C:\Windows\Fonts`). The app reads them; it stores its own data in `app.getPath('userData')`. The one exception is Install: it copies Imported Font files she chose into her own Fonts folder (`~/Library/Fonts`), records each copy in `installed.json`, and Uninstall deletes only those copies, and only while they are unchanged.
 - Keep the security baseline: `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false`, zod-validated IPC input in main, and no wholesale `ipcRenderer` exposure.

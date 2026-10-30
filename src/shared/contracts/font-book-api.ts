@@ -2,6 +2,7 @@ import type { AppCommand, AppInfo, AppMenuEntry } from "./app";
 import type { ExportPngInput, ExportPngResult } from "./export";
 import type {
   ImportResult,
+  InstallResult,
   Library,
   ScanProgress,
   ShowInFolderInput,
@@ -32,6 +33,10 @@ export interface FontBookApi {
     importFiles(files: readonly File[]): Promise<ImportResult>;
     /** File > Import...: main shows the open dialog, Imports, then Scans. */
     importWithDialog(): Promise<ImportResult>;
+    /** Copies these Styles' Imported Font files into her Fonts folder, then Scans. */
+    install(styleIds: string[]): Promise<InstallResult>;
+    /** Removes the copies Install made of these Styles' Font files, then Scans. */
+    uninstall(styleIds: string[]): Promise<InstallResult>;
     /** Returns an unsubscribe function. */
     onScanProgress(callback: (progress: ScanProgress) => void): () => void;
   };

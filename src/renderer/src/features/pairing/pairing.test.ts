@@ -92,6 +92,7 @@ function style(familyName: string, styleName = "Regular"): Style {
       size: 1,
       modifiedMs: 0,
       faceCount: 1,
+      isInstalled: false,
     },
   };
 }

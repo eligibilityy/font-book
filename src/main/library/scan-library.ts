@@ -167,6 +167,8 @@ export async function scanLibrary(
           size: entry.size,
           modifiedMs: entry.modifiedMs,
           faceCount: entry.result.faceCount,
+          // The Library service marks the Installed ones after the Scan.
+          isInstalled: false,
         },
       });
     }

@@ -36,6 +36,7 @@ function style(familyName: string, changes: Partial<Style> = {}): Style {
       size: 1,
       modifiedMs: 0,
       faceCount: 1,
+      isInstalled: false,
     },
     ...changes,
   };
@@ -49,6 +50,7 @@ const system = {
   size: 1,
   modifiedMs: 0,
   faceCount: 1,
+  isInstalled: false,
 } as const;
 const styles = [
   style("Inter", { familyClass: 0x0805 }),
